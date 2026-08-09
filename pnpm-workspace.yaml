@@ -1,0 +1,16 @@
+# pnpm 11 blocks dependency install scripts unless they are explicitly reviewed.
+allowBuilds:
+  # Next.js image optimization.
+  sharp: true
+  # Native resolver used by the Next.js ESLint toolchain.
+  unrs-resolver: true
+
+# Temporary transitive security patches. Remove each override when its direct
+# dependency ships a patched compatible range.
+overrides:
+  "next>postcss": 8.5.18
+  "next>sharp": 0.35.0
+  "minimatch@3.1.5>brace-expansion": 5.0.8
+
+patchedDependencies:
+  minimatch@3.1.5: patches/minimatch@3.1.5.patch
