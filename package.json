@@ -16,7 +16,9 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "security:audit": "pnpm audit --audit-level high",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm security:audit && pnpm build"
   },
   "dependencies": {
     "@heroui/react": "^3.2.2",
