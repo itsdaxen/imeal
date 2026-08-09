@@ -14,7 +14,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@heroui/react": "^3.2.2",
