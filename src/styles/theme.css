@@ -1,0 +1,67 @@
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* HeroUI semantic foundation */
+  --background: oklch(0.968 0.003 264);
+  --foreground: oklch(0.205 0.007 265);
+  --surface: oklch(0.995 0.001 264);
+  --surface-foreground: var(--foreground);
+  --surface-secondary: oklch(0.952 0.004 264);
+  --surface-secondary-foreground: var(--foreground);
+  --surface-tertiary: oklch(0.925 0.006 264);
+  --surface-tertiary-foreground: var(--foreground);
+  --muted: oklch(0.53 0.012 264);
+  --default: oklch(94% 0.001 286.375);
+  --default-foreground: var(--foreground);
+  /* 50% lightness, not 54.8: green sits on white as link-hover and carries white
+     text as the primary action, and both pairs cleared 4.5:1 only at this depth. */
+  --accent: oklch(50% 0.16958 142.558);
+  --accent-foreground: oklch(0.99 0 0);
+  --border: oklch(0.89 0.005 264);
+  --separator: oklch(0.91 0.004 264);
+  --focus: var(--accent);
+  --link: var(--foreground);
+  --radius: 0.5rem;
+
+  /* Legibility roles for content placed on food imagery */
+  --imeal-media-foreground: oklch(1 0 0);
+  --imeal-media-muted: oklch(1 0 0 / 80%);
+  --imeal-media-eyebrow: oklch(1 0 0 / 85%);
+  --imeal-media-scrim-start: oklch(0 0 0 / 8%);
+  --imeal-media-scrim-end: oklch(0 0 0 / 38%);
+  --imeal-media-panel-start: oklch(0 0 0 / 46%);
+  --imeal-media-panel-end: oklch(0 0 0 / 24%);
+  --imeal-media-panel-border: oklch(1 0 0 / 25%);
+  --imeal-media-control: oklch(1 0 0 / 86%);
+  --imeal-media-control-foreground: oklch(0 0 0);
+  --imeal-media-action: oklch(1 0 0);
+  --imeal-media-action-foreground: oklch(0 0 0);
+
+  /* Identity. The one blue in the app: it marks a person, never a state or action. */
+  --imeal-identity: oklch(0.949 0.026 245);
+  --imeal-identity-foreground: oklch(0.505 0.088 250);
+  /* HeroUI's blue hue, taken to 52% lightness: at its own 62% it reads 3.35:1 on our
+     background, which fails AA at eyebrow size. */
+  --imeal-identity-strong: oklch(52% 0.195 253.83);
+}
+
+@theme inline {
+  --color-media-foreground: var(--imeal-media-foreground);
+  --color-media-muted: var(--imeal-media-muted);
+  --color-media-eyebrow: var(--imeal-media-eyebrow);
+  --color-media-scrim-start: var(--imeal-media-scrim-start);
+  --color-media-scrim-end: var(--imeal-media-scrim-end);
+  --color-media-panel-start: var(--imeal-media-panel-start);
+  --color-media-panel-end: var(--imeal-media-panel-end);
+  --color-media-panel-border: var(--imeal-media-panel-border);
+  --color-media-control: var(--imeal-media-control);
+  --color-media-control-foreground: var(--imeal-media-control-foreground);
+  --color-media-action: var(--imeal-media-action);
+  --color-media-action-foreground: var(--imeal-media-action-foreground);
+  --font-sans:
+    var(--imeal-sans-font), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-brand: var(--imeal-brand-font), cursive;
+  --color-identity: var(--imeal-identity);
+  --color-identity-foreground: var(--imeal-identity-foreground);
+  --color-identity-strong: var(--imeal-identity-strong);
+}

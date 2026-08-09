@@ -1,32 +1,83 @@
 @import "tailwindcss";
 @import "@heroui/styles";
-
-:root {
-  --background: #f6f8f4;
-  --foreground: #19221b;
-  --muted: #5f6c62;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #101511;
-    --foreground: #edf3ed;
-    --muted: #a6b2a8;
-  }
-}
+@import "../styles/theme.css";
 
 html {
   background: var(--background);
+  /* Reserve the scrollbar's width always, so a short page and a long one do not
+     sit at different horizontal offsets. */
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+/**
+ * Element selectors, so any component class HeroUI applies still wins — this is the
+ * baseline for anything interactive that never got one.
+ */
+button,
+a,
+summary,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/**
+ * An underline that appears on hover makes a page of quiet links twitch as the cursor
+ * crosses it, and the line lands on a different baseline in every card. Colour carries
+ * the same signal without moving anything. Links over a photograph opt out by setting
+ * --link-hover to their own colour.
+ */
+.link {
+  --link-hover: var(--accent);
+}
+
+.link:hover,
+.link[data-hovered="true"],
+.link:active,
+.link[data-pressed="true"] {
+  color: var(--link-hover);
+  text-decoration: none;
+}
+
+/* You are already here: the current page keeps its colour under the cursor. The
+   value is explicit because currentcolor here would resolve against the inherited
+   colour, not the pill's own. */
+.link[aria-current="page"] {
+  --link-hover: var(--background);
+}
+
+/**
+ * A card whose whole surface is one link. The link stretches over the card, so the
+ * focus ring belongs on the card too rather than on the few words of the title.
+ */
+.card-link:has(a:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-link a:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
