@@ -38,3 +38,19 @@ AI features are candidates for later phases after the core workflow is reliable.
 - HeroUI components used selectively as the UI foundation.
 - Supabase Postgres, Auth, Row Level Security, and Storage.
 - OpenAI API for bounded, optional assistance in a later phase.
+
+## Local development
+
+Requires Node `22.22.3` (see `.node-version`) and pnpm `11.17.0`.
+
+```bash
+pnpm install
+pnpm dev
+```
+
+The app runs against typed mock data and needs no Supabase or OpenAI credentials to start.
+Before opening a pull request, run the full quality gate:
+
+```bash
+pnpm check   # format check, lint, typecheck, tests, dependency audit, and a production build
+```
