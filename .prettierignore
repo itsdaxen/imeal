@@ -6,3 +6,6 @@ out/
 playwright-report/
 pnpm-lock.yaml
 test-results/
+
+# Supabase CLI local state
+supabase/.temp/
