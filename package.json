@@ -17,6 +17,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "verify:rls": "node scripts/verify-rls.mjs",
     "security:audit": "pnpm audit --audit-level high",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm security:audit && pnpm build"
   },
