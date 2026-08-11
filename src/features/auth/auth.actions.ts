@@ -1,0 +1,87 @@
+"use server";
+
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { safeInternalPath } from "@/lib/safe-redirect";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+import { signInSchema, signUpSchema } from "./auth.schema";
+
+export type AuthFormState = {
+  error?: string;
+  notice?: string;
+};
+
+const SIGNED_IN_HOME = "/";
+
+function firstIssue(error: { issues: { message: string }[] }) {
+  return error.issues[0]?.message ?? "Check the form and try again.";
+}
+
+export async function signIn(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = signInSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error) };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+
+  if (error) {
+    // Supabase already collapses unknown-email and wrong-password into one
+    // message; keep it that way so the form cannot confirm an address exists.
+    return { error: error.message };
+  }
+
+  redirect(
+    safeInternalPath(String(formData.get("next") ?? ""), SIGNED_IN_HOME),
+  );
+}
+
+export async function signUp(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = signUpSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    displayName: formData.get("displayName"),
+  });
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error) };
+  }
+
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin");
+  const supabase = await createSupabaseServerClient();
+
+  const { error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      emailRedirectTo: origin ? `${origin}/auth/callback` : undefined,
+      data: { display_name: parsed.data.displayName || null },
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { notice: "Check your email to confirm your account." };
+}
+
+export async function signOut() {
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+  redirect("/sign-in");
+}
