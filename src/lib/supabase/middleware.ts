@@ -5,6 +5,14 @@ import type { Database } from "./database.types";
 
 import { publicEnv } from "@/lib/env";
 
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/auth/callback"];
+
+function isPublic(pathname: string) {
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const env = publicEnv();
@@ -33,7 +41,41 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refreshing here keeps the auth cookie current for Server Components, which cannot write cookies.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname, search } = request.nextUrl;
+
+  if (!user && !isPublic(pathname)) {
+    const signIn = request.nextUrl.clone();
+    signIn.pathname = "/sign-in";
+    signIn.search = "";
+    signIn.searchParams.set("next", `${pathname}${search}`);
+
+    const redirectResponse = NextResponse.redirect(signIn);
+
+    // The refreshed session cookies must survive the redirect.
+    for (const cookie of response.cookies.getAll()) {
+      redirectResponse.cookies.set(cookie);
+    }
+
+    return redirectResponse;
+  }
+
+  if (user && (pathname === "/sign-in" || pathname === "/sign-up")) {
+    const home = request.nextUrl.clone();
+    home.pathname = "/";
+    home.search = "";
+
+    const redirectResponse = NextResponse.redirect(home);
+
+    for (const cookie of response.cookies.getAll()) {
+      redirectResponse.cookies.set(cookie);
+    }
+
+    return redirectResponse;
+  }
 
   return response;
 }
