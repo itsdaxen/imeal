@@ -2,14 +2,10 @@ import Image from "next/image";
 
 import { Card, cn, Link, ProgressBar, Typography } from "@heroui/react";
 
-import { AppHeader } from "@/components/ui/app-header";
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { TagList } from "@/components/ui/tag-list";
-
-import { getCurrentUser } from "@/features/auth/current-user";
-import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 import { dashboardFixture, type DashboardMeal } from "./dashboard.fixture";
 import { PlanningDay } from "./components/planning-day";
@@ -29,13 +25,6 @@ const mediaPanelClassName =
   "rounded-4xl border border-media-panel-border bg-gradient-to-r from-media-panel-start to-media-panel-end p-4 backdrop-blur-xs";
 const mediaActionClassName =
   "rounded-full bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline shadow-sm transition-transform motion-safe:hover:scale-[1.02] motion-reduce:transition-none";
-
-const dashboardNavigationItems = [
-  { href: "#dashboard", label: "Today" },
-  { href: "#week-plan", label: "Planner", mobileLabel: "Plan" },
-  { href: "#shopping", label: "Shopping", mobileLabel: "Shop" },
-  { href: "#recipes", label: "Recipes" },
-] as const;
 
 function MealArtwork({
   artwork,
@@ -258,21 +247,10 @@ function RecipeCard({ recipe }: { recipe: DashboardMeal }) {
   );
 }
 
-export async function Dashboard() {
-  const user = await getCurrentUser();
-
+export function Dashboard() {
   return (
-    <div id="dashboard" className="min-h-screen">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <AppHeader
-          activeHref="#dashboard"
-          homeHref="#dashboard"
-          navigationItems={dashboardNavigationItems}
-          navigationLabel="Dashboard sections"
-          actions={<SignOutButton />}
-          user={user ?? dashboardFixture.user}
-        />
-
+    <div id="dashboard">
+      <div>
         <main className="pt-10 sm:pt-14">
           <header className="mb-8 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
             <div>
