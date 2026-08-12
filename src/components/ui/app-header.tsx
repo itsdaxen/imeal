@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cva } from "class-variance-authority";
 import { cn, Link, Surface } from "@heroui/react";
 
@@ -54,6 +55,7 @@ export type AppHeaderNavigationItem = {
 };
 
 type AppHeaderProps = {
+  actions?: ReactNode;
   activeHref: string;
   homeHref: string;
   navigationItems: ReadonlyArray<AppHeaderNavigationItem>;
@@ -118,6 +120,7 @@ function HeaderNavigation({
 }
 
 export function AppHeader({
+  actions,
   activeHref,
   homeHref,
   navigationItems,
@@ -148,13 +151,16 @@ export function AppHeader({
         viewport="desktop"
       />
 
-      <span
-        aria-label={`Signed in as ${user.displayName}`}
-        className="grid size-9 place-items-center rounded-full bg-foreground text-xs font-semibold text-background"
-        role="img"
-      >
-        {user.initials}
-      </span>
+      <div className="flex items-center gap-3">
+        <span
+          aria-label={`Signed in as ${user.displayName}`}
+          className="grid size-9 place-items-center rounded-full bg-foreground text-xs font-semibold text-background"
+          role="img"
+        >
+          {user.initials}
+        </span>
+        {actions}
+      </div>
 
       <HeaderNavigation
         activeHref={activeHref}

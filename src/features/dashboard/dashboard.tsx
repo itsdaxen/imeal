@@ -8,6 +8,9 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { TagList } from "@/components/ui/tag-list";
 
+import { getCurrentUser } from "@/features/auth/current-user";
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
+
 import { dashboardFixture, type DashboardMeal } from "./dashboard.fixture";
 import { PlanningDay } from "./components/planning-day";
 
@@ -255,7 +258,9 @@ function RecipeCard({ recipe }: { recipe: DashboardMeal }) {
   );
 }
 
-export function Dashboard() {
+export async function Dashboard() {
+  const user = await getCurrentUser();
+
   return (
     <div id="dashboard" className="min-h-screen">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
@@ -264,7 +269,8 @@ export function Dashboard() {
           homeHref="#dashboard"
           navigationItems={dashboardNavigationItems}
           navigationLabel="Dashboard sections"
-          user={dashboardFixture.user}
+          actions={<SignOutButton />}
+          user={user ?? dashboardFixture.user}
         />
 
         <main className="pt-10 sm:pt-14">
