@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/features/auth/current-user";
 const navigationItems = [
   { href: "/", label: "Today" },
   { href: "/planner", label: "Planner" },
+  { href: "/shopping", label: "Shopping" },
   { href: "/recipes", label: "Recipes" },
 ];
 
