@@ -318,6 +318,16 @@ export type Database = {
     };
     Functions: {
       is_admin: { Args: never; Returns: boolean };
+      planned_ingredients: {
+        Args: { p_meal_plan_id: string };
+        Returns: {
+          name: string;
+        }[];
+      };
+      sync_generated_shopping_items: {
+        Args: { p_week_start: string };
+        Returns: number;
+      };
     };
     Enums: {
       app_role: "user" | "admin";
