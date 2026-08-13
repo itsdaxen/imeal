@@ -105,7 +105,12 @@ export async function updateRecipe(
   redirect(`/recipes/${id}`);
 }
 
-export async function deleteRecipe(id: string) {
+const FOREIGN_KEY_VIOLATION = "23503";
+
+export async function deleteRecipe(
+  id: string,
+  _previous: RecipeFormState,
+): Promise<RecipeFormState> {
   const { supabase, userId } = await requireUserId();
 
   const { error } = await supabase
@@ -114,8 +119,15 @@ export async function deleteRecipe(id: string) {
     .eq("id", id)
     .eq("owner_id", userId);
 
+  if (error?.code === FOREIGN_KEY_VIOLATION) {
+    // meal_plan_items references recipes with `on delete restrict`.
+    return {
+      error: "This recipe is in a meal plan. Remove it from the plan first.",
+    };
+  }
+
   if (error) {
-    throw new Error(`Could not delete the recipe: ${error.message}`);
+    return { error: "Could not delete the recipe. Try again." };
   }
 
   revalidatePath("/recipes");
