@@ -14,6 +14,81 @@ export type Database = {
   };
   public: {
     Tables: {
+      friend_requests: {
+        Row: {
+          addressee_id: string;
+          created_at: string;
+          id: string;
+          requester_id: string;
+          responded_at: string | null;
+          status: Database["public"]["Enums"]["friend_request_status"];
+        };
+        Insert: {
+          addressee_id: string;
+          created_at?: string;
+          id?: string;
+          requester_id: string;
+          responded_at?: string | null;
+          status?: Database["public"]["Enums"]["friend_request_status"];
+        };
+        Update: {
+          addressee_id?: string;
+          created_at?: string;
+          id?: string;
+          requester_id?: string;
+          responded_at?: string | null;
+          status?: Database["public"]["Enums"]["friend_request_status"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "friend_requests_addressee_id_fkey";
+            columns: ["addressee_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "friend_requests_requester_id_fkey";
+            columns: ["requester_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      friendships: {
+        Row: {
+          created_at: string;
+          friend_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          friend_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          friend_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "friendships_friend_id_fkey";
+            columns: ["friend_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "friendships_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       meal_plan_items: {
         Row: {
           approved: boolean;
@@ -317,7 +392,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      accept_friend_request: {
+        Args: { p_request_id: string };
+        Returns: undefined;
+      };
+      decline_friend_request: {
+        Args: { p_request_id: string };
+        Returns: undefined;
+      };
       is_admin: { Args: never; Returns: boolean };
+      is_friend: { Args: { p_other: string }; Returns: boolean };
       planned_ingredients: {
         Args: { p_meal_plan_id: string };
         Returns: {
@@ -331,6 +415,7 @@ export type Database = {
     };
     Enums: {
       app_role: "user" | "admin";
+      friend_request_status: "pending" | "accepted" | "declined";
       meal_slot: "breakfast" | "lunch" | "snack" | "dinner";
       recipe_status: "active" | "archived";
       recipe_visibility: "private" | "public";
@@ -463,6 +548,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "admin"],
+      friend_request_status: ["pending", "accepted", "declined"],
       meal_slot: ["breakfast", "lunch", "snack", "dinner"],
       recipe_status: ["active", "archived"],
       recipe_visibility: ["private", "public"],
