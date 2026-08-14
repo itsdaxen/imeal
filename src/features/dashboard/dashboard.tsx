@@ -1,17 +1,20 @@
-import Image from "next/image";
-
 import { Card, cn, Link, ProgressBar, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { IconBadge } from "@/components/ui/icon-badge";
 import { TagList } from "@/components/ui/tag-list";
+import { getCurrentUser } from "@/features/auth/current-user";
 
-import { dashboardFixture, type DashboardMeal } from "./dashboard.fixture";
+import {
+  getDashboardData,
+  type Artwork,
+  type DashboardData,
+} from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
 
-// Temporary placeholder artwork.
-const artworkClasses: Record<DashboardMeal["artwork"], string> = {
+// Placeholder artwork stands in until recipe images exist.
+const artworkClasses: Record<Artwork, string> = {
   citrus:
     "bg-[linear-gradient(150deg,oklch(0.58_0.12_72),oklch(0.82_0.10_88))]",
   herb: "bg-[linear-gradient(150deg,oklch(0.48_0.10_158),oklch(0.74_0.08_152))]",
@@ -30,7 +33,7 @@ function MealArtwork({
   artwork,
   className = "",
 }: {
-  artwork: DashboardMeal["artwork"];
+  artwork: Artwork;
   className?: string;
 }) {
   return (
@@ -41,9 +44,10 @@ function MealArtwork({
   );
 }
 
-function WeekOverviewCard() {
-  const { week } = dashboardFixture;
-
+function WeekOverviewCard({
+  week,
+  weekStart,
+}: Pick<DashboardData, "week" | "weekStart">) {
   return (
     <ContentCard
       className="col-span-12 md:flex-row md:items-center"
@@ -53,9 +57,14 @@ function WeekOverviewCard() {
       <Card.Header className="min-w-0 flex-1 gap-1">
         <Eyebrow>YOUR WEEK</Eyebrow>
         <Card.Title className="text-xl sm:text-2xl">
-          {week.plannedMeals} meals are planned
+          {week.plannedMeals === 0
+            ? "Nothing planned yet"
+            : `${week.plannedMeals} of ${week.totalSlots} slots planned`}
         </Card.Title>
-        <Card.Description>{week.label}</Card.Description>
+        <Card.Description>
+          {week.label} ·{" "}
+          <Link href={`/planner?week=${weekStart}`}>Open the planner</Link>
+        </Card.Description>
       </Card.Header>
 
       <Card.Content className="w-full md:max-w-xl">
@@ -65,11 +74,11 @@ function WeekOverviewCard() {
         >
           {week.days.map((day) => (
             <PlanningDay
-              date={day.date}
-              hasMeal={Boolean(day.hasMeal)}
-              isToday={Boolean(day.isToday)}
-              key={`${day.label}-${day.date}`}
-              label={day.label}
+              date={day.dayOfMonth}
+              hasMeal={day.hasMeal}
+              isToday={day.isToday}
+              key={day.label}
+              label={day.shortLabel}
             />
           ))}
         </ol>
@@ -78,11 +87,15 @@ function WeekOverviewCard() {
   );
 }
 
-function ShoppingSummaryCard() {
-  const { shopping } = dashboardFixture;
-  const percentage = Math.round(
-    (shopping.completedItems / shopping.totalItems) * 100,
-  );
+function ShoppingSummaryCard({
+  shopping,
+  weekStart,
+}: Pick<DashboardData, "shopping" | "weekStart">) {
+  const remaining = shopping.totalItems - shopping.completedItems;
+  const percentage =
+    shopping.totalItems === 0
+      ? 0
+      : Math.round((shopping.completedItems / shopping.totalItems) * 100);
 
   return (
     <ContentCard className="col-span-12 lg:col-span-5" id="shopping">
@@ -105,43 +118,63 @@ function ShoppingSummaryCard() {
         </IconBadge>
         <div className="flex flex-col gap-1">
           <Eyebrow>SHOPPING</Eyebrow>
-          <Card.Title className="text-xl">Almost ready for the week</Card.Title>
+          <Card.Title className="text-xl">
+            {shopping.totalItems === 0
+              ? "No list yet"
+              : remaining === 0
+                ? "Everything is bought"
+                : "Ready for the week"}
+          </Card.Title>
           <Card.Description>
-            {shopping.completedItems} of {shopping.totalItems} items collected
+            {shopping.totalItems === 0 ? (
+              <Link href={`/shopping?week=${weekStart}`}>
+                Build it from your plan
+              </Link>
+            ) : (
+              `${shopping.completedItems} of ${shopping.totalItems} items collected`
+            )}
           </Card.Description>
         </div>
       </Card.Header>
 
-      <Card.Content className="mt-2 gap-5">
-        <ProgressBar aria-label="Shopping list completion" value={percentage}>
-          <ProgressBar.Output className="text-xs font-medium text-muted" />
-          <ProgressBar.Track>
-            <ProgressBar.Fill />
-          </ProgressBar.Track>
-        </ProgressBar>
+      {shopping.totalItems > 0 ? (
+        <>
+          <Card.Content className="mt-2 gap-5">
+            <ProgressBar
+              aria-label="Shopping list completion"
+              value={percentage}
+            >
+              <ProgressBar.Output className="text-xs font-medium text-muted" />
+              <ProgressBar.Track>
+                <ProgressBar.Fill />
+              </ProgressBar.Track>
+            </ProgressBar>
 
-        <TagList
-          casing="none"
-          label="Next shopping items"
+            <TagList
+              casing="none"
+              label="Next shopping items"
 
-          tags={shopping.nextItems}
+              tags={shopping.nextItems}
 
-          tone="neutral"
-        />
-      </Card.Content>
+              tone="neutral"
+            />
+          </Card.Content>
 
-      <Card.Footer>
-        <span className="text-sm font-medium text-foreground">
-          {shopping.totalItems - shopping.completedItems} items left
-        </span>
-      </Card.Footer>
+          <Card.Footer>
+            <span className="text-sm font-medium text-foreground">
+              {remaining} items left
+            </span>
+          </Card.Footer>
+        </>
+      ) : null}
     </ContentCard>
   );
 }
 
-function NextMealCard() {
-  const { nextMeal } = dashboardFixture;
-
+function NextMealCard({
+  nextMeal,
+  weekStart,
+}: Pick<DashboardData, "nextMeal" | "weekStart">) {
   return (
     <ContentCard
       appearance="media"
@@ -150,43 +183,88 @@ function NextMealCard() {
       id="next-meal"
       variant="tertiary"
     >
-      <Image
-        alt=""
-        className="object-cover"
-        fill
-        preload
-        sizes="(min-width: 1280px) 42rem, (min-width: 1024px) 58vw, 100vw"
-        src={nextMeal.image}
+      <MealArtwork
+        artwork={nextMeal?.artwork ?? "herb"}
+        className="absolute inset-0 size-full"
       />
       <div className={mediaScrimClassName} />
+
       <Card.Header className="relative z-10 p-6 sm:p-8">
         <div className={mediaPanelClassName}>
           <Eyebrow tone="media">
-            {nextMeal.dayLabel.toUpperCase()} · {nextMeal.time}
+            {nextMeal
+              ? `${nextMeal.dayLabel.toUpperCase()} · ${nextMeal.slot}`
+              : "NEXT UP"}
           </Eyebrow>
           <Card.Title className="max-w-sm text-2xl text-media-foreground sm:text-3xl">
-            {nextMeal.title}
+            {nextMeal ? nextMeal.title : "Nothing planned yet"}
           </Card.Title>
           <Card.Description className="max-w-xs text-media-muted">
-            {nextMeal.subtitle}
+            {nextMeal
+              ? "Everything you need is on the shopping list."
+              : "Pick a few recipes and place them in the week."}
           </Card.Description>
         </div>
       </Card.Header>
+
       <Card.Footer className="relative z-10 mt-auto flex items-end justify-between gap-4 p-6 sm:p-8">
-        <div className="rounded-full bg-media-control px-4 py-2 text-sm font-medium text-media-control-foreground shadow-sm backdrop-blur-md">
-          {nextMeal.prepMinutes} minutes
-        </div>
-        <Link className={mediaActionClassName} href="#recipes">
-          View recipe
-          <Link.Icon aria-hidden="true" />
-        </Link>
+        {nextMeal ? (
+          <>
+            <div className="rounded-full bg-media-control px-4 py-2 text-sm font-medium text-media-control-foreground shadow-sm backdrop-blur-md">
+              {nextMeal.prepMinutes} minutes
+            </div>
+            <Link
+              className={mediaActionClassName}
+              href={`/cook/${nextMeal.id}`}
+            >
+              Start cooking
+              <Link.Icon aria-hidden="true" />
+            </Link>
+          </>
+        ) : (
+          <Link
+            className={mediaActionClassName}
+            href={`/planner?week=${weekStart}`}
+          >
+            Plan the week
+            <Link.Icon aria-hidden="true" />
+          </Link>
+        )}
       </Card.Footer>
     </ContentCard>
   );
 }
 
-function ReminderCard() {
-  const { reminder } = dashboardFixture;
+function NextStepCard({ shopping, week, weekStart }: DashboardData) {
+  const remaining = shopping.totalItems - shopping.completedItems;
+  const step =
+    week.plannedMeals === 0
+      ? {
+          title: "Plan your week",
+          description: "Place a few recipes into days and slots.",
+          href: `/planner?week=${weekStart}`,
+          action: "Open the planner",
+        }
+      : shopping.totalItems === 0
+        ? {
+            title: "Build the shopping list",
+            description: "Turn this week's meals into one list.",
+            href: `/shopping?week=${weekStart}`,
+            action: "Build it",
+          }
+        : remaining > 0
+          ? {
+              title: `${remaining} things left to buy`,
+              description: "Tick them off as you shop.",
+              href: `/shopping?week=${weekStart}`,
+              action: "Open the list",
+            }
+          : {
+              title: "You are all set",
+              description: "The week is planned and the shopping is done.",
+              href: `/planner?week=${weekStart}`,
+              action: "Review the week",
+            };
 
   return (
     <ContentCard className="col-span-12 lg:col-span-5">
@@ -208,21 +286,25 @@ function ReminderCard() {
           </svg>
         </IconBadge>
         <div className="flex flex-col gap-1">
-          <Eyebrow>{reminder.eyebrow}</Eyebrow>
-          <Card.Title className="text-lg">{reminder.title}</Card.Title>
-          <Card.Description>{reminder.description}</Card.Description>
+          <Eyebrow>NEXT STEP</Eyebrow>
+          <Card.Title className="text-lg">{step.title}</Card.Title>
+          <Card.Description>{step.description}</Card.Description>
         </div>
       </Card.Header>
       <Card.Footer>
-        <span className="text-sm font-medium text-foreground">
-          Tomorrow · Lunch
-        </span>
+        <Link className="text-sm font-medium" href={step.href}>
+          {step.action}
+        </Link>
       </Card.Footer>
     </ContentCard>
   );
 }
 
-function RecipeCard({ recipe }: { recipe: DashboardMeal }) {
+function RecipeCard({
+  recipe,
+}: {
+  recipe: DashboardData["recentRecipes"][number];
+}) {
   return (
     <ContentCard className="col-span-12 sm:col-span-6" density="compact">
       <MealArtwork
@@ -230,79 +312,104 @@ function RecipeCard({ recipe }: { recipe: DashboardMeal }) {
         className="h-40 w-full rounded-3xl sm:h-44"
       />
       <Card.Header className="gap-1 px-1 pb-0">
-        <Card.Title className="text-base">{recipe.title}</Card.Title>
-        <Card.Description>{recipe.subtitle}</Card.Description>
+        <Card.Title className="text-base">
+          <Link
+            className="text-foreground no-underline"
+            href={`/recipes/${recipe.id}`}
+          >
+            {recipe.title}
+          </Link>
+        </Card.Title>
+        <Card.Description>Serves {recipe.servings}</Card.Description>
       </Card.Header>
       <Card.Footer className="justify-between px-1 pt-0">
-        <span className="text-xs font-medium text-muted">{recipe.time}</span>
-        <span className="flex items-center gap-1.5 text-xs font-medium text-muted">
-          <span
-            aria-hidden="true"
-            className="size-1.5 rounded-full bg-accent"
-          />
-          Saved
+        <span className="text-xs font-medium text-muted">
+          {recipe.prepMinutes} minutes
         </span>
       </Card.Footer>
     </ContentCard>
   );
 }
 
-export function Dashboard() {
+function greeting(hour: number) {
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  return hour < 18 ? "Good afternoon" : "Good evening";
+}
+
+export async function Dashboard() {
+  const now = new Date();
+  const [data, user] = await Promise.all([
+    getDashboardData(now),
+    getCurrentUser(),
+  ]);
+  const today = new Intl.DateTimeFormat("en", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(now);
+
   return (
     <div id="dashboard">
-      <div>
-        <main className="pt-10 sm:pt-14">
-          <header className="mb-8 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <Typography color="muted" type="body-sm" weight="medium">
-                Monday, July 27
-              </Typography>
-              <Typography.Heading className="mt-1" level={1}>
-                Good evening, {dashboardFixture.user.firstName}.
-              </Typography.Heading>
-            </div>
-            <Typography.Paragraph
-              className="max-w-md sm:text-right"
-              color="muted"
-              size="sm"
-            >
-              Dinner is planned and most of your shopping is already done.
-            </Typography.Paragraph>
-          </header>
+      <main className="pt-10 sm:pt-14">
+        <header className="mb-8 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Typography color="muted" type="body-sm" weight="medium">
+              {today}
+            </Typography>
+            <Typography.Heading className="mt-1" level={1}>
+              {greeting(now.getHours())}
+              {user ? `, ${user.displayName}` : ""}.
+            </Typography.Heading>
+          </div>
+        </header>
 
-          <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
-            <WeekOverviewCard />
-            <ShoppingSummaryCard />
-            <NextMealCard />
-            <ReminderCard />
+        <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+          <WeekOverviewCard week={data.week} weekStart={data.weekStart} />
+          <ShoppingSummaryCard
+            shopping={data.shopping}
+            weekStart={data.weekStart}
+          />
+          <NextMealCard nextMeal={data.nextMeal} weekStart={data.weekStart} />
+          <NextStepCard {...data} />
 
-            <section
-              aria-labelledby="recent-recipes-title"
-              className="col-span-12 mt-2"
-              id="recipes"
-            >
-              <div className="mb-4 px-1">
-                <div>
-                  <Eyebrow>YOUR LIBRARY</Eyebrow>
-                  <Typography.Heading level={2} id="recent-recipes-title">
-                    Recent recipes
-                  </Typography.Heading>
-                </div>
+          <section
+            aria-labelledby="recent-recipes-title"
+            className="col-span-12 mt-2"
+            id="recipes"
+          >
+            <div className="mb-4 flex items-end justify-between px-1">
+              <div>
+                <Eyebrow>YOUR LIBRARY</Eyebrow>
+                <Typography.Heading id="recent-recipes-title" level={2}>
+                  Recent recipes
+                </Typography.Heading>
               </div>
+              <Link href="/recipes">See all</Link>
+            </div>
+
+            {data.recentRecipes.length === 0 ? (
+              <Typography color="muted" type="body">
+                No recipes yet.{" "}
+                <Link href="/recipes/new">Add your first one</Link>.
+              </Typography>
+            ) : (
               <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
-                {dashboardFixture.recentRecipes.map((recipe) => (
+                {data.recentRecipes.map((recipe) => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
-            </section>
-          </div>
-        </main>
+            )}
+          </section>
+        </div>
+      </main>
 
-        <footer className="mt-12 flex items-center justify-between border-t border-separator px-1 py-6 text-xs text-muted">
-          <span>iMeal</span>
-          <span>Plan with intention. Cook with ease.</span>
-        </footer>
-      </div>
+      <footer className="mt-12 flex items-center justify-between border-t border-separator px-1 py-6 text-xs text-muted">
+        <span>iMeal</span>
+        <span>Plan with intention. Cook with ease.</span>
+      </footer>
     </div>
   );
 }
