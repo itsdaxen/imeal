@@ -11,6 +11,7 @@ const navigationItems = [
   { href: "/planner", label: "Planner" },
   { href: "/shopping", label: "Shopping" },
   { href: "/recipes", label: "Recipes" },
+  { href: "/friends", label: "Friends" },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
