@@ -38,6 +38,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </Typography>
 
         <div className="flex items-center gap-4">
+          <Link href={`/cook/${recipe.id}`}>Cook this</Link>
           <Link href={`/recipes/${recipe.id}/edit`}>Edit</Link>
           <DeleteRecipeForm id={recipe.id} />
         </div>

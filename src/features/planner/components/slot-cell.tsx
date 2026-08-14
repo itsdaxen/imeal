@@ -36,7 +36,10 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
           <Typography className="text-muted" type="body-xs">
             {meal.recipe.prepMinutes} min
           </Typography>
-          <div className="mt-auto flex gap-1">
+          <div className="mt-auto flex flex-wrap items-center gap-2">
+            <Link className="text-xs" href={`/cook/${meal.recipe.id}`}>
+              Cook
+            </Link>
             <Link className="text-xs" href={assignHref}>
               Change
             </Link>
