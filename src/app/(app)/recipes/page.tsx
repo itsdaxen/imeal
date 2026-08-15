@@ -29,7 +29,10 @@ export default async function RecipesPage({
         <Typography type="h1" weight="semibold">
           Recipes
         </Typography>
-        <Link href="/recipes/new">Add a recipe</Link>
+        <div className="flex items-center gap-4">
+          <Link href="/recipes/shared">Shared with you</Link>
+          <Link href="/recipes/new">Add a recipe</Link>
+        </div>
       </header>
 
       <RecipeSearch mealTag={filters.mealTag} search={filters.search} />
