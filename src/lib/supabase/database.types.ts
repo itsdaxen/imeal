@@ -208,6 +208,49 @@ export type Database = {
         };
         Relationships: [];
       };
+      recipe_shares: {
+        Row: {
+          created_at: string;
+          recipe_id: string;
+          shared_by: string;
+          shared_with: string;
+        };
+        Insert: {
+          created_at?: string;
+          recipe_id: string;
+          shared_by: string;
+          shared_with: string;
+        };
+        Update: {
+          created_at?: string;
+          recipe_id?: string;
+          shared_by?: string;
+          shared_with?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "recipe_shares_recipe_id_fkey";
+            columns: ["recipe_id"];
+            isOneToOne: false;
+            referencedRelation: "recipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "recipe_shares_shared_by_fkey";
+            columns: ["shared_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "recipe_shares_shared_with_fkey";
+            columns: ["shared_with"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       recipes: {
         Row: {
           created_at: string;
@@ -402,6 +445,7 @@ export type Database = {
       };
       is_admin: { Args: never; Returns: boolean };
       is_friend: { Args: { p_other: string }; Returns: boolean };
+      owns_recipe: { Args: { p_recipe_id: string }; Returns: boolean };
       planned_ingredients: {
         Args: { p_meal_plan_id: string };
         Returns: {
