@@ -251,6 +251,61 @@ export type Database = {
           },
         ];
       };
+      recipe_suggestions: {
+        Row: {
+          created_at: string;
+          id: string;
+          recipe_id: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          reviewer_note: string | null;
+          status: Database["public"]["Enums"]["suggestion_status"];
+          suggested_by: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          recipe_id: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          reviewer_note?: string | null;
+          status?: Database["public"]["Enums"]["suggestion_status"];
+          suggested_by: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          recipe_id?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          reviewer_note?: string | null;
+          status?: Database["public"]["Enums"]["suggestion_status"];
+          suggested_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "recipe_suggestions_recipe_id_fkey";
+            columns: ["recipe_id"];
+            isOneToOne: false;
+            referencedRelation: "recipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "recipe_suggestions_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "recipe_suggestions_suggested_by_fkey";
+            columns: ["suggested_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       recipes: {
         Row: {
           created_at: string;
@@ -439,6 +494,14 @@ export type Database = {
         Args: { p_request_id: string };
         Returns: undefined;
       };
+      approve_recipe_suggestion: {
+        Args: { p_suggestion_id: string };
+        Returns: string;
+      };
+      archive_catalog_recipe: {
+        Args: { p_recipe_id: string };
+        Returns: undefined;
+      };
       decline_friend_request: {
         Args: { p_request_id: string };
         Returns: undefined;
@@ -452,6 +515,10 @@ export type Database = {
           name: string;
         }[];
       };
+      reject_recipe_suggestion: {
+        Args: { p_note?: string; p_suggestion_id: string };
+        Returns: undefined;
+      };
       sync_generated_shopping_items: {
         Args: { p_week_start: string };
         Returns: number;
@@ -464,6 +531,7 @@ export type Database = {
       recipe_status: "active" | "archived";
       recipe_visibility: "private" | "public";
       shopping_item_source: "generated" | "manual" | "staple";
+      suggestion_status: "pending" | "approved" | "rejected";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -597,6 +665,7 @@ export const Constants = {
       recipe_status: ["active", "archived"],
       recipe_visibility: ["private", "public"],
       shopping_item_source: ["generated", "manual", "staple"],
+      suggestion_status: ["pending", "approved", "rejected"],
     },
   },
 } as const;
