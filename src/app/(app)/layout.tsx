@@ -5,17 +5,22 @@ import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AccountMenu } from "@/features/auth/components/account-menu";
 import { getCurrentUser } from "@/features/auth/current-user";
+import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 
 const navigationItems = [
   { href: "/", label: "Today" },
   { href: "/planner", label: "Planner" },
   { href: "/shopping", label: "Shopping" },
   { href: "/recipes", label: "Recipes" },
+  { href: "/catalog", label: "Catalog" },
   { href: "/friends", label: "Friends" },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
+  const [user, isAdmin] = await Promise.all([
+    getCurrentUser(),
+    isCurrentUserAdmin(),
+  ]);
 
   // The proxy already redirects anonymous requests; this covers a session that
   // expires between the proxy check and rendering.
@@ -34,7 +39,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             />
           }
           homeHref="/"
-          navigationItems={navigationItems}
+          navigationItems={
+            isAdmin
+              ? [...navigationItems, { href: "/admin", label: "Moderation" }]
+              : navigationItems
+          }
           navigationLabel="Main navigation"
         />
         {children}
