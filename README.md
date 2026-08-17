@@ -75,12 +75,12 @@ Before opening a pull request, run the full quality gate:
 pnpm check   # format check, lint, typecheck, tests, dependency audit, and a production build
 ```
 
-`pnpm verify:rls` exercises the Row Level Security policies against a real project.
-It creates and deletes throwaway users and needs `SUPABASE_SERVICE_KEY`, so it is
-deliberately outside `pnpm check`:
+Two checks run against a real project rather than in CI. Both create and delete
+throwaway users and need `SUPABASE_SERVICE_KEY`, so they sit outside `pnpm check`:
 
 ```bash
-set -a; . ./.env.local; set +a && pnpm verify:rls
+set -a; . ./.env.local; set +a && pnpm verify:rls      # the access matrix
+set -a; . ./.env.local; set +a && pnpm verify:routes   # every page renders (needs pnpm dev)
 ```
 
 ## Administrators
