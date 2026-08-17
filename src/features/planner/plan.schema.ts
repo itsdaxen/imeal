@@ -11,4 +11,19 @@ export const slotAssignmentSchema = z.object({
 
 export const slotTargetSchema = slotAssignmentSchema.omit({ recipeId: true });
 
+export const GENERATION_SOURCES = ["mine", "catalog", "both"] as const;
+
+export type GenerationSource = (typeof GENERATION_SOURCES)[number];
+
+export const generationSchema = z.object({
+  weekStart: z.iso.date(),
+  source: z.enum(GENERATION_SOURCES),
+  slots: z.array(z.enum(MEAL_SLOTS)).min(1, "Choose at least one meal slot."),
+});
+
+export const mealSchema = z.object({
+  weekStart: z.iso.date(),
+  itemId: z.uuid(),
+});
+
 export type SlotAssignment = z.output<typeof slotAssignmentSchema>;

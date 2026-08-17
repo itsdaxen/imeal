@@ -4,6 +4,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 export type PlannedMeal = {
   id: string;
+  approved: boolean;
   dayIndex: number;
   slot: MealSlot;
   recipe: { id: string; title: string; prepMinutes: number };
@@ -36,7 +37,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
 
   const { data: items, error: itemsError } = await supabase
     .from("meal_plan_items")
-    .select("id, day_index, slot, recipes (id, title, prep_minutes)")
+    .select("id, approved, day_index, slot, recipes (id, title, prep_minutes)")
     .eq("meal_plan_id", plan.id);
 
   if (itemsError) {
@@ -47,6 +48,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
     .filter((item) => item.recipes !== null)
     .map((item) => ({
       id: item.id,
+      approved: item.approved,
       dayIndex: item.day_index,
       slot: item.slot,
       recipe: {
@@ -63,4 +65,47 @@ export function mealAt(plan: WeekPlan, dayIndex: number, slot: MealSlot) {
   return plan.meals.find(
     (meal) => meal.dayIndex === dayIndex && meal.slot === slot,
   );
+}
+
+export type PlannableRecipeRow = {
+  id: string;
+  mealTags: MealSlot[];
+};
+
+/**
+ * The pool a week can be filled from. "both" mirrors the source the old planner
+ * offered: your own recipes together with the public catalog.
+ */
+export async function listPlannableRecipes(
+  source: "mine" | "catalog" | "both",
+): Promise<PlannableRecipeRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  let query = supabase
+    .from("recipes")
+    .select("id, meal_tags")
+    .eq("status", "active");
+
+  if (source === "mine") {
+    query = query.eq("owner_id", user.id);
+  } else if (source === "catalog") {
+    query = query.eq("visibility", "public");
+  } else {
+    query = query.or(`owner_id.eq.${user.id},visibility.eq.public`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Could not load recipes to plan from: ${error.message}`);
+  }
+
+  return data.map((recipe) => ({ id: recipe.id, mealTags: recipe.meal_tags }));
 }
