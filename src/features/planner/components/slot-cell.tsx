@@ -4,6 +4,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import type { PlannedMeal } from "../plan.queries";
 import { ClearSlotForm } from "./clear-slot-form";
+import { MealControls } from "./meal-controls";
 
 type SlotCellProps = {
   dayIndex: number;
@@ -16,7 +17,13 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
   const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}`;
 
   return (
-    <div className="flex min-h-24 flex-col gap-1.5 rounded-2xl border border-border/80 p-3">
+    <div
+      className={`flex min-h-24 flex-col gap-1.5 rounded-2xl border p-3 ${
+        meal?.approved
+          ? "border-accent/60 bg-accent-soft/40"
+          : "border-border/80"
+      }`}
+    >
       <Typography
         className="text-muted capitalize"
         type="body-xs"
@@ -36,6 +43,12 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
           <Typography className="text-muted" type="body-xs">
             {meal.recipe.prepMinutes} min
           </Typography>
+          <MealControls
+            isApproved={meal.approved}
+            itemId={meal.id}
+            weekStart={weekStart}
+          />
+
           <div className="mt-auto flex flex-wrap items-center gap-2">
             <Link className="text-xs" href={`/cook/${meal.recipe.id}`}>
               Cook
