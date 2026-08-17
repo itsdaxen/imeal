@@ -82,7 +82,7 @@ export default async function CatalogPage({
               <ContentCard density="compact">
                 <Card.Header>
                   <TagList label="Meals this suits" tags={recipe.mealTags} />
-                  <Typography type="h3" weight="semibold">
+                  <Typography type="h2" weight="semibold">
                     <Link
                       className="text-foreground no-underline"
                       href={`/recipes/${recipe.id}`}

@@ -10,7 +10,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
     <ContentCard density="compact">
       <Card.Header>
         <TagList label="Meals this suits" tags={recipe.meal_tags} />
-        <Typography type="h3" weight="semibold">
+        <Typography type="h2" weight="semibold">
           <Link
             className="text-foreground no-underline"
             href={`/recipes/${recipe.id}`}

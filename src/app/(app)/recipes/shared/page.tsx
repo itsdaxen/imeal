@@ -38,7 +38,7 @@ export default async function SharedRecipesPage() {
               <ContentCard density="compact">
                 <Card.Header>
                   <Eyebrow>From {recipe.sharedBy}</Eyebrow>
-                  <Typography type="h3" weight="semibold">
+                  <Typography type="h2" weight="semibold">
                     <Link
                       className="text-foreground no-underline"
                       href={`/recipes/${recipe.id}`}

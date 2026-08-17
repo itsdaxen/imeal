@@ -17,7 +17,7 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
       {weekDays(weekStart).map((day) => (
         <ContentCard density="compact" key={day.date}>
           <Card.Header>
-            <Typography type="h3" weight="semibold">
+            <Typography type="h2" weight="semibold">
               {day.label}
             </Typography>
             <Typography className="text-muted" type="body-xs">
