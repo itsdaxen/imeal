@@ -113,15 +113,3 @@ export async function removeFriend(formData: FormData) {
 
   revalidatePath("/friends");
 }
-
-export async function setDiscoverable(formData: FormData) {
-  const discoverable = formData.get("discoverable") === "true";
-  const { supabase, userId } = await requireUserId();
-
-  await supabase
-    .from("profiles")
-    .update({ friend_discoverable: discoverable })
-    .eq("id", userId);
-
-  revalidatePath("/friends");
-}

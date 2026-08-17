@@ -9,7 +9,6 @@ import {
   declineFriendRequest,
   removeFriend,
   sendFriendRequest,
-  setDiscoverable,
   withdrawFriendRequest,
 } from "@/features/friends/friend.actions";
 import {
@@ -18,23 +17,8 @@ import {
   listOutgoingRequests,
   searchPeople,
 } from "@/features/friends/friend.queries";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Friends" };
-
-async function isDiscoverable() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data } = await supabase
-    .from("profiles")
-    .select("friend_discoverable")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
-
-  return data?.friend_discoverable ?? true;
-}
 
 export default async function FriendsPage({
   searchParams,
@@ -42,14 +26,12 @@ export default async function FriendsPage({
   searchParams: Promise<{ search?: string }>;
 }) {
   const { search } = await searchParams;
-  const [friends, incoming, outgoing, matches, discoverable] =
-    await Promise.all([
-      listFriends(),
-      listIncomingRequests(),
-      listOutgoingRequests(),
-      searchPeople(search ?? ""),
-      isDiscoverable(),
-    ]);
+  const [friends, incoming, outgoing, matches] = await Promise.all([
+    listFriends(),
+    listIncomingRequests(),
+    listOutgoingRequests(),
+    searchPeople(search ?? ""),
+  ]);
 
   const knownIds = new Set([
     ...friends.map((person) => person.id),
@@ -209,27 +191,6 @@ export default async function FriendsPage({
             ))}
           </ul>
         )}
-      </section>
-
-      <section className="flex flex-col gap-3 border-t border-border/60 pt-6">
-        <Typography type="h2" weight="semibold">
-          Discoverability
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          {discoverable
-            ? "Other people can find you by name."
-            : "You are hidden from search. Only people you contact first can add you."}
-        </Typography>
-        <form action={setDiscoverable}>
-          <input
-            name="discoverable"
-            type="hidden"
-            value={String(!discoverable)}
-          />
-          <Button size="sm" type="submit" variant="tertiary">
-            {discoverable ? "Hide me from search" : "Let people find me"}
-          </Button>
-        </form>
       </section>
     </main>
   );
