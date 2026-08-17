@@ -494,6 +494,14 @@ export type Database = {
         Args: { p_request_id: string };
         Returns: undefined;
       };
+      apply_generated_plan: {
+        Args: {
+          p_assignments: Json;
+          p_slots: Database["public"]["Enums"]["meal_slot"][];
+          p_week_start: string;
+        };
+        Returns: number;
+      };
       approve_recipe_suggestion: {
         Args: { p_suggestion_id: string };
         Returns: string;
