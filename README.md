@@ -13,31 +13,36 @@ brings them into one workflow:
 3. Generate and refine the shopping list for that plan.
 4. Keep the recipe accessible while preparing the meal.
 
-The core experience will work without AI. AI-assisted recipe import and shopping
-list cleanup are planned as optional conveniences, with user review before they
-change saved data.
+The core experience works without AI. AI-assisted recipe import and shopping list
+cleanup are planned as optional conveniences, with user review before they change
+saved data.
 
 ## Features
 
-- Supabase-backed authentication and user profiles.
-- A private recipe library with search and meal-type tags.
-- Weekly planning by day and meal slot.
-- Shopping-list generation from planned meals.
-- Manual shopping items, checked state, and staple items.
-- A focused, mobile-friendly recipe and cooking view.
-- Responsive and accessible interaction across the main workflow.
+- Email authentication with confirmation, and a profile holding your display name,
+  planning defaults, and whether other people can find you.
+- A private recipe library with title search and meal-slot filters.
+- Weekly planning across seven days and four meal slots, with week navigation.
+- Shopping-list generation from a week's plan, alongside manual items and reusable
+  staples. Rebuilding the list never discards items you have already ticked off.
+- A focused cooking view with one step at a time and the screen kept awake.
+- Friends, with requests to accept or decline, and recipes shared read-only with
+  the friends you choose.
+- A public catalog that anyone can browse, an author-driven suggestion queue, and
+  moderation for administrators.
 
-Collaboration, recipe sharing, a curated public catalog, administration tools, and
-AI features are candidates for later phases after the core workflow is reliable.
+AI-assisted recipe import and shopping-list cleanup are the remaining planned
+features. They are deliberately optional: nothing above depends on them.
 
 ## Stack
 
-- Next.js App Router and React.
+- Next.js App Router and React, with Server Components by default and Server
+  Actions for mutations.
 - TypeScript with strict checking.
-- Tailwind CSS.
-- HeroUI components used selectively as the UI foundation.
-- Supabase Postgres, Auth, Row Level Security, and Storage.
-- OpenAI API for bounded, optional assistance in a later phase.
+- Tailwind CSS with HeroUI as the component foundation.
+- Supabase Postgres, Auth, and Row Level Security.
+- Zod for validating every untrusted boundary.
+- Vitest and Testing Library.
 
 ## Local development
 
@@ -45,12 +50,42 @@ Requires Node `22.22.3` (see `.node-version`) and pnpm `11.17.0`.
 
 ```bash
 pnpm install
+```
+
+Create a Supabase project, then copy `.env.example` to `.env.local` and fill it in
+from the project's API settings:
+
+| Variable                               | Purpose                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Project URL, used by browser and server code.                                 |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key; every request is still constrained by Row Level Security.    |
+| `SUPABASE_SERVICE_KEY`                 | Server-only. Bypasses Row Level Security, so it must never reach the browser. |
+
+Apply the schema with the Supabase CLI, then start the app:
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
 pnpm dev
 ```
 
-The app runs against typed mock data and needs no Supabase or OpenAI credentials to start.
 Before opening a pull request, run the full quality gate:
 
 ```bash
 pnpm check   # format check, lint, typecheck, tests, dependency audit, and a production build
 ```
+
+`pnpm verify:rls` exercises the Row Level Security policies against a real project.
+It creates and deletes throwaway users and needs `SUPABASE_SERVICE_KEY`, so it is
+deliberately outside `pnpm check`:
+
+```bash
+set -a; . ./.env.local; set +a && pnpm verify:rls
+```
+
+## Administrators
+
+There is no way to become an administrator through the application. The
+`user_roles` table has no write policy at all, so a role can only be granted out of
+band with the service key. That is what makes privilege escalation impossible
+rather than merely disallowed.
