@@ -87,6 +87,78 @@ function WeekOverviewCard({
   );
 }
 
+function TodayCard({
+  today,
+  weekStart,
+}: Pick<DashboardData, "today" | "weekStart">) {
+  const planned = today.slots.filter((entry) => entry.meal !== null).length;
+
+  return (
+    <ContentCard className="col-span-12 lg:col-span-5" id="today">
+      <Card.Header className="gap-3">
+        <IconBadge tone="accent">
+          <svg
+            aria-hidden="true"
+            className="size-5"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M8 3v3m8-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+            />
+          </svg>
+        </IconBadge>
+        <div className="flex flex-col gap-1">
+          <Eyebrow>TODAY</Eyebrow>
+          <Card.Title className="text-xl">{today.label}</Card.Title>
+          <Card.Description>
+            {planned === 0
+              ? "Nothing planned for today."
+              : `${planned} of ${today.slots.length} meals planned.`}
+          </Card.Description>
+        </div>
+      </Card.Header>
+
+      <Card.Content className="mt-2">
+        <ul className="flex list-none flex-col p-0">
+          {today.slots.map(({ meal, slot }) => (
+            <li
+              className="flex min-h-11 items-center justify-between gap-3 border-b border-border/60 last:border-b-0"
+              key={slot}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs font-semibold text-muted capitalize">
+                  {slot}
+                </span>
+                <span className="block truncate text-sm text-foreground">
+                  {meal ? meal.title : "—"}
+                </span>
+              </span>
+
+              {meal ? (
+                <Link className="shrink-0 text-xs" href={`/cook/${meal.id}`}>
+                  Cook
+                </Link>
+              ) : (
+                <Link
+                  className="shrink-0 text-xs"
+                  href={`/planner?week=${weekStart}`}
+                >
+                  Plan
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Card.Content>
+    </ContentCard>
+  );
+}
+
 function ShoppingSummaryCard({
   shopping,
   weekStart,
@@ -368,6 +440,7 @@ export async function Dashboard() {
 
         <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
           <WeekOverviewCard week={data.week} weekStart={data.weekStart} />
+          <TodayCard today={data.today} weekStart={data.weekStart} />
           <ShoppingSummaryCard
             shopping={data.shopping}
             weekStart={data.weekStart}
