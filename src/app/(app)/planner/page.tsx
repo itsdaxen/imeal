@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
-import { Link, Typography } from "@heroui/react";
+import { Button, Link, Typography } from "@heroui/react";
 
+import { FillWeekForm } from "@/features/planner/components/fill-week-form";
 import { WeekGrid } from "@/features/planner/components/week-grid";
+import { approveWholeWeek } from "@/features/planner/plan.actions";
 import { getWeekPlan } from "@/features/planner/plan.queries";
 import {
   addWeeks,
@@ -41,6 +43,22 @@ export default async function PlannerPage({
           <Link href={`/planner?week=${addWeeks(weekStart, 1)}`}>Next</Link>
         </nav>
       </header>
+
+      <section className="flex flex-col gap-4 rounded-3xl border border-border/80 p-4 sm:p-5">
+        <Typography type="h2" weight="semibold">
+          Fill the week
+        </Typography>
+        <FillWeekForm enabledSlots={plan.enabledSlots} weekStart={weekStart} />
+      </section>
+
+      {plan.meals.length > 0 ? (
+        <form action={approveWholeWeek} className="self-start">
+          <input name="weekStart" type="hidden" value={weekStart} />
+          <Button size="sm" type="submit" variant="tertiary">
+            Approve the whole week
+          </Button>
+        </form>
+      ) : null}
 
       <WeekGrid plan={plan} weekStart={weekStart} />
     </main>
