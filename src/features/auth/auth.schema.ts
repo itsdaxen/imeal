@@ -17,3 +17,17 @@ export const signUpSchema = z.object({
     .max(80, "Keep the display name under 80 characters.")
     .optional(),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.email("Enter a valid email address."),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password,
+    confirmation: z.string(),
+  })
+  .refine((values) => values.password === values.confirmation, {
+    message: "The two passwords do not match.",
+    path: ["confirmation"],
+  });
