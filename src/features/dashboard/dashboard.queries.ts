@@ -37,6 +37,13 @@ export type DashboardData = {
     imageUrl: string | null;
     artwork: Artwork;
   } | null;
+  today: {
+    label: string;
+    slots: Array<{
+      slot: MealSlot;
+      meal: { id: string; title: string; prepMinutes: number } | null;
+    }>;
+  };
   shopping: { completedItems: number; totalItems: number; nextItems: string[] };
   recentRecipes: Array<{
     id: string;
@@ -96,6 +103,24 @@ export async function getDashboardData(
   const todayIndex = days.findIndex((day) => day.date === todayIso);
   const upcoming = selectNextMeal(plan.meals, todayIndex);
 
+  // The old app's home screen answered one question first: what am I cooking today.
+  const todaySlots = plan.enabledSlots.map((slot) => {
+    const meal = plan.meals.find(
+      (planned) => planned.dayIndex === todayIndex && planned.slot === slot,
+    );
+
+    return {
+      slot,
+      meal: meal
+        ? {
+            id: meal.recipe.id,
+            title: meal.recipe.title,
+            prepMinutes: meal.recipe.prepMinutes,
+          }
+        : null,
+    };
+  });
+
   return {
     weekStart,
     week: {
@@ -121,6 +146,10 @@ export async function getDashboardData(
           artwork: artworkFor(upcoming.recipe.id),
         }
       : null,
+    today: {
+      label: todayIndex === -1 ? "Today" : days[todayIndex].label,
+      slots: todaySlots,
+    },
     shopping: {
       completedItems: shopping.items.filter((item) => item.checked).length,
       totalItems: shopping.items.length,
