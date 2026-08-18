@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { safeInternalPath } from "@/lib/safe-redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-import { signInSchema, signUpSchema } from "./auth.schema";
+import {
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  signInSchema,
+  signUpSchema,
+} from "./auth.schema";
 
 export type AuthFormState = {
   error?: string;
@@ -84,4 +89,68 @@ export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect("/sign-in");
+}
+
+export async function requestPasswordReset(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = forgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  });
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error) };
+  }
+
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin");
+  const supabase = await createSupabaseServerClient();
+
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: origin
+      ? `${origin}/auth/callback?next=/reset-password`
+      : undefined,
+  });
+
+  // The same answer either way: telling the sender whether an account exists
+  // would turn this form into an account-existence oracle.
+  return {
+    notice: "If that address has an account, a reset link is on its way.",
+  };
+}
+
+export async function updatePassword(
+  _previous: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = resetPasswordSchema.safeParse({
+    password: formData.get("password"),
+    confirmation: formData.get("confirmation"),
+  });
+
+  if (!parsed.success) {
+    return { error: firstIssue(parsed.error) };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      error: "That reset link has expired. Ask for a new one and try again.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  redirect("/");
 }
