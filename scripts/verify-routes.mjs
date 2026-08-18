@@ -30,6 +30,8 @@ const SIGNED_OUT = [
   ["/profile", 307],
   ["/sign-in", 200],
   ["/sign-up", 200],
+  ["/forgot-password", 200],
+  ["/reset-password", 307],
 ];
 
 // Signed in as an ordinary user. Moderation is 404 because they are not an admin.
@@ -47,6 +49,8 @@ const SIGNED_IN = [
   ["/profile", 200],
   ["/admin", 404],
   ["/sign-in", 307],
+  ["/forgot-password", 200],
+  ["/reset-password", 200],
 ];
 
 const admin = createClient(url, service, {
