@@ -5,7 +5,12 @@ import type { Database } from "./database.types";
 
 import { publicEnv } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/auth/callback"];
+const PUBLIC_PATHS = [
+  "/sign-in",
+  "/sign-up",
+  "/forgot-password",
+  "/auth/callback",
+];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some(

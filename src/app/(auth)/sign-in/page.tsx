@@ -25,6 +25,10 @@ export default async function SignInPage({
       <Typography type="body-sm">
         Need an account? <Link href="/sign-up">Create one</Link>
       </Typography>
+
+      <Typography type="body-sm">
+        Forgotten your password? <Link href="/forgot-password">Reset it</Link>
+      </Typography>
     </section>
   );
 }
