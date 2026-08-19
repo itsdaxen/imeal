@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Link, Typography } from "@heroui/react";
 
@@ -45,6 +46,18 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
+      {recipe.image_url ? (
+        <Image
+          alt=""
+          className="aspect-video w-full rounded-3xl object-cover"
+          height={420}
+          priority
+          sizes="(min-width: 768px) 48rem, 100vw"
+          src={recipe.image_url}
+          width={768}
+        />
+      ) : null}
+
       <header className="flex flex-col gap-3">
         <TagList label="Meals this suits" tags={recipe.meal_tags} />
         <Typography type="h1" weight="semibold">
