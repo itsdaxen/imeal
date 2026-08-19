@@ -47,6 +47,7 @@ export type DashboardData = {
   shopping: { completedItems: number; totalItems: number; nextItems: string[] };
   recentRecipes: Array<{
     id: string;
+    imageUrl: string | null;
     title: string;
     prepMinutes: number;
     servings: number;
@@ -142,7 +143,7 @@ export async function getDashboardData(
           dayLabel: days[upcoming.dayIndex].label,
           slot: upcoming.slot,
           prepMinutes: upcoming.recipe.prepMinutes,
-          imageUrl: null,
+          imageUrl: upcoming.recipe.imageUrl,
           artwork: artworkFor(upcoming.recipe.id),
         }
       : null,
@@ -160,6 +161,7 @@ export async function getDashboardData(
     },
     recentRecipes: recipes.slice(0, RECENT_RECIPE_COUNT).map((recipe) => ({
       id: recipe.id,
+      imageUrl: recipe.image_url,
       title: recipe.title,
       prepMinutes: recipe.prep_minutes,
       servings: recipe.servings,

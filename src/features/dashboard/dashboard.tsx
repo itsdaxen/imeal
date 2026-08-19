@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card, cn, Link, ProgressBar, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
@@ -255,10 +256,20 @@ function NextMealCard({
       id="next-meal"
       variant="tertiary"
     >
-      <MealArtwork
-        artwork={nextMeal?.artwork ?? "herb"}
-        className="absolute inset-0 size-full"
-      />
+      {nextMeal?.imageUrl ? (
+        <Image
+          alt=""
+          className="object-cover"
+          fill
+          sizes="(min-width: 1024px) 58vw, 100vw"
+          src={nextMeal.imageUrl}
+        />
+      ) : (
+        <MealArtwork
+          artwork={nextMeal?.artwork ?? "herb"}
+          className="absolute inset-0 size-full"
+        />
+      )}
       <div className={mediaScrimClassName} />
 
       <Card.Header className="relative z-10 p-6 sm:p-8">
@@ -379,10 +390,21 @@ function RecipeCard({
 }) {
   return (
     <ContentCard className="col-span-12 sm:col-span-6" density="compact">
-      <MealArtwork
-        artwork={recipe.artwork}
-        className="h-40 w-full rounded-3xl sm:h-44"
-      />
+      {recipe.imageUrl ? (
+        <Image
+          alt=""
+          className="h-40 w-full rounded-3xl object-cover sm:h-44"
+          height={192}
+          sizes="(min-width: 640px) 20rem, 100vw"
+          src={recipe.imageUrl}
+          width={256}
+        />
+      ) : (
+        <MealArtwork
+          artwork={recipe.artwork}
+          className="h-40 w-full rounded-3xl sm:h-44"
+        />
+      )}
       <Card.Header className="gap-1 px-1 pb-0">
         <Card.Title className="text-base">
           <Link

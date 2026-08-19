@@ -7,7 +7,12 @@ export type PlannedMeal = {
   approved: boolean;
   dayIndex: number;
   slot: MealSlot;
-  recipe: { id: string; title: string; prepMinutes: number };
+  recipe: {
+    id: string;
+    title: string;
+    prepMinutes: number;
+    imageUrl: string | null;
+  };
 };
 
 export type WeekPlan = {
@@ -37,7 +42,9 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
 
   const { data: items, error: itemsError } = await supabase
     .from("meal_plan_items")
-    .select("id, approved, day_index, slot, recipes (id, title, prep_minutes)")
+    .select(
+      "id, approved, day_index, slot, recipes (id, title, prep_minutes, image_url)",
+    )
     .eq("meal_plan_id", plan.id);
 
   if (itemsError) {
@@ -55,6 +62,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
         id: item.recipes.id,
         title: item.recipes.title,
         prepMinutes: item.recipes.prep_minutes,
+        imageUrl: item.recipes.image_url,
       },
     }));
 
