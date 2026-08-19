@@ -1,15 +1,31 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Description, Input, Label, TextField } from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  Description,
+  Input,
+  Label,
+  TextField,
+} from "@heroui/react";
 
 import { FormMessage } from "@/features/auth/components/form-message";
+import { IMAGE_TYPES } from "@/features/images/image";
 import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
 
 import { updateProfile, type ProfileFormState } from "../profile.actions";
 import type { Profile } from "../profile.queries";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
+  const initials =
+    profile.displayName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "?";
+
   const [state, formAction, isPending] = useActionState<
     ProfileFormState,
     FormData
@@ -23,6 +39,31 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       {state.saved ? (
         <FormMessage tone="notice">Profile saved.</FormMessage>
       ) : null}
+
+      <div className="flex items-center gap-4">
+        <Avatar size="lg" variant="soft">
+          {profile.avatarUrl ? (
+            <Avatar.Image alt="" src={profile.avatarUrl} />
+          ) : null}
+          <Avatar.Fallback className="bg-identity text-identity-foreground">
+            {initials}
+          </Avatar.Fallback>
+        </Avatar>
+
+        <div className="flex min-w-0 flex-col gap-1">
+          <Label htmlFor="avatar">Photograph</Label>
+          <input
+            accept={IMAGE_TYPES.join(",")}
+            className="max-w-full text-sm file:mr-3 file:min-h-11 file:rounded-full file:border-0 file:bg-default file:px-4 file:text-sm file:font-medium file:text-foreground"
+            id="avatar"
+            name="avatar"
+            type="file"
+          />
+          <span className="text-sm text-muted">
+            JPEG, PNG, WebP or AVIF, up to 2MB.
+          </span>
+        </div>
+      </div>
 
       <TextField
         defaultValue={profile.displayName}

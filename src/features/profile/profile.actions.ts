@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+import { AVATAR_MAX_BYTES } from "@/features/images/image";
+import { chosenFile, storeImage } from "@/features/images/upload";
+
 import { parseProfileForm } from "./profile.schema";
 
 export type ProfileFormState = {
@@ -31,9 +34,29 @@ export async function updateProfile(
     redirect("/sign-in");
   }
 
+  const avatar = chosenFile(formData.get("avatar"));
+  let avatarUrl: string | undefined;
+
+  if (avatar) {
+    const stored = await storeImage({
+      bucket: "avatars",
+      file: avatar,
+      maxBytes: AVATAR_MAX_BYTES,
+      supabase,
+      userId: user.id,
+    });
+
+    if ("error" in stored) {
+      return { error: stored.error };
+    }
+
+    avatarUrl = stored.url;
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
       display_name: parsed.data.displayName,
       friend_discoverable: parsed.data.discoverable,
       default_meals_per_week: parsed.data.defaultMealsPerWeek,

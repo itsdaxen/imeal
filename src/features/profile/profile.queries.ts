@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 export type Profile = {
+  avatarUrl: string | null;
   displayName: string;
   discoverable: boolean;
   defaultMealsPerWeek: number;
@@ -22,7 +23,7 @@ export async function getProfile(): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "display_name, friend_discoverable, default_meals_per_week, default_enabled_slots",
+      "display_name, avatar_url, friend_discoverable, default_meals_per_week, default_enabled_slots",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -36,6 +37,7 @@ export async function getProfile(): Promise<Profile | null> {
   }
 
   return {
+    avatarUrl: data.avatar_url,
     displayName: data.display_name ?? "",
     discoverable: data.friend_discoverable,
     defaultMealsPerWeek: data.default_meals_per_week,
