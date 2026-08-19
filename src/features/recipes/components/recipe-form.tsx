@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Image from "next/image";
 import {
   Button,
   Description,
@@ -13,9 +14,12 @@ import {
 import { FormMessage } from "@/features/auth/components/form-message";
 
 import type { RecipeFormState } from "../recipe.actions";
+import { IMAGE_TYPES } from "@/features/images/image";
+
 import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
 
 export type RecipeFormValues = {
+  imageUrl?: string | null;
   title: string;
   ingredients: string;
   steps: string;
@@ -26,6 +30,7 @@ export type RecipeFormValues = {
 };
 
 const EMPTY: RecipeFormValues = {
+  imageUrl: null,
   title: "",
   ingredients: "",
   steps: "",
@@ -59,6 +64,29 @@ export function RecipeForm({
       {state.error ? (
         <FormMessage tone="error">{state.error}</FormMessage>
       ) : null}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="image">Photograph</Label>
+        {values.imageUrl ? (
+          <Image
+            alt=""
+            className="aspect-4/3 w-full max-w-64 rounded-2xl object-cover"
+            height={192}
+            src={values.imageUrl}
+            width={256}
+          />
+        ) : null}
+        <input
+          accept={IMAGE_TYPES.join(",")}
+          className="max-w-full text-sm file:mr-3 file:min-h-11 file:rounded-full file:border-0 file:bg-default file:px-4 file:text-sm file:font-medium file:text-foreground"
+          id="image"
+          name="image"
+          type="file"
+        />
+        <span className="text-sm text-muted">
+          Optional. JPEG, PNG, WebP or AVIF, up to 5MB.
+        </span>
+      </div>
 
       <TextField defaultValue={values.title} isRequired name="title">
         <Label>Title</Label>

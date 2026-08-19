@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { RECIPE_IMAGE_MAX_BYTES } from "@/features/images/image";
+import { chosenFile, storeImage } from "@/features/images/upload";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { parseRecipeForm } from "./recipe.schema";
@@ -24,6 +26,28 @@ async function requireUserId() {
   return { supabase, userId: user.id };
 }
 
+async function uploadedImage(
+  formData: FormData,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+): Promise<{ url?: string } | { error: string }> {
+  const file = chosenFile(formData.get("image"));
+
+  if (!file) {
+    return {};
+  }
+
+  const stored = await storeImage({
+    bucket: "recipe-images",
+    file,
+    maxBytes: RECIPE_IMAGE_MAX_BYTES,
+    supabase,
+    userId,
+  });
+
+  return "error" in stored ? stored : { url: stored.url };
+}
+
 export async function createRecipe(
   _previous: RecipeFormState,
   formData: FormData,
@@ -37,10 +61,17 @@ export async function createRecipe(
   const { supabase, userId } = await requireUserId();
   const recipe = parsed.data;
 
+  const image = await uploadedImage(formData, supabase, userId);
+
+  if ("error" in image) {
+    return { error: image.error };
+  }
+
   const { data, error } = await supabase
     .from("recipes")
     .insert({
       owner_id: userId,
+      image_url: image.url ?? null,
       title: recipe.title,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
@@ -76,9 +107,17 @@ export async function updateRecipe(
 
   // RLS already restricts this to the owner; the filter makes the intent explicit
   // and turns a forbidden write into an empty result rather than a silent success.
+  const image = await uploadedImage(formData, supabase, userId);
+
+  if ("error" in image) {
+    return { error: image.error };
+  }
+
   const { data, error } = await supabase
     .from("recipes")
     .update({
+      // Leaving the file input empty keeps whatever photograph is already there.
+      ...(image.url ? { image_url: image.url } : {}),
       title: recipe.title,
       ingredients: recipe.ingredients,
       steps: recipe.steps,

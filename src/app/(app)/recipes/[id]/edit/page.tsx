@@ -35,6 +35,7 @@ export default async function EditRecipePage({
         action={updateThisRecipe}
         submitLabel="Save changes"
         values={{
+          imageUrl: recipe.image_url,
           title: recipe.title,
           ingredients: recipe.ingredients.join("\n"),
           steps: recipe.steps.join("\n"),
