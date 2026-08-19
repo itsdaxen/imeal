@@ -137,6 +137,49 @@ export type Database = {
           },
         ];
       };
+      meal_plan_shares: {
+        Row: {
+          created_at: string;
+          meal_plan_id: string;
+          owner_id: string;
+          recipient_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          meal_plan_id: string;
+          owner_id: string;
+          recipient_id: string;
+        };
+        Update: {
+          created_at?: string;
+          meal_plan_id?: string;
+          owner_id?: string;
+          recipient_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_shares_meal_plan_id_fkey";
+            columns: ["meal_plan_id"];
+            isOneToOne: false;
+            referencedRelation: "meal_plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meal_plan_shares_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meal_plan_shares_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       meal_plans: {
         Row: {
           created_at: string;
@@ -510,12 +553,17 @@ export type Database = {
         Args: { p_recipe_id: string };
         Returns: undefined;
       };
+      copy_shared_plan: {
+        Args: { p_meal_plan_id: string; p_week_start: string };
+        Returns: number;
+      };
       decline_friend_request: {
         Args: { p_request_id: string };
         Returns: undefined;
       };
       is_admin: { Args: never; Returns: boolean };
       is_friend: { Args: { p_other: string }; Returns: boolean };
+      owns_meal_plan: { Args: { p_meal_plan_id: string }; Returns: boolean };
       owns_recipe: { Args: { p_recipe_id: string }; Returns: boolean };
       planned_ingredients: {
         Args: { p_meal_plan_id: string };
@@ -525,6 +573,10 @@ export type Database = {
       };
       reject_recipe_suggestion: {
         Args: { p_note?: string; p_suggestion_id: string };
+        Returns: undefined;
+      };
+      share_meal_plan: {
+        Args: { p_meal_plan_id: string; p_recipient: string };
         Returns: undefined;
       };
       sync_generated_shopping_items: {
