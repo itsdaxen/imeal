@@ -34,6 +34,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <AppHeader
           actions={
             <AccountMenu
+              avatarUrl={user.avatarUrl}
               displayName={user.displayName}
               initials={user.initials}
             />

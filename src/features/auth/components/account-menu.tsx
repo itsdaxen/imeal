@@ -11,11 +11,16 @@ const itemClassName =
   "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-foreground no-underline transition-colors hover:bg-default motion-reduce:transition-none";
 
 type AccountMenuProps = {
+  avatarUrl?: string | null;
   displayName: string;
   initials: string;
 };
 
-export function AccountMenu({ displayName, initials }: AccountMenuProps) {
+export function AccountMenu({
+  avatarUrl,
+  displayName,
+  initials,
+}: AccountMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -30,6 +35,7 @@ export function AccountMenu({ displayName, initials }: AccountMenuProps) {
           variant="ghost"
         >
           <Avatar size="sm" variant="soft">
+            {avatarUrl ? <Avatar.Image alt="" src={avatarUrl} /> : null}
             <Avatar.Fallback className="bg-identity text-identity-foreground">
               {initials}
             </Avatar.Fallback>
@@ -45,6 +51,7 @@ export function AccountMenu({ displayName, initials }: AccountMenuProps) {
             onPress={() => setIsOpen(false)}
           >
             <Avatar size="md" variant="soft">
+              {avatarUrl ? <Avatar.Image alt="" src={avatarUrl} /> : null}
               <Avatar.Fallback className="bg-identity text-identity-foreground">
                 {initials}
               </Avatar.Fallback>

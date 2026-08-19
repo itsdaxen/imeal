@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type CurrentUser = {
+  avatarUrl: string | null;
   id: string;
   displayName: string;
   initials: string;
@@ -24,7 +25,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name")
+    .select("display_name, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -32,5 +33,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const displayName =
     profile?.display_name?.trim() || (user.email?.split("@")[0] ?? "Cook");
 
-  return { id: user.id, displayName, initials: toInitials(displayName) };
+  return {
+    avatarUrl: profile?.avatar_url ?? null,
+    id: user.id,
+    displayName,
+    initials: toInitials(displayName),
+  };
 }
