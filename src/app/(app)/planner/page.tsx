@@ -3,6 +3,13 @@ import type { Metadata } from "next";
 import { Button, Link, Typography } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
+import { ShareWeekPanel } from "@/features/planner/components/share-week-panel";
+import { SharedWeekInbox } from "@/features/planner/components/shared-week-inbox";
+import {
+  listPlanRecipients,
+  listPlansSharedWithMe,
+} from "@/features/planner/plan-sharing.queries";
+import { listFriends } from "@/features/friends/friend.queries";
 import { WeekGrid } from "@/features/planner/components/week-grid";
 import { approveWholeWeek } from "@/features/planner/plan.actions";
 import { getWeekPlan } from "@/features/planner/plan.queries";
@@ -21,7 +28,12 @@ export default async function PlannerPage({
 }) {
   const { week } = await searchParams;
   const weekStart = resolveWeekStart(week);
-  const plan = await getWeekPlan(weekStart);
+  const [plan, sharedWithMe, friends, recipientIds] = await Promise.all([
+    getWeekPlan(weekStart),
+    listPlansSharedWithMe(),
+    listFriends(),
+    listPlanRecipients(weekStart),
+  ]);
 
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
@@ -44,6 +56,8 @@ export default async function PlannerPage({
         </nav>
       </header>
 
+      <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
+
       <section className="flex flex-col gap-4 rounded-3xl border border-border/80 p-4 sm:p-5">
         <Typography type="h2" weight="semibold">
           Fill the week
@@ -61,6 +75,14 @@ export default async function PlannerPage({
       ) : null}
 
       <WeekGrid plan={plan} weekStart={weekStart} />
+
+      {plan.planId ? (
+        <ShareWeekPanel
+          friends={friends}
+          recipientIds={recipientIds}
+          weekStart={weekStart}
+        />
+      ) : null}
     </main>
   );
 }
