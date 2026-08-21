@@ -11,7 +11,11 @@ import {
 } from "@/features/planner/plan-sharing.queries";
 import { listFriends } from "@/features/friends/friend.queries";
 import { WeekGrid } from "@/features/planner/components/week-grid";
-import { approveWholeWeek } from "@/features/planner/plan.actions";
+import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
+import {
+  approveWholeWeek,
+  deleteWeekPlan,
+} from "@/features/planner/plan.actions";
 import { getWeekPlan } from "@/features/planner/plan.queries";
 import {
   addWeeks,
@@ -66,12 +70,23 @@ export default async function PlannerPage({
       </section>
 
       {plan.meals.length > 0 ? (
-        <form action={approveWholeWeek} className="self-start">
-          <input name="weekStart" type="hidden" value={weekStart} />
-          <Button size="sm" type="submit" variant="tertiary">
-            Approve the whole week
-          </Button>
-        </form>
+        <div className="flex flex-wrap items-center gap-3">
+          <form action={approveWholeWeek}>
+            <input name="weekStart" type="hidden" value={weekStart} />
+            <Button size="sm" type="submit" variant="tertiary">
+              Approve the whole week
+            </Button>
+          </form>
+
+          <ConfirmActionForm
+            action={deleteWeekPlan}
+            confirmLabel="Empty the week"
+            description="Every meal in this week goes, approved ones included, and anyone you shared it with loses their copy of the invitation."
+            fields={{ weekStart }}
+            heading="Empty this week?"
+            label="Empty the week"
+          />
+        </div>
       ) : null}
 
       <WeekGrid plan={plan} weekStart={weekStart} />
