@@ -9,7 +9,11 @@ import {
   Typography,
 } from "@heroui/react";
 
-import { addStaple, removeStaple } from "@/features/shopping/shopping.actions";
+import {
+  addStaple,
+  removeStaple,
+  toggleStaple,
+} from "@/features/shopping/shopping.actions";
 import { listStaples } from "@/features/shopping/shopping.queries";
 
 export const metadata: Metadata = { title: "Staples" };
@@ -24,7 +28,8 @@ export default async function StaplesPage() {
           Staples
         </Typography>
         <Typography className="text-muted" type="body-sm">
-          Things you buy most weeks. Add them to any list in one step.
+          Things you buy most weeks. Add them to a list in one step, and pause
+          the ones you do not need right now.
         </Typography>
         <Link href="/shopping">Back to shopping</Link>
       </header>
@@ -50,13 +55,26 @@ export default async function StaplesPage() {
               className="flex items-center justify-between border-b border-border/60 py-2.5"
               key={staple.id}
             >
-              <span>{staple.name}</span>
-              <form action={removeStaple}>
-                <input name="stapleId" type="hidden" value={staple.id} />
-                <Button size="sm" type="submit" variant="ghost">
-                  Remove
-                </Button>
-              </form>
+              <span className={staple.active ? undefined : "text-muted"}>
+                {staple.name}
+                {staple.active ? "" : " · paused"}
+              </span>
+
+              <div className="flex items-center gap-2">
+                <form action={toggleStaple}>
+                  <input name="stapleId" type="hidden" value={staple.id} />
+                  <Button size="sm" type="submit" variant="tertiary">
+                    {staple.active ? "Pause" : "Resume"}
+                  </Button>
+                </form>
+
+                <form action={removeStaple}>
+                  <input name="stapleId" type="hidden" value={staple.id} />
+                  <Button size="sm" type="submit" variant="ghost">
+                    Remove
+                  </Button>
+                </form>
+              </div>
             </li>
           ))}
         </ul>

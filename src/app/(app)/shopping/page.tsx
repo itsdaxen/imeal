@@ -4,8 +4,10 @@ import { Button, Link, Typography } from "@heroui/react";
 
 import { AddItemForm } from "@/features/shopping/components/add-item-form";
 import { ShoppingItemRow } from "@/features/shopping/components/shopping-item-row";
+import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
 import {
   addStaplesToList,
+  clearShoppingList,
   generateShoppingList,
 } from "@/features/shopping/shopping.actions";
 import { getShoppingList } from "@/features/shopping/shopping.queries";
@@ -71,6 +73,17 @@ export default async function ShoppingPage({
             <Link className="self-center" href="/shopping/staples">
               Manage staples
             </Link>
+
+            {list.items.length > 0 ? (
+              <ConfirmActionForm
+                action={clearShoppingList}
+                confirmLabel="Clear the list"
+                description="Every item goes, including the ones you added yourself and any staples. Building it again from the plan is one press away."
+                fields={{ weekStart }}
+                heading="Clear this shopping list?"
+                label="Clear the list"
+              />
+            ) : null}
           </div>
 
           <AddItemForm weekStart={weekStart} />
