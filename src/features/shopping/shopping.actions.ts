@@ -230,3 +230,52 @@ export async function removeStaple(formData: FormData) {
 
   revalidatePath("/shopping/staples");
 }
+
+export async function clearShoppingList(formData: FormData) {
+  const parsed = weekSchema.safeParse({ weekStart: formData.get("weekStart") });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const { supabase, planId } = await findPlanId(parsed.data.weekStart);
+
+  if (!planId) {
+    return;
+  }
+
+  // Everything goes, including staples and manual items. Rebuilding from the plan
+  // is one press away; this exists for the week you want to start over.
+  await supabase.from("shopping_items").delete().eq("meal_plan_id", planId);
+
+  revalidatePath("/shopping");
+}
+
+export async function toggleStaple(formData: FormData) {
+  const id = z.uuid().safeParse(formData.get("stapleId"));
+
+  if (!id.success) {
+    return;
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { data: staple } = await supabase
+    .from("staples")
+    .select("active")
+    .eq("id", id.data)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!staple) {
+    return;
+  }
+
+  // An inactive staple is remembered but skipped when staples are added to a list.
+  await supabase
+    .from("staples")
+    .update({ active: !staple.active })
+    .eq("id", id.data)
+    .eq("user_id", userId);
+
+  revalidatePath("/shopping/staples");
+}

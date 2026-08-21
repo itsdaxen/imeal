@@ -296,3 +296,25 @@ export async function approveWholeWeek(formData: FormData) {
 
   revalidatePath("/planner");
 }
+
+export async function deleteWeekPlan(formData: FormData) {
+  const parsed = slotTargetSchema
+    .pick({ weekStart: true })
+    .safeParse({ weekStart: formData.get("weekStart") });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const { supabase, userId } = await requireUserId();
+
+  // meal_plan_items and any shares cascade from the plan.
+  await supabase
+    .from("meal_plans")
+    .delete()
+    .eq("user_id", userId)
+    .eq("week_start", parsed.data.weekStart);
+
+  revalidatePath("/planner");
+  redirect(`/planner?week=${parsed.data.weekStart}`);
+}
