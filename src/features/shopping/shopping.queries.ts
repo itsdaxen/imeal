@@ -9,47 +9,139 @@ export type ShoppingItem = {
   checked: boolean;
 };
 
+export type ShoppingListSummary = {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  isOwn: boolean;
+};
+
 export type ShoppingList = {
+  listId: string | null;
+  listName: string;
   planId: string | null;
   items: ShoppingItem[];
   remaining: number;
 };
 
+export async function listShoppingLists(): Promise<ShoppingListSummary[]> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("shopping_lists")
+    .select("id, name, is_default, owner_id")
+    .order("is_default", { ascending: false })
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw new Error(`Could not load your lists: ${error.message}`);
+  }
+
+  return data.map((list) => ({
+    id: list.id,
+    name: list.name,
+    isDefault: list.is_default,
+    isOwn: list.owner_id === user.id,
+  }));
+}
+
+/** The list a week fills: whatever it points at, or the default. */
+export async function resolveWeekList(weekStart: string) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { planId: null, listId: null };
+  }
+
+  const { data: plan } = await supabase
+    .from("meal_plans")
+    .select("id, target_list_id")
+    .eq("user_id", user.id)
+    .eq("week_start", weekStart)
+    .maybeSingle();
+
+  if (plan?.target_list_id) {
+    return { planId: plan.id, listId: plan.target_list_id };
+  }
+
+  const { data: fallback } = await supabase
+    .from("shopping_lists")
+    .select("id")
+    .eq("owner_id", user.id)
+    .eq("is_default", true)
+    .maybeSingle();
+
+  return { planId: plan?.id ?? null, listId: fallback?.id ?? null };
+}
+
 export async function getShoppingList(
   weekStart: string,
 ): Promise<ShoppingList> {
   const supabase = await createSupabaseServerClient();
+  const { planId, listId } = await resolveWeekList(weekStart);
 
-  const { data: plan, error: planError } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("week_start", weekStart)
-    .maybeSingle();
-
-  if (planError) {
-    throw new Error(`Could not load the week: ${planError.message}`);
+  if (!listId) {
+    return {
+      listId: null,
+      listName: "Shopping",
+      planId,
+      items: [],
+      remaining: 0,
+    };
   }
 
-  if (!plan) {
-    return { planId: null, items: [], remaining: 0 };
-  }
-
-  const { data, error } = await supabase
-    .from("shopping_items")
-    .select("id, name, quantity, unit, source, checked")
-    .eq("meal_plan_id", plan.id)
-    .order("checked", { ascending: true })
-    .order("name", { ascending: true });
+  const [{ data: list }, { data, error }] = await Promise.all([
+    supabase
+      .from("shopping_lists")
+      .select("name")
+      .eq("id", listId)
+      .maybeSingle(),
+    supabase
+      .from("shopping_items")
+      .select("id, name, quantity, unit, source, checked")
+      .eq("list_id", listId)
+      .order("checked", { ascending: true })
+      .order("name", { ascending: true }),
+  ]);
 
   if (error) {
     throw new Error(`Could not load the shopping list: ${error.message}`);
   }
 
   return {
-    planId: plan.id,
+    listId,
+    listName: list?.name ?? "Shopping",
+    planId,
     items: data,
     remaining: data.filter((item) => !item.checked).length,
   };
+}
+
+export async function listMembers(listId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("shopping_list_members")
+    .select("user_id, profiles (display_name)")
+    .eq("list_id", listId);
+
+  if (error) {
+    throw new Error(`Could not load who shares this list: ${error.message}`);
+  }
+
+  return data.map((row) => ({
+    id: row.user_id,
+    displayName: row.profiles?.display_name?.trim() || "A cook",
+  }));
 }
 
 export async function listStaples() {

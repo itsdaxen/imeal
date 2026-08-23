@@ -185,6 +185,7 @@ export type Database = {
           created_at: string;
           enabled_slots: Database["public"]["Enums"]["meal_slot"][];
           id: string;
+          target_list_id: string | null;
           title: string | null;
           updated_at: string;
           user_id: string;
@@ -194,6 +195,7 @@ export type Database = {
           created_at?: string;
           enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
           id?: string;
+          target_list_id?: string | null;
           title?: string | null;
           updated_at?: string;
           user_id: string;
@@ -203,12 +205,20 @@ export type Database = {
           created_at?: string;
           enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
           id?: string;
+          target_list_id?: string | null;
           title?: string | null;
           updated_at?: string;
           user_id?: string;
           week_start?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "meal_plans_target_list_id_fkey";
+            columns: ["target_list_id"];
+            isOneToOne: false;
+            referencedRelation: "shopping_lists";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "meal_plans_user_id_fkey";
             columns: ["user_id"];
@@ -424,6 +434,7 @@ export type Database = {
           checked: boolean;
           created_at: string;
           id: string;
+          list_id: string;
           meal_plan_id: string | null;
           name: string;
           quantity: number;
@@ -437,6 +448,7 @@ export type Database = {
           checked?: boolean;
           created_at?: string;
           id?: string;
+          list_id: string;
           meal_plan_id?: string | null;
           name: string;
           quantity?: number;
@@ -450,6 +462,7 @@ export type Database = {
           checked?: boolean;
           created_at?: string;
           id?: string;
+          list_id?: string;
           meal_plan_id?: string | null;
           name?: string;
           quantity?: number;
@@ -460,6 +473,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "shopping_items_list_id_fkey";
+            columns: ["list_id"];
+            isOneToOne: false;
+            referencedRelation: "shopping_lists";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "shopping_items_meal_plan_id_fkey";
             columns: ["meal_plan_id"];
             isOneToOne: false;
@@ -469,6 +489,74 @@ export type Database = {
           {
             foreignKeyName: "shopping_items_user_id_fkey";
             columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      shopping_list_members: {
+        Row: {
+          added_at: string;
+          list_id: string;
+          user_id: string;
+        };
+        Insert: {
+          added_at?: string;
+          list_id: string;
+          user_id: string;
+        };
+        Update: {
+          added_at?: string;
+          list_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_members_list_id_fkey";
+            columns: ["list_id"];
+            isOneToOne: false;
+            referencedRelation: "shopping_lists";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shopping_list_members_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      shopping_lists: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          name: string;
+          owner_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          owner_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          owner_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shopping_lists_owner_id_fkey";
+            columns: ["owner_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -561,10 +649,13 @@ export type Database = {
         Args: { p_request_id: string };
         Returns: undefined;
       };
+      default_shopping_list: { Args: { p_user: string }; Returns: string };
       is_admin: { Args: never; Returns: boolean };
       is_friend: { Args: { p_other: string }; Returns: boolean };
+      is_list_member: { Args: { p_list_id: string }; Returns: boolean };
       owns_meal_plan: { Args: { p_meal_plan_id: string }; Returns: boolean };
       owns_recipe: { Args: { p_recipe_id: string }; Returns: boolean };
+      owns_shopping_list: { Args: { p_list_id: string }; Returns: boolean };
       planned_ingredients: {
         Args: { p_meal_plan_id: string };
         Returns: {
