@@ -7,6 +7,7 @@ import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { updateRecipe } from "@/features/recipes/recipe.actions";
 import { getRecipe } from "@/features/recipes/recipe.queries";
+import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 
 export const metadata: Metadata = { title: "Edit recipe" };
 
@@ -16,10 +17,18 @@ export default async function EditRecipePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [recipe, user] = await Promise.all([getRecipe(id), getCurrentUser()]);
+  const [recipe, user, isAdmin] = await Promise.all([
+    getRecipe(id),
+    getCurrentUser(),
+    isCurrentUserAdmin(),
+  ]);
 
-  // A catalog recipe is readable but not editable, so absence of ownership is a 404.
-  if (!recipe || !user || recipe.owner_id !== user.id) {
+  // Your own recipe, or a catalog entry you moderate. Anything else is a 404.
+  const mayEdit =
+    Boolean(recipe && user && recipe.owner_id === user.id) ||
+    Boolean(recipe && isAdmin && recipe.visibility === "public");
+
+  if (!recipe || !mayEdit) {
     notFound();
   }
 

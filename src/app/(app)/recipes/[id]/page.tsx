@@ -8,6 +8,9 @@ import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { listFriends } from "@/features/friends/friend.queries";
 import { DeleteRecipeForm } from "@/features/recipes/components/delete-recipe-form";
+import { archiveRecipe } from "@/features/recipes/recipe.actions";
+import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
+import { Button } from "@heroui/react";
 import { getRecipe } from "@/features/recipes/recipe.queries";
 import { SuggestForm } from "@/features/catalog/components/suggest-form";
 import { listMySuggestions } from "@/features/catalog/catalog.queries";
@@ -27,7 +30,11 @@ export async function generateMetadata({
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { id } = await params;
-  const [recipe, user] = await Promise.all([getRecipe(id), getCurrentUser()]);
+  const [recipe, user, isAdmin] = await Promise.all([
+    getRecipe(id),
+    getCurrentUser(),
+    isCurrentUserAdmin(),
+  ]);
 
   if (!recipe) {
     notFound();
@@ -72,8 +79,18 @@ export default async function RecipePage({ params }: RecipePageProps) {
           {isOwner ? (
             <>
               <Link href={`/recipes/${recipe.id}/edit`}>Edit</Link>
+
+              <form action={archiveRecipe}>
+                <input name="recipeId" type="hidden" value={recipe.id} />
+                <Button size="sm" type="submit" variant="ghost">
+                  Archive
+                </Button>
+              </form>
+
               <DeleteRecipeForm id={recipe.id} />
             </>
+          ) : isAdmin ? (
+            <Link href={`/recipes/${recipe.id}/edit`}>Edit as moderator</Link>
           ) : (
             <span className="text-sm text-muted">Shared with you</span>
           )}
