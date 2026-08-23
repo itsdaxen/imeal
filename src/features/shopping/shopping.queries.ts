@@ -6,6 +6,7 @@ export type ShoppingItem = {
   quantity: number;
   unit: string | null;
   source: "generated" | "manual" | "staple";
+  category: string | null;
   checked: boolean;
 };
 
@@ -108,7 +109,7 @@ export async function getShoppingList(
       .maybeSingle(),
     supabase
       .from("shopping_items")
-      .select("id, name, quantity, unit, source, checked")
+      .select("id, name, quantity, unit, source, category, checked")
       .eq("list_id", listId)
       .order("checked", { ascending: true })
       .order("name", { ascending: true }),

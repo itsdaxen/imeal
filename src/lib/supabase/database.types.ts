@@ -633,6 +633,10 @@ export type Database = {
         };
         Returns: number;
       };
+      apply_shopping_tidy: {
+        Args: { p_changes: Json; p_list: string };
+        Returns: number;
+      };
       approve_recipe_suggestion: {
         Args: { p_suggestion_id: string };
         Returns: string;
