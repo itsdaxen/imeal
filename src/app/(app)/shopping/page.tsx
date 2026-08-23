@@ -10,7 +10,14 @@ import {
   clearShoppingList,
   generateShoppingList,
 } from "@/features/shopping/shopping.actions";
-import { getShoppingList } from "@/features/shopping/shopping.queries";
+import { ListPanel } from "@/features/shopping/components/list-panel";
+import {
+  getShoppingList,
+  listMembers,
+  listShoppingLists,
+} from "@/features/shopping/shopping.queries";
+import { listFriends } from "@/features/friends/friend.queries";
+import { getCurrentUser } from "@/features/auth/current-user";
 import {
   addWeeks,
   formatWeekLabel,
@@ -26,7 +33,13 @@ export default async function ShoppingPage({
 }) {
   const { week } = await searchParams;
   const weekStart = resolveWeekStart(week);
-  const list = await getShoppingList(weekStart);
+  const [list, lists, friends, user] = await Promise.all([
+    getShoppingList(weekStart),
+    listShoppingLists(),
+    listFriends(),
+    getCurrentUser(),
+  ]);
+  const members = list.listId ? await listMembers(list.listId) : [];
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
@@ -36,7 +49,8 @@ export default async function ShoppingPage({
             Shopping
           </Typography>
           <Typography className="text-muted" type="body-sm">
-            {formatWeekLabel(weekStart)} · {list.remaining} left
+            {list.listName} · {formatWeekLabel(weekStart)} · {list.remaining}{" "}
+            left
           </Typography>
         </div>
 
@@ -48,6 +62,15 @@ export default async function ShoppingPage({
           <Link href={`/shopping?week=${addWeeks(weekStart, 1)}`}>Next</Link>
         </nav>
       </header>
+
+      <ListPanel
+        currentUserId={user?.id ?? ""}
+        friends={friends}
+        listId={list.listId}
+        lists={lists}
+        members={members}
+        weekStart={weekStart}
+      />
 
       {list.planId === null ? (
         <Typography className="text-muted" type="body">
@@ -95,11 +118,7 @@ export default async function ShoppingPage({
           ) : (
             <ul className="flex list-none flex-col p-0">
               {list.items.map((item) => (
-                <ShoppingItemRow
-                  item={item}
-                  key={item.id}
-                  weekStart={weekStart}
-                />
+                <ShoppingItemRow item={item} key={item.id} />
               ))}
             </ul>
           )}

@@ -3,17 +3,11 @@ import { Button } from "@heroui/react";
 import { removeItem, toggleItemChecked } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
 
-type ShoppingItemRowProps = {
-  item: ShoppingItem;
-  weekStart: string;
-};
-
-export function ShoppingItemRow({ item, weekStart }: ShoppingItemRowProps) {
+export function ShoppingItemRow({ item }: { item: ShoppingItem }) {
   return (
     <li className="flex items-center justify-between gap-2 border-b border-border/60">
       <form action={toggleItemChecked} className="min-w-0 flex-1">
         <input name="itemId" type="hidden" value={item.id} />
-        <input name="weekStart" type="hidden" value={weekStart} />
 
         {/* The whole row is the target, so an item can be ticked off one-handed. */}
         <button
@@ -54,7 +48,6 @@ export function ShoppingItemRow({ item, weekStart }: ShoppingItemRowProps) {
 
         <form action={removeItem}>
           <input name="itemId" type="hidden" value={item.id} />
-          <input name="weekStart" type="hidden" value={weekStart} />
           <Button size="sm" type="submit" variant="ghost">
             Remove
           </Button>
