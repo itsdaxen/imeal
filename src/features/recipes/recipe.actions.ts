@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { RECIPE_IMAGE_MAX_BYTES } from "@/features/images/image";
 import { chosenFile, storeImage } from "@/features/images/upload";
@@ -105,15 +106,22 @@ export async function updateRecipe(
   const { supabase, userId } = await requireUserId();
   const recipe = parsed.data;
 
-  // RLS already restricts this to the owner; the filter makes the intent explicit
-  // and turns a forbidden write into an empty result rather than a silent success.
   const image = await uploadedImage(formData, supabase, userId);
 
   if ("error" in image) {
     return { error: image.error };
   }
 
-  const { data, error } = await supabase
+  // A catalog recipe has no owner, so a moderator editing one cannot be matched by
+  // an owner filter. RLS decides in both cases; the filter only narrows the owner's,
+  // turning a forbidden write into an empty result rather than a silent success.
+  const { data: existing } = await supabase
+    .from("recipes")
+    .select("owner_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  const update = supabase
     .from("recipes")
     .update({
       // Leaving the file input empty keeps whatever photograph is already there.
@@ -126,8 +134,11 @@ export async function updateRecipe(
       servings: recipe.servings,
       meal_tags: recipe.mealTags,
     })
-    .eq("id", id)
-    .eq("owner_id", userId)
+    .eq("id", id);
+
+  const { data, error } = await (
+    existing?.owner_id === null ? update : update.eq("owner_id", userId)
+  )
     .select("id")
     .maybeSingle();
 
@@ -171,4 +182,38 @@ export async function deleteRecipe(
 
   revalidatePath("/recipes");
   redirect("/recipes");
+}
+
+export async function setRecipeArchived(
+  id: string,
+  archived: boolean,
+): Promise<void> {
+  const { supabase, userId } = await requireUserId();
+
+  // Archiving keeps the recipe out of the library and the planner's pool while
+  // leaving past weeks that reference it intact, which deleting cannot do.
+  await supabase
+    .from("recipes")
+    .update({ status: archived ? "archived" : "active" })
+    .eq("id", id)
+    .eq("owner_id", userId);
+
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${id}`);
+}
+
+export async function archiveRecipe(formData: FormData) {
+  const id = z.uuid().safeParse(formData.get("recipeId"));
+
+  if (id.success) {
+    await setRecipeArchived(id.data, true);
+  }
+}
+
+export async function restoreRecipe(formData: FormData) {
+  const id = z.uuid().safeParse(formData.get("recipeId"));
+
+  if (id.success) {
+    await setRecipeArchived(id.data, false);
+  }
 }

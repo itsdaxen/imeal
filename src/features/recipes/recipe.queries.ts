@@ -3,11 +3,12 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { MealSlot } from "./recipe.schema";
 
 const LIST_COLUMNS = "id, title, prep_minutes, servings, meal_tags, image_url";
-const DETAIL_COLUMNS = `${LIST_COLUMNS}, ingredients, steps, tip, owner_id`;
+const DETAIL_COLUMNS = `${LIST_COLUMNS}, ingredients, steps, tip, owner_id, visibility`;
 
 export type RecipeListFilters = {
   search?: string;
   mealTag?: MealSlot;
+  archived?: boolean;
 };
 
 export type RecipeSummary = {
@@ -40,7 +41,7 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
     .from("recipes")
     .select(LIST_COLUMNS)
     .eq("owner_id", user.id)
-    .eq("status", "active")
+    .eq("status", filters.archived ? "archived" : "active")
     .order("created_at", { ascending: false });
 
   const search = filters.search?.trim();
