@@ -5,7 +5,7 @@ type PersonActionProps = {
   label: string;
   name: string;
   value: string;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "tertiary" | "ghost";
 };
 
 export function PersonAction({
@@ -13,7 +13,7 @@ export function PersonAction({
   label,
   name,
   value,
-  variant = "secondary",
+  variant = "tertiary",
 }: PersonActionProps) {
   return (
     <form action={action}>

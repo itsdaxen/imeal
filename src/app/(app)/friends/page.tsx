@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
-import { Button, Input, Label, TextField, Typography } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  TextField,
+  Typography,
+} from "@heroui/react";
 
+import { ContentCard } from "@/components/ui/content-card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { PageGrid, span } from "@/components/ui/page-grid";
+import { PanelTitle } from "@/components/ui/panel-title";
 import { PersonAction } from "@/features/friends/components/person-action";
 import { PersonRow } from "@/features/friends/components/person-row";
 import {
@@ -20,6 +32,29 @@ import {
 
 export const metadata: Metadata = { title: "Friends" };
 
+/** Each group of people is a panel, so a quiet week is not four floating headings. */
+function Panel({
+  children,
+  eyebrow,
+  title,
+  width = span.full,
+}: {
+  children: ReactNode;
+  eyebrow: string;
+  title: string;
+  width?: string;
+}) {
+  return (
+    <ContentCard className={width}>
+      <Card.Header className="gap-1">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <PanelTitle>{title}</PanelTitle>
+      </Card.Header>
+      <Card.Content>{children}</Card.Content>
+    </ContentCard>
+  );
+}
+
 export default async function FriendsPage({
   searchParams,
 }: {
@@ -37,161 +72,161 @@ export default async function FriendsPage({
     ...friends.map((person) => person.id),
     ...outgoing.map((request) => request.person.id),
   ]);
+  const pending = incoming.length > 0 || outgoing.length > 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-10 pt-10 sm:pt-14">
-      <header className="flex flex-col gap-2">
+    <main className="flex flex-col gap-6 pt-10 sm:pt-14">
+      <header className="flex flex-col gap-1">
         <Typography type="h1" weight="semibold">
           Friends
         </Typography>
-        <Typography className="text-muted" type="body-sm">
-          Share recipes with people you cook with.
+        <Typography color="muted" type="body">
+          Share recipes with the people you cook with.
         </Typography>
       </header>
 
-      <section className="flex flex-col gap-3">
-        <Typography type="h2" weight="semibold">
-          Find someone
-        </Typography>
-
-        <form
-          action="/friends"
-          className="flex flex-wrap items-end gap-3"
-          role="search"
-        >
-          <TextField
-            className="min-w-56 flex-1"
-            defaultValue={search}
-            name="search"
+      <PageGrid>
+        <Panel eyebrow="Search" title="Find someone">
+          <form
+            action="/friends"
+            className="flex flex-wrap items-end gap-3"
+            role="search"
           >
-            <Label>Search by name</Label>
-            <Input placeholder="At least two characters" type="search" />
-          </TextField>
-          <Button type="submit" variant="tertiary">
-            Search
-          </Button>
-        </form>
+            <TextField
+              className="min-w-56 flex-1"
+              defaultValue={search}
+              name="search"
+            >
+              <Label>Search by name</Label>
+              <Input placeholder="At least two characters" type="search" />
+            </TextField>
+            <Button data-action-tier="primary" type="submit">
+              Search
+            </Button>
+          </form>
 
-        {search && matches.length === 0 ? (
-          <Typography className="text-muted" type="body-sm">
-            Nobody discoverable matches that name.
-          </Typography>
+          {search && matches.length === 0 ? (
+            <Typography className="mt-3" color="muted" type="body-sm">
+              Nobody discoverable matches that name.
+            </Typography>
+          ) : null}
+
+          {matches.length > 0 ? (
+            <ul className="mt-2 flex list-none flex-col p-0">
+              {matches.map((person) => (
+                <PersonRow
+                  actions={
+                    knownIds.has(person.id) ? (
+                      <Typography color="muted" type="body-sm">
+                        Already connected
+                      </Typography>
+                    ) : (
+                      <PersonAction
+                        action={sendFriendRequest}
+                        label="Add friend"
+                        name="personId"
+                        value={person.id}
+                      />
+                    )
+                  }
+                  key={person.id}
+                  name={person.displayName}
+                />
+              ))}
+            </ul>
+          ) : null}
+        </Panel>
+
+        {incoming.length > 0 ? (
+          <Panel
+            eyebrow="Waiting on you"
+            title="Requests for you"
+            width={outgoing.length > 0 ? span.narrow : span.full}
+          >
+            <ul className="flex list-none flex-col p-0">
+              {incoming.map((request) => (
+                <PersonRow
+                  actions={
+                    <>
+                      <PersonAction
+                        action={acceptFriendRequest}
+                        label="Accept"
+                        name="requestId"
+                        value={request.id}
+                      />
+                      <PersonAction
+                        action={declineFriendRequest}
+                        label="Decline"
+                        name="requestId"
+                        value={request.id}
+                        variant="ghost"
+                      />
+                    </>
+                  }
+                  key={request.id}
+                  name={request.person.displayName}
+                />
+              ))}
+            </ul>
+          </Panel>
         ) : null}
 
-        {matches.length > 0 ? (
-          <ul className="flex list-none flex-col p-0">
-            {matches.map((person) => (
-              <PersonRow
-                actions={
-                  knownIds.has(person.id) ? (
-                    <span className="text-sm text-muted">
-                      Already connected
-                    </span>
-                  ) : (
+        {outgoing.length > 0 ? (
+          <Panel
+            eyebrow="Sent"
+            title="Waiting on a reply"
+            width={incoming.length > 0 ? span.narrow : span.full}
+          >
+            <ul className="flex list-none flex-col p-0">
+              {outgoing.map((request) => (
+                <PersonRow
+                  actions={
                     <PersonAction
-                      action={sendFriendRequest}
-                      label="Add friend"
-                      name="personId"
-                      value={person.id}
-                    />
-                  )
-                }
-                key={person.id}
-                name={person.displayName}
-              />
-            ))}
-          </ul>
-        ) : null}
-      </section>
-
-      {incoming.length > 0 ? (
-        <section className="flex flex-col gap-3">
-          <Typography type="h2" weight="semibold">
-            Requests for you
-          </Typography>
-          <ul className="flex list-none flex-col p-0">
-            {incoming.map((request) => (
-              <PersonRow
-                actions={
-                  <>
-                    <PersonAction
-                      action={acceptFriendRequest}
-                      label="Accept"
-                      name="requestId"
-                      value={request.id}
-                      variant="primary"
-                    />
-                    <PersonAction
-                      action={declineFriendRequest}
-                      label="Decline"
+                      action={withdrawFriendRequest}
+                      label="Withdraw"
                       name="requestId"
                       value={request.id}
                       variant="ghost"
                     />
-                  </>
-                }
-                key={request.id}
-                name={request.person.displayName}
-              />
-            ))}
-          </ul>
-        </section>
-      ) : null}
+                  }
+                  key={request.id}
+                  name={request.person.displayName}
+                />
+              ))}
+            </ul>
+          </Panel>
+        ) : null}
 
-      {outgoing.length > 0 ? (
-        <section className="flex flex-col gap-3">
-          <Typography type="h2" weight="semibold">
-            Waiting on a reply
-          </Typography>
-          <ul className="flex list-none flex-col p-0">
-            {outgoing.map((request) => (
-              <PersonRow
-                actions={
-                  <PersonAction
-                    action={withdrawFriendRequest}
-                    label="Withdraw"
-                    name="requestId"
-                    value={request.id}
-                    variant="ghost"
-                  />
-                }
-                key={request.id}
-                name={request.person.displayName}
-              />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <section className="flex flex-col gap-3">
-        <Typography type="h2" weight="semibold">
-          Your friends
-        </Typography>
-
-        {friends.length === 0 ? (
-          <Typography className="text-muted" type="body-sm">
-            No friends yet. Search for someone above.
-          </Typography>
-        ) : (
-          <ul className="flex list-none flex-col p-0">
-            {friends.map((person) => (
-              <PersonRow
-                actions={
-                  <PersonAction
-                    action={removeFriend}
-                    label="Remove"
-                    name="personId"
-                    value={person.id}
-                    variant="ghost"
-                  />
-                }
-                key={person.id}
-                name={person.displayName}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
+        <Panel
+          eyebrow="Connected"
+          title="Your friends"
+          width={pending ? span.wide : span.full}
+        >
+          {friends.length === 0 ? (
+            <Typography color="muted" type="body-sm">
+              Nobody yet. Search for someone above.
+            </Typography>
+          ) : (
+            <ul className="flex list-none flex-col p-0">
+              {friends.map((person) => (
+                <PersonRow
+                  actions={
+                    <PersonAction
+                      action={removeFriend}
+                      label="Remove"
+                      name="personId"
+                      value={person.id}
+                      variant="ghost"
+                    />
+                  }
+                  key={person.id}
+                  name={person.displayName}
+                />
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </PageGrid>
     </main>
   );
 }
