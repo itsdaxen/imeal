@@ -11,6 +11,7 @@ import {
   generateShoppingList,
 } from "@/features/shopping/shopping.actions";
 import { ListPanel } from "@/features/shopping/components/list-panel";
+import { TidyPanel } from "@/features/ai/components/tidy-panel";
 import {
   getShoppingList,
   listMembers,
@@ -110,6 +111,10 @@ export default async function ShoppingPage({
           </div>
 
           <AddItemForm weekStart={weekStart} />
+
+          {list.items.length > 0 ? (
+            <TidyPanel items={list.items} weekStart={weekStart} />
+          ) : null}
 
           {list.items.length === 0 ? (
             <Typography className="text-muted" type="body">

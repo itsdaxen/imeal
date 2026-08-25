@@ -1,0 +1,96 @@
+"use client";
+
+import { useActionState } from "react";
+import { Button, Typography } from "@heroui/react";
+
+import { FormMessage } from "@/features/auth/components/form-message";
+
+import { applyTidy, proposeTidy, type TidyState } from "../ai.actions";
+import type { TidyChange } from "../tidy-list";
+
+type TidyPanelProps = {
+  items: ReadonlyArray<{ id: string; name: string; category: string | null }>;
+  weekStart: string;
+};
+
+function describe(
+  change: TidyChange,
+  before: Map<string, { name: string; category: string | null }>,
+) {
+  const original = before.get(change.id);
+  const notes: string[] = [];
+
+  if (change.mergedIds.length > 0) {
+    notes.push(`${change.mergedIds.length + 1} rows into one`);
+  }
+
+  if (original && original.name !== change.name) {
+    notes.push(`renamed from “${original.name}”`);
+  }
+
+  if (original?.category !== change.category) {
+    notes.push(`filed under ${change.category}`);
+  }
+
+  return notes;
+}
+
+export function TidyPanel({ items, weekStart }: TidyPanelProps) {
+  const [state, formAction, isPending] = useActionState<TidyState, FormData>(
+    proposeTidy,
+    {},
+  );
+  const before = new Map(items.map((item) => [item.id, item]));
+  const proposed = (state.changes ?? [])
+    .map((change) => ({ change, notes: describe(change, before) }))
+    .filter(({ notes }) => notes.length > 0);
+
+  return (
+    <section className="flex flex-col gap-4">
+      <form action={formAction}>
+        <input name="weekStart" type="hidden" value={weekStart} />
+        <Button isPending={isPending} type="submit" variant="tertiary">
+          Tidy up
+        </Button>
+      </form>
+
+      {state.error ? (
+        <FormMessage tone="error">{state.error}</FormMessage>
+      ) : null}
+
+      {state.changes && proposed.length === 0 ? (
+        <Typography className="text-muted" type="body-sm">
+          The list is already tidy. Nothing to change.
+        </Typography>
+      ) : null}
+
+      {proposed.length > 0 ? (
+        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 p-4">
+          <Typography type="body-sm" weight="medium">
+            {proposed.length} {proposed.length === 1 ? "change" : "changes"}{" "}
+            proposed
+          </Typography>
+
+          <ul className="flex list-none flex-col gap-2 p-0">
+            {proposed.map(({ change, notes }) => (
+              <li className="flex flex-col" key={change.id}>
+                <Typography type="body-sm">
+                  {change.name}
+                  {change.quantity > 1 ? ` × ${change.quantity}` : ""}
+                </Typography>
+                <Typography className="text-muted" type="body-xs">
+                  {notes.join(" · ")}
+                </Typography>
+              </li>
+            ))}
+          </ul>
+
+          <form action={applyTidy}>
+            <input name="weekStart" type="hidden" value={weekStart} />
+            <Button type="submit">Apply these changes</Button>
+          </form>
+        </div>
+      ) : null}
+    </section>
+  );
+}
