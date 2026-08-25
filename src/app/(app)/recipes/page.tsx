@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { Link, Typography } from "@heroui/react";
+import { Button, Typography } from "@heroui/react";
 
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { RecipeSearch } from "@/features/recipes/components/recipe-search";
 import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
 import { restoreRecipe } from "@/features/recipes/recipe.actions";
-import { Button } from "@heroui/react";
+import { ActionLink } from "@/components/ui/action";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 export const metadata: Metadata = { title: "Recipes" };
@@ -40,20 +40,29 @@ export default async function RecipesPage({
         <Typography type="h1" weight="semibold">
           {showArchived ? "Archived recipes" : "Recipes"}
         </Typography>
-        <div className="flex items-center gap-4">
-          <Link href={showArchived ? "/recipes" : "/recipes?archived=1"}>
+        <div className="flex flex-wrap items-center gap-4">
+          <ActionLink
+            href={showArchived ? "/recipes" : "/recipes?archived=1"}
+            tier="quiet"
+          >
             {showArchived ? "Back to your recipes" : "Archived"}
-          </Link>
-          <Link href="/recipes/shared">Shared with you</Link>
-          <Link href="/recipes/import">Import</Link>
-          <Link href="/recipes/new">Add a recipe</Link>
+          </ActionLink>
+          <ActionLink href="/recipes/shared" tier="quiet">
+            Shared with you
+          </ActionLink>
+          <ActionLink href="/recipes/import" tier="neutral">
+            Import
+          </ActionLink>
+          <ActionLink href="/recipes/new" tier="primary">
+            Add a recipe
+          </ActionLink>
         </div>
       </header>
 
       <RecipeSearch mealTag={filters.mealTag} search={filters.search} />
 
       {recipes.length === 0 ? (
-        <Typography className="text-muted" type="body">
+        <Typography color="muted" type="body">
           {showArchived
             ? "Nothing archived."
             : isFiltered
