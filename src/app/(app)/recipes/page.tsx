@@ -45,6 +45,7 @@ export default async function RecipesPage({
             {showArchived ? "Back to your recipes" : "Archived"}
           </Link>
           <Link href="/recipes/shared">Shared with you</Link>
+          <Link href="/recipes/import">Import</Link>
           <Link href="/recipes/new">Add a recipe</Link>
         </div>
       </header>
