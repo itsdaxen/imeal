@@ -1,9 +1,12 @@
 import Image from "next/image";
-import { Card, cn, Link, ProgressBar, Typography } from "@heroui/react";
+import { Card, cn, Link, ProgressCircle, Typography } from "@heroui/react";
 
+import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
+import { LinkCard } from "@/components/ui/link-card";
+import { PageGrid, span } from "@/components/ui/page-grid";
+import { PanelTitle } from "@/components/ui/panel-title";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { IconBadge } from "@/components/ui/icon-badge";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 
@@ -23,16 +26,9 @@ const artworkClasses: Record<Artwork, string> = {
     "bg-[linear-gradient(150deg,oklch(0.50_0.15_28),oklch(0.74_0.12_44))]",
 };
 
-const mediaScrimClassName =
-  "absolute inset-0 bg-gradient-to-b from-media-scrim-start via-transparent to-media-scrim-end";
-const mediaPanelClassName =
-  "rounded-4xl border border-media-panel-border bg-gradient-to-r from-media-panel-start to-media-panel-end p-4 backdrop-blur-xs";
-const mediaActionClassName =
-  "rounded-full bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline shadow-sm transition-transform motion-safe:hover:scale-[1.02] motion-reduce:transition-none";
-
 function MealArtwork({
   artwork,
-  className = "",
+  className,
 }: {
   artwork: Artwork;
   className?: string;
@@ -45,33 +41,28 @@ function MealArtwork({
   );
 }
 
-function WeekOverviewCard({
-  week,
-  weekStart,
-}: Pick<DashboardData, "week" | "weekStart">) {
+function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (
     <ContentCard
-      className="col-span-12 md:flex-row md:items-center"
-      density="spacious"
+      className={cn(
+        span.full,
+        "gap-5 md:flex-row md:items-center md:justify-between",
+      )}
       id="week-plan"
     >
-      <Card.Header className="min-w-0 flex-1 gap-1">
-        <Eyebrow>YOUR WEEK</Eyebrow>
-        <Card.Title className="text-xl sm:text-2xl">
+      <Card.Header className="min-w-0 gap-1">
+        <Eyebrow>This week</Eyebrow>
+        <PanelTitle>
           {week.plannedMeals === 0
             ? "Nothing planned yet"
-            : `${week.plannedMeals} of ${week.totalSlots} slots planned`}
-        </Card.Title>
-        <Card.Description>
-          {week.label} ·{" "}
-          <Link href={`/planner?week=${weekStart}`}>Open the planner</Link>
-        </Card.Description>
+            : `${week.plannedMeals} of ${week.totalSlots} meals planned`}
+        </PanelTitle>
       </Card.Header>
 
-      <Card.Content className="w-full md:max-w-xl">
+      <Card.Content className="flex-none">
         <ol
           aria-label="Days in the current plan"
-          className="grid grid-cols-7 gap-2"
+          className="grid w-full grid-cols-7 gap-2 md:w-auto md:min-w-96"
         >
           {week.days.map((day) => (
             <PlanningDay
@@ -88,6 +79,90 @@ function WeekOverviewCard({
   );
 }
 
+function NextMealCard({
+  nextMeal,
+  weekStart,
+}: Pick<DashboardData, "nextMeal" | "weekStart">) {
+  if (!nextMeal) {
+    return (
+      <ContentCard
+        className={cn(span.wide, "justify-center gap-5")}
+        id="next-meal"
+      >
+        <Card.Header className="gap-1">
+          <Eyebrow>Next up</Eyebrow>
+          <PanelTitle>Nothing planned yet</PanelTitle>
+          <Card.Description>
+            Place a few recipes into the week and the next one shows up here.
+          </Card.Description>
+        </Card.Header>
+        <Card.Footer>
+          <ActionLink href={`/planner?week=${weekStart}`} tier="neutral">
+            Plan the week
+          </ActionLink>
+        </Card.Footer>
+      </ContentCard>
+    );
+  }
+
+  return (
+    <ContentCard
+      appearance="media"
+      className={cn(
+        span.wide,
+        "aspect-[3/2] sm:aspect-[2/1] lg:aspect-auto lg:min-h-88",
+      )}
+      density="flush"
+      id="next-meal"
+    >
+      {nextMeal.imageUrl ? (
+        <Image
+          alt=""
+          className="object-cover"
+          fill
+          // The hero above the fold, and so the page's LCP element.
+          preload
+          sizes="(min-width: 1024px) 66vw, 100vw"
+          src={nextMeal.imageUrl}
+        />
+      ) : (
+        <MealArtwork
+          artwork={nextMeal.artwork}
+          className="absolute inset-0 size-full"
+        />
+      )}
+
+      {/* A soft floor under the panel, so a pale photograph cannot swallow its edge. */}
+      <div className="absolute inset-x-0 bottom-0 z-10 h-2/3 bg-linear-to-t from-black/45 to-transparent" />
+
+      <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 p-5 sm:p-7">
+        {/* Glass over a photograph, so it sits outside the surface scale on purpose. */}
+        <Card.Header className="max-w-md gap-1 rounded-2xl border border-media-panel-border bg-linear-to-br from-media-panel-start to-media-panel-end p-4 backdrop-blur-md">
+          <Eyebrow tone="media">
+            {nextMeal.dayLabel} · {nextMeal.slot}
+          </Eyebrow>
+          <PanelTitle className="text-media-foreground">
+            {nextMeal.title}
+          </PanelTitle>
+          <Card.Description className="text-media-muted">
+            {nextMeal.prepMinutes} minutes
+          </Card.Description>
+        </Card.Header>
+
+        <Card.Footer>
+          <ActionLink
+            className="rounded-full bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline transition-transform [--link-hover:var(--imeal-media-action-foreground)] motion-safe:hover:scale-[1.03]"
+            href={`/cook/${nextMeal.id}`}
+            tier="primary"
+          >
+            Start cooking
+          </ActionLink>
+        </Card.Footer>
+      </div>
+    </ContentCard>
+  );
+}
+
 function TodayCard({
   today,
   weekStart,
@@ -95,63 +170,39 @@ function TodayCard({
   const planned = today.slots.filter((entry) => entry.meal !== null).length;
 
   return (
-    <ContentCard className="col-span-12 lg:col-span-5" id="today">
-      <Card.Header className="gap-3">
-        <IconBadge tone="accent">
-          <svg
-            aria-hidden="true"
-            className="size-5"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M8 3v3m8-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </IconBadge>
-        <div className="flex flex-col gap-1">
-          <Eyebrow>TODAY</Eyebrow>
-          <Card.Title className="text-xl">{today.label}</Card.Title>
-          <Card.Description>
-            {planned === 0
-              ? "Nothing planned for today."
-              : `${planned} of ${today.slots.length} meals planned.`}
-          </Card.Description>
-        </div>
+    <ContentCard className={cn(span.narrow, "gap-5")} id="today">
+      <Card.Header className="gap-1">
+        <Eyebrow>Today</Eyebrow>
+        <PanelTitle>{today.label}</PanelTitle>
+        <Card.Description>
+          {planned === 0
+            ? "Nothing planned for today."
+            : `${planned} of ${today.slots.length} meals planned.`}
+        </Card.Description>
       </Card.Header>
 
-      <Card.Content className="mt-2">
+      <Card.Content>
         <ul className="flex list-none flex-col p-0">
           {today.slots.map(({ meal, slot }) => (
             <li
-              className="flex min-h-11 items-center justify-between gap-3 border-b border-border/60 last:border-b-0"
+              className="flex min-h-12 items-center justify-between gap-3 border-b border-separator last:border-b-0"
               key={slot}
             >
               <span className="min-w-0">
-                <span className="block text-xs font-semibold text-muted capitalize">
+                <span className="block text-xs font-medium text-muted capitalize">
                   {slot}
                 </span>
-                <span className="block truncate text-sm text-foreground">
-                  {meal ? meal.title : "—"}
+                <span className="block truncate text-sm">
+                  {meal ? meal.title : "Not planned"}
                 </span>
               </span>
 
-              {meal ? (
-                <Link className="shrink-0 text-xs" href={`/cook/${meal.id}`}>
-                  Cook
-                </Link>
-              ) : (
-                <Link
-                  className="shrink-0 text-xs"
-                  href={`/planner?week=${weekStart}`}
-                >
-                  Plan
-                </Link>
-              )}
+              <Link
+                className="shrink-0 text-sm"
+                href={meal ? `/cook/${meal.id}` : `/planner?week=${weekStart}`}
+              >
+                {meal ? "Cook" : "Plan"}
+              </Link>
             </li>
           ))}
         </ul>
@@ -160,224 +211,82 @@ function TodayCard({
   );
 }
 
-function ShoppingSummaryCard({
+function ShoppingBand({
   shopping,
   weekStart,
 }: Pick<DashboardData, "shopping" | "weekStart">) {
   const remaining = shopping.totalItems - shopping.completedItems;
-  const percentage =
-    shopping.totalItems === 0
-      ? 0
-      : Math.round((shopping.completedItems / shopping.totalItems) * 100);
+  const href = `/shopping?week=${weekStart}`;
 
-  return (
-    <ContentCard className="col-span-12 lg:col-span-5" id="shopping">
-      <Card.Header className="gap-3">
-        <IconBadge tone="accent">
-          <svg
-            aria-hidden="true"
-            className="size-5"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M4 5h2l1.3 8.1a2 2 0 0 0 2 1.7h7.5a2 2 0 0 0 1.9-1.4L20 8H7M10 19.2h.01M17 19.2h.01"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </IconBadge>
-        <div className="flex flex-col gap-1">
-          <Eyebrow>SHOPPING</Eyebrow>
-          <Card.Title className="text-xl">
-            {shopping.totalItems === 0
-              ? "No list yet"
-              : remaining === 0
-                ? "Everything is bought"
-                : "Ready for the week"}
-          </Card.Title>
-          <Card.Description>
-            {shopping.totalItems === 0 ? (
-              <Link href={`/shopping?week=${weekStart}`}>
-                Build it from your plan
-              </Link>
-            ) : (
-              `${shopping.completedItems} of ${shopping.totalItems} items collected`
-            )}
-          </Card.Description>
-        </div>
-      </Card.Header>
+  if (shopping.totalItems === 0) {
+    return (
+      <ContentCard
+        className={cn(
+          span.full,
+          "gap-3 md:flex-row md:items-center md:justify-between",
+        )}
+        id="shopping"
+      >
+        <Card.Header className="gap-1">
+          <Eyebrow>Shopping</Eyebrow>
+          <Typography type="body">No list for this week yet.</Typography>
+        </Card.Header>
+        <Card.Footer>
+          <ActionLink href={href} tier="neutral">
+            Build it from the plan
+          </ActionLink>
+        </Card.Footer>
+      </ContentCard>
+    );
+  }
 
-      {shopping.totalItems > 0 ? (
-        <>
-          <Card.Content className="mt-2 gap-5">
-            <ProgressBar
-              aria-label="Shopping list completion"
-              value={percentage}
-            >
-              <ProgressBar.Output className="text-xs font-medium text-muted" />
-              <ProgressBar.Track>
-                <ProgressBar.Fill />
-              </ProgressBar.Track>
-            </ProgressBar>
-
-            <TagList
-              casing="none"
-              label="Next shopping items"
-
-              tags={shopping.nextItems}
-
-              tone="neutral"
-            />
-          </Card.Content>
-
-          <Card.Footer>
-            <span className="text-sm font-medium text-foreground">
-              {remaining} items left
-            </span>
-          </Card.Footer>
-        </>
-      ) : null}
-    </ContentCard>
-  );
-}
-
-function NextMealCard({
-  nextMeal,
-  weekStart,
-}: Pick<DashboardData, "nextMeal" | "weekStart">) {
   return (
     <ContentCard
-      appearance="media"
-      className="col-span-12 min-h-60 sm:min-h-80 lg:col-span-7 lg:row-span-2 lg:min-h-[27rem]"
-      density="flush"
-      id="next-meal"
-      variant="tertiary"
+      className={cn(span.full, "gap-5 md:flex-row md:items-center md:gap-8")}
+      id="shopping"
     >
-      {nextMeal?.imageUrl ? (
-        <Image
-          alt=""
-          className="object-cover"
-          fill
-          sizes="(min-width: 1024px) 58vw, 100vw"
-          src={nextMeal.imageUrl}
-        />
-      ) : (
-        <MealArtwork
-          artwork={nextMeal?.artwork ?? "herb"}
-          className="absolute inset-0 size-full"
-        />
-      )}
-      <div className={mediaScrimClassName} />
+      <div className="flex min-w-0 items-center gap-4 md:w-72 md:shrink-0">
+        {/* A ring, not a bar: at one of twenty-two a bar is a hairline that reads
+            as a stray rule, and a horizontal band has no width to spare. */}
+        <ProgressCircle
+          aria-label="Shopping list completion"
+          className="shrink-0"
+          value={Math.round(
+            (shopping.completedItems / shopping.totalItems) * 100,
+          )}
+        >
+          <ProgressCircle.Track>
+            <ProgressCircle.TrackCircle />
+            <ProgressCircle.FillCircle />
+          </ProgressCircle.Track>
+        </ProgressCircle>
 
-      <Card.Header className="relative z-10 p-6 sm:p-8">
-        <div className={mediaPanelClassName}>
-          <Eyebrow tone="media">
-            {nextMeal
-              ? `${nextMeal.dayLabel.toUpperCase()} · ${nextMeal.slot}`
-              : "NEXT UP"}
-          </Eyebrow>
-          <Card.Title className="max-w-sm text-2xl text-media-foreground sm:text-3xl">
-            {nextMeal ? nextMeal.title : "Nothing planned yet"}
-          </Card.Title>
-          <Card.Description className="max-w-xs text-media-muted">
-            {nextMeal
-              ? "Everything you need is on the shopping list."
-              : "Pick a few recipes and place them in the week."}
+        <Card.Header className="min-w-0 gap-1">
+          <Eyebrow>Shopping</Eyebrow>
+          <PanelTitle>
+            {remaining === 0
+              ? "Everything is bought"
+              : `${remaining} left to buy`}
+          </PanelTitle>
+          <Card.Description>
+            {shopping.completedItems} of {shopping.totalItems} collected
           </Card.Description>
-        </div>
-      </Card.Header>
+        </Card.Header>
+      </div>
 
-      <Card.Footer className="relative z-10 mt-auto flex items-end justify-between gap-4 p-6 sm:p-8">
-        {nextMeal ? (
-          <>
-            <div className="rounded-full bg-media-control px-4 py-2 text-sm font-medium text-media-control-foreground shadow-sm backdrop-blur-md">
-              {nextMeal.prepMinutes} minutes
-            </div>
-            <Link
-              className={mediaActionClassName}
-              href={`/cook/${nextMeal.id}`}
-            >
-              Start cooking
-              <Link.Icon aria-hidden="true" />
-            </Link>
-          </>
-        ) : (
-          <Link
-            className={mediaActionClassName}
-            href={`/planner?week=${weekStart}`}
-          >
-            Plan the week
-            <Link.Icon aria-hidden="true" />
-          </Link>
-        )}
-      </Card.Footer>
-    </ContentCard>
-  );
-}
+      <Card.Content className="min-w-0 justify-center">
+        <TagList
+          casing="none"
+          label="Next shopping items"
+          tags={shopping.nextItems}
+          tone="neutral"
+        />
+      </Card.Content>
 
-function NextStepCard({ shopping, week, weekStart }: DashboardData) {
-  const remaining = shopping.totalItems - shopping.completedItems;
-  const step =
-    week.plannedMeals === 0
-      ? {
-          title: "Plan your week",
-          description: "Place a few recipes into days and slots.",
-          href: `/planner?week=${weekStart}`,
-          action: "Open the planner",
-        }
-      : shopping.totalItems === 0
-        ? {
-            title: "Build the shopping list",
-            description: "Turn this week's meals into one list.",
-            href: `/shopping?week=${weekStart}`,
-            action: "Build it",
-          }
-        : remaining > 0
-          ? {
-              title: `${remaining} things left to buy`,
-              description: "Tick them off as you shop.",
-              href: `/shopping?week=${weekStart}`,
-              action: "Open the list",
-            }
-          : {
-              title: "You are all set",
-              description: "The week is planned and the shopping is done.",
-              href: `/planner?week=${weekStart}`,
-              action: "Review the week",
-            };
-
-  return (
-    <ContentCard className="col-span-12 lg:col-span-5">
-      <Card.Header className="gap-3">
-        <IconBadge>
-          <svg
-            aria-hidden="true"
-            className="size-5"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M12 7v5l3 2m5-2a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </IconBadge>
-        <div className="flex flex-col gap-1">
-          <Eyebrow>NEXT STEP</Eyebrow>
-          <Card.Title className="text-lg">{step.title}</Card.Title>
-          <Card.Description>{step.description}</Card.Description>
-        </div>
-      </Card.Header>
-      <Card.Footer>
-        <Link className="text-sm font-medium" href={step.href}>
-          {step.action}
-        </Link>
+      <Card.Footer className="shrink-0">
+        <ActionLink href={href} tier="quiet">
+          Open the list
+        </ActionLink>
       </Card.Footer>
     </ContentCard>
   );
@@ -389,39 +298,36 @@ function RecipeCard({
   recipe: DashboardData["recentRecipes"][number];
 }) {
   return (
-    <ContentCard className="col-span-12 sm:col-span-6" density="compact">
-      {recipe.imageUrl ? (
-        <Image
-          alt=""
-          className="h-40 w-full rounded-3xl object-cover sm:h-44"
-          height={192}
-          sizes="(min-width: 640px) 20rem, 100vw"
-          src={recipe.imageUrl}
-          width={256}
-        />
-      ) : (
-        <MealArtwork
-          artwork={recipe.artwork}
-          className="h-40 w-full rounded-3xl sm:h-44"
-        />
-      )}
-      <Card.Header className="gap-1 px-1 pb-0">
+    <LinkCard className={cn(span.third, "hover:shadow-lg")} density="compact">
+      <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+        {recipe.imageUrl ? (
+          <Image
+            alt=""
+            className="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
+            height={192}
+            sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
+            src={recipe.imageUrl}
+            width={256}
+          />
+        ) : (
+          <MealArtwork
+            artwork={recipe.artwork}
+            className="size-full transition-transform duration-300 motion-safe:group-hover:scale-105"
+          />
+        )}
+      </Card.Content>
+
+      <Card.Header className="gap-0.5">
         <Card.Title className="text-base">
-          <Link
-            className="text-foreground no-underline"
-            href={`/recipes/${recipe.id}`}
-          >
+          <LinkCard.Target href={`/recipes/${recipe.id}`}>
             {recipe.title}
-          </Link>
+          </LinkCard.Target>
         </Card.Title>
-        <Card.Description>Serves {recipe.servings}</Card.Description>
+        <Card.Description>
+          {recipe.prepMinutes} min · serves {recipe.servings}
+        </Card.Description>
       </Card.Header>
-      <Card.Footer className="justify-between px-1 pt-0">
-        <span className="text-xs font-medium text-muted">
-          {recipe.prepMinutes} minutes
-        </span>
-      </Card.Footer>
-    </ContentCard>
+    </LinkCard>
   );
 }
 
@@ -430,13 +336,17 @@ function greeting(hour: number) {
     return "Good morning";
   }
 
-  return hour < 18 ? "Good afternoon" : "Good evening";
+  if (hour < 18) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
 }
 
 export async function Dashboard() {
   const now = new Date();
   const [data, user] = await Promise.all([
-    getDashboardData(now),
+    getDashboardData(),
     getCurrentUser(),
   ]);
   const today = new Intl.DateTimeFormat("en", {
@@ -448,41 +358,34 @@ export async function Dashboard() {
   return (
     <div id="dashboard">
       <main className="pt-10 sm:pt-14">
-        <header className="mb-8 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Typography color="muted" type="body-sm" weight="medium">
-              {today}
-            </Typography>
-            <Typography.Heading className="mt-1" level={1}>
-              {greeting(now.getHours())}
-              {user ? `, ${user.displayName}` : ""}.
-            </Typography.Heading>
-          </div>
+        <header className="mb-6 flex flex-col gap-1 sm:mb-8">
+          <Eyebrow tone="info">{today}</Eyebrow>
+          <Typography type="h1" weight="semibold">
+            {greeting(now.getHours())}
+            {user ? `, ${user.displayName}` : ""}.
+          </Typography>
         </header>
 
-        <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
-          <WeekOverviewCard week={data.week} weekStart={data.weekStart} />
-          <TodayCard today={data.today} weekStart={data.weekStart} />
-          <ShoppingSummaryCard
-            shopping={data.shopping}
-            weekStart={data.weekStart}
-          />
+        <h2 className="sr-only">This week at a glance</h2>
+
+        <PageGrid>
+          <WeekBand week={data.week} />
           <NextMealCard nextMeal={data.nextMeal} weekStart={data.weekStart} />
-          <NextStepCard {...data} />
+          <TodayCard today={data.today} weekStart={data.weekStart} />
+          <ShoppingBand shopping={data.shopping} weekStart={data.weekStart} />
 
           <section
             aria-labelledby="recent-recipes-title"
-            className="col-span-12 mt-2"
+            className={cn(span.full, "mt-4 flex flex-col gap-4")}
             id="recipes"
           >
-            <div className="mb-4 flex items-end justify-between px-1">
-              <div>
-                <Eyebrow>YOUR LIBRARY</Eyebrow>
-                <Typography.Heading id="recent-recipes-title" level={2}>
-                  Recent recipes
-                </Typography.Heading>
-              </div>
-              <Link href="/recipes">See all</Link>
+            <div className="flex items-baseline justify-between gap-4">
+              <Typography id="recent-recipes-title" type="h2" weight="semibold">
+                Recent recipes
+              </Typography>
+              <ActionLink href="/recipes" tier="quiet">
+                See all
+              </ActionLink>
             </div>
 
             {data.recentRecipes.length === 0 ? (
@@ -491,20 +394,15 @@ export async function Dashboard() {
                 <Link href="/recipes/new">Add your first one</Link>.
               </Typography>
             ) : (
-              <div className="grid grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+              <PageGrid>
                 {data.recentRecipes.map((recipe) => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
-              </div>
+              </PageGrid>
             )}
           </section>
-        </div>
+        </PageGrid>
       </main>
-
-      <footer className="mt-12 flex items-center justify-between border-t border-separator px-1 py-6 text-xs text-muted">
-        <span>iMeal</span>
-        <span>Plan with intention. Cook with ease.</span>
-      </footer>
     </div>
   );
 }

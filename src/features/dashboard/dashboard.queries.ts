@@ -8,8 +8,8 @@ import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { getShoppingList } from "@/features/shopping/shopping.queries";
 
-const RECENT_RECIPE_COUNT = 2;
-const NEXT_SHOPPING_ITEM_COUNT = 4;
+const RECENT_RECIPE_COUNT = 3;
+const NEXT_SHOPPING_ITEM_COUNT = 6;
 const ARTWORKS = ["tomato", "citrus", "herb"] as const;
 
 export type Artwork = (typeof ARTWORKS)[number];
