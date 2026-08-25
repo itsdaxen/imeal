@@ -17,17 +17,6 @@ type AppHeaderProps = {
   navigationLabel: string;
 };
 
-function BrandMark() {
-  return (
-    <span
-      aria-hidden="true"
-      className="grid size-9 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground shadow-sm"
-    >
-      i
-    </span>
-  );
-}
-
 export function AppHeader({
   actions,
   homeHref,
@@ -38,7 +27,11 @@ export function AppHeader({
     <Surface
       className={cn(
         panelVariants({ density: "flush" }),
-        "flex items-center justify-between gap-3 px-3 py-2 sm:px-5 sm:py-3",
+        // A Surface, not a Card, so the radius and shadow that Card supplies are set here.
+        "rounded-3xl shadow-surface",
+        "flex items-center justify-between gap-3 px-3 py-2 transition-[border-radius,background-color,box-shadow,padding,border-color] duration-200 ease-out motion-reduce:transition-none sm:px-5 sm:py-3",
+        // Stuck, the bar around it carries the edge, so the card drops its own.
+        "group-data-[stuck=true]:rounded-none group-data-[stuck=true]:bg-transparent group-data-[stuck=true]:py-1 group-data-[stuck=true]:shadow-none sm:group-data-[stuck=true]:py-1.5",
       )}
       role="banner"
     >
@@ -50,7 +43,12 @@ export function AppHeader({
           className="flex items-center gap-2.5 text-foreground no-underline"
           href={homeHref}
         >
-          <BrandMark />
+          <span
+            aria-hidden="true"
+            className="grid size-9 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground shadow-sm"
+          >
+            i
+          </span>
           <span className="truncate text-lg font-semibold tracking-tight">
             iMeal
           </span>

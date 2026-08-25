@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { AppHeader } from "@/components/ui/app-header";
+import { StickyHeader } from "@/components/ui/sticky-header";
 import { AccountMenu } from "@/features/auth/components/account-menu";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
@@ -30,7 +31,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <StickyHeader>
         <AppHeader
           actions={
             <AccountMenu
@@ -47,6 +48,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           }
           navigationLabel="Main navigation"
         />
+      </StickyHeader>
+
+      <div className="mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8">
         {children}
       </div>
     </div>
