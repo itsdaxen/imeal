@@ -10,7 +10,7 @@ import type { TidyChange } from "../tidy-list";
 
 type TidyPanelProps = {
   items: ReadonlyArray<{ id: string; name: string; category: string | null }>;
-  weekStart: string;
+  listId: string;
 };
 
 function describe(
@@ -35,7 +35,7 @@ function describe(
   return notes;
 }
 
-export function TidyPanel({ items, weekStart }: TidyPanelProps) {
+export function TidyPanel({ items, listId }: TidyPanelProps) {
   const [state, formAction, isPending] = useActionState<TidyState, FormData>(
     proposeTidy,
     {},
@@ -48,7 +48,7 @@ export function TidyPanel({ items, weekStart }: TidyPanelProps) {
   return (
     <section className="flex flex-col gap-4">
       <form action={formAction}>
-        <input name="weekStart" type="hidden" value={weekStart} />
+        <input name="listId" type="hidden" value={listId} />
         <Button isPending={isPending} type="submit" variant="tertiary">
           Tidy up
         </Button>
@@ -86,7 +86,7 @@ export function TidyPanel({ items, weekStart }: TidyPanelProps) {
           </ul>
 
           <form action={applyTidy}>
-            <input name="weekStart" type="hidden" value={weekStart} />
+            <input name="listId" type="hidden" value={listId} />
             <Button type="submit">Apply these changes</Button>
           </form>
         </div>

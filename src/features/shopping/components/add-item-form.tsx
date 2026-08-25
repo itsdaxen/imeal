@@ -2,10 +2,10 @@ import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { addManualItem } from "../shopping.actions";
 
-export function AddItemForm({ weekStart }: { weekStart: string }) {
+export function AddItemForm({ listId }: { listId: string }) {
   return (
     <form action={addManualItem} className="flex flex-wrap items-end gap-3">
-      <input name="weekStart" type="hidden" value={weekStart} />
+      <input name="listId" type="hidden" value={listId} />
 
       <TextField className="min-w-56 flex-1" isRequired name="name">
         <Label>Add an item</Label>

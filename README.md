@@ -25,6 +25,8 @@ saved data.
 - Weekly planning across seven days and four meal slots, with week navigation.
 - Shopping-list generation from a week's plan, alongside manual items and reusable
   staples. Rebuilding the list never discards items you have already ticked off.
+- Named and shared shopping lists work without a meal plan. Opening a list is
+  separate from choosing where a week's generated ingredients go.
 - A focused cooking view with one step at a time and the screen kept awake.
 - Friends, with requests to accept or decline, and recipes shared read-only with
   the friends you choose.
@@ -75,12 +77,13 @@ Before opening a pull request, run the full quality gate:
 pnpm check   # format check, lint, typecheck, tests, dependency audit, and a production build
 ```
 
-Two checks run against a real project rather than in CI. Both create and delete
+Three checks run against a real project rather than in CI. They create and delete
 throwaway users and need `SUPABASE_SERVICE_KEY`, so they sit outside `pnpm check`:
 
 ```bash
 set -a; . ./.env.local; set +a && pnpm verify:rls      # the access matrix
 set -a; . ./.env.local; set +a && pnpm verify:routes   # every page renders (needs pnpm dev)
+node --env-file=.env.local scripts/verify-shopping.mjs # shopping forms and list isolation (needs pnpm dev)
 ```
 
 ## Administrators

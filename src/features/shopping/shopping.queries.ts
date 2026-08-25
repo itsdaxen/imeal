@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { listSchema } from "./shopping.schema";
 
 export type ShoppingItem = {
   id: string;
@@ -21,6 +22,7 @@ export type ShoppingList = {
   listId: string | null;
   listName: string;
   planId: string | null;
+  targetListId: string | null;
   items: ShoppingItem[];
   remaining: number;
 };
@@ -64,65 +66,93 @@ export async function resolveWeekList(weekStart: string) {
     return { planId: null, listId: null };
   }
 
-  const { data: plan } = await supabase
+  const { data: plan, error: planError } = await supabase
     .from("meal_plans")
     .select("id, target_list_id")
     .eq("user_id", user.id)
     .eq("week_start", weekStart)
     .maybeSingle();
 
+  if (planError) {
+    throw new Error(
+      `Could not load the week's shopping destination: ${planError.message}`,
+    );
+  }
+
   if (plan?.target_list_id) {
     return { planId: plan.id, listId: plan.target_list_id };
   }
 
-  const { data: fallback } = await supabase
+  const { data: fallback, error: fallbackError } = await supabase
     .from("shopping_lists")
     .select("id")
     .eq("owner_id", user.id)
     .eq("is_default", true)
     .maybeSingle();
 
+  if (fallbackError) {
+    throw new Error(
+      `Could not load your default shopping list: ${fallbackError.message}`,
+    );
+  }
+
   return { planId: plan?.id ?? null, listId: fallback?.id ?? null };
 }
 
 export async function getShoppingList(
   weekStart: string,
+  requestedListId?: string,
 ): Promise<ShoppingList> {
   const supabase = await createSupabaseServerClient();
-  const { planId, listId } = await resolveWeekList(weekStart);
+  const { planId, listId: targetListId } = await resolveWeekList(weekStart);
+  const selected = listSchema.safeParse({
+    listId: requestedListId ?? targetListId,
+  });
+  const listId = selected.success ? selected.data.listId : null;
+  const empty: ShoppingList = {
+    listId: null,
+    listName: "Shopping",
+    planId,
+    targetListId,
+    items: [],
+    remaining: 0,
+  };
 
   if (!listId) {
-    return {
-      listId: null,
-      listName: "Shopping",
-      planId,
-      items: [],
-      remaining: 0,
-    };
+    return empty;
   }
 
-  const [{ data: list }, { data, error }] = await Promise.all([
-    supabase
-      .from("shopping_lists")
-      .select("name")
-      .eq("id", listId)
-      .maybeSingle(),
-    supabase
-      .from("shopping_items")
-      .select("id, name, quantity, unit, source, category, checked")
-      .eq("list_id", listId)
-      .order("checked", { ascending: true })
-      .order("name", { ascending: true }),
-  ]);
+  const [{ data: list, error: listError }, { data, error }] = await Promise.all(
+    [
+      supabase
+        .from("shopping_lists")
+        .select("name")
+        .eq("id", listId)
+        .maybeSingle(),
+      supabase
+        .from("shopping_items")
+        .select("id, name, quantity, unit, source, category, checked")
+        .eq("list_id", listId)
+        .order("checked", { ascending: true })
+        .order("name", { ascending: true }),
+    ],
+  );
 
-  if (error) {
-    throw new Error(`Could not load the shopping list: ${error.message}`);
+  if (error || listError) {
+    throw new Error(
+      `Could not load the shopping list: ${(error ?? listError)?.message}`,
+    );
+  }
+
+  if (!list) {
+    return empty;
   }
 
   return {
     listId,
-    listName: list?.name ?? "Shopping",
+    listName: list.name,
     planId,
+    targetListId,
     items: data,
     remaining: data.filter((item) => !item.checked).length,
   };

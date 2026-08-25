@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { listSchema } from "@/features/shopping/shopping.schema";
 
 import { readRecipe, readTidy } from "./ai";
 import type { DraftRecipe } from "./draft-recipe";
@@ -13,7 +14,6 @@ import type { TidyableItem, TidyChange } from "./tidy-list";
 const pasteSchema = z.object({
   text: z.string().trim().min(1, "Paste a recipe first."),
 });
-const weekSchema = z.object({ weekStart: z.iso.date() });
 
 export type RecipeDraftState = { error?: string; draft?: DraftRecipe };
 export type TidyState = { error?: string; changes?: TidyChange[] };
@@ -46,7 +46,7 @@ export async function draftRecipe(
   return { draft: result.value };
 }
 
-async function currentListItems(weekStart: string) {
+async function currentListItems(list: string) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -54,22 +54,6 @@ async function currentListItems(weekStart: string) {
 
   if (!user) {
     redirect("/sign-in");
-  }
-
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("target_list_id")
-    .eq("user_id", user.id)
-    .eq("week_start", weekStart)
-    .maybeSingle();
-
-  const { data: listId } = await supabase.rpc("default_shopping_list", {
-    p_user: user.id,
-  });
-  const list = plan?.target_list_id ?? listId;
-
-  if (!list) {
-    return { supabase, list: null, items: [] as TidyableItem[] };
   }
 
   const { data, error } = await supabase
@@ -89,13 +73,13 @@ export async function proposeTidy(
   _previous: TidyState,
   formData: FormData,
 ): Promise<TidyState> {
-  const parsed = weekSchema.safeParse({ weekStart: formData.get("weekStart") });
+  const parsed = listSchema.safeParse({ listId: formData.get("listId") });
 
   if (!parsed.success) {
-    return { error: "That week is not valid." };
+    return { error: "That list is not valid." };
   }
 
-  const { items } = await currentListItems(parsed.data.weekStart);
+  const { items } = await currentListItems(parsed.data.listId);
   const result = readTidy(items);
 
   if (!result.ok) {
@@ -111,15 +95,13 @@ export async function proposeTidy(
  * form that was submitted.
  */
 export async function applyTidy(formData: FormData) {
-  const parsed = weekSchema.safeParse({ weekStart: formData.get("weekStart") });
+  const parsed = listSchema.safeParse({ listId: formData.get("listId") });
 
   if (!parsed.success) {
-    throw new Error("That week is not valid.");
+    throw new Error("That list is not valid.");
   }
 
-  const { supabase, list, items } = await currentListItems(
-    parsed.data.weekStart,
-  );
+  const { supabase, list, items } = await currentListItems(parsed.data.listId);
   const result = readTidy(items);
 
   if (!list || !result.ok) {

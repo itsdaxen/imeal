@@ -1,13 +1,13 @@
 import { Button, Input, Label, TextField, Typography } from "@heroui/react";
 
 import type { Person } from "@/features/friends/friend.queries";
+import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
 
 import {
   addListMember,
   createShoppingList,
   deleteShoppingList,
   removeListMember,
-  setWeekList,
 } from "../shopping.actions";
 import type { ShoppingListSummary } from "../shopping.queries";
 
@@ -17,7 +17,6 @@ type ListPanelProps = {
   lists: ShoppingListSummary[];
   members: Array<{ id: string; displayName: string }>;
   currentUserId: string;
-  weekStart: string;
 };
 
 export function ListPanel({
@@ -26,7 +25,6 @@ export function ListPanel({
   lists,
   members,
   currentUserId,
-  weekStart,
 }: ListPanelProps) {
   const current = lists.find((list) => list.id === listId);
   const memberIds = new Set(members.map((member) => member.id));
@@ -37,31 +35,6 @@ export function ListPanel({
         <Typography type="h2" weight="semibold">
           Lists
         </Typography>
-
-        {lists.length > 1 ? (
-          <form action={setWeekList} className="flex flex-wrap items-end gap-3">
-            <input name="weekStart" type="hidden" value={weekStart} />
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="listId">This week fills</Label>
-              <select
-                className="h-11 rounded-xl border border-border bg-surface px-3 text-sm"
-                defaultValue={listId ?? ""}
-                id="listId"
-                name="listId"
-              >
-                {lists.map((list) => (
-                  <option key={list.id} value={list.id}>
-                    {list.name}
-                    {list.isOwn ? "" : " · shared with you"}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Button size="sm" type="submit" variant="tertiary">
-              Use this list
-            </Button>
-          </form>
-        ) : null}
 
         <form
           action={createShoppingList}
@@ -117,12 +90,14 @@ export function ListPanel({
           )}
 
           {!current.isDefault ? (
-            <form action={deleteShoppingList} className="self-start">
-              <input name="listId" type="hidden" value={listId} />
-              <Button size="sm" type="submit" variant="ghost">
-                Delete this list
-              </Button>
-            </form>
+            <ConfirmActionForm
+              action={deleteShoppingList}
+              confirmLabel="Delete list"
+              description={`Delete “${current.name}” and all its items for everyone sharing it? This cannot be undone.`}
+              fields={{ listId }}
+              heading="Delete this list?"
+              label="Delete this list"
+            />
           ) : null}
         </div>
       ) : null}

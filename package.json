@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "verify:rls": "node scripts/verify-rls.mjs",
     "verify:routes": "node scripts/verify-routes.mjs",
+    "verify:shopping": "node scripts/verify-shopping.mjs",
     "security:audit": "pnpm audit --audit-level high",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm security:audit && pnpm build"
   },
