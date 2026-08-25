@@ -43,15 +43,7 @@ export function AppHeader({
           className="flex items-center gap-2.5 text-foreground no-underline"
           href={homeHref}
         >
-          <span
-            aria-hidden="true"
-            className="grid size-9 place-items-center rounded-full bg-accent text-sm font-bold text-accent-foreground shadow-sm"
-          >
-            i
-          </span>
-          <span className="truncate text-lg font-semibold tracking-tight">
-            iMeal
-          </span>
+          <span className="font-brand text-2xl leading-normal">iMeal</span>
         </Link>
       </div>
 

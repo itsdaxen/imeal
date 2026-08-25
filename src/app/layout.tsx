@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 
+import { Dancing_Script, Geist } from "next/font/google";
+
 import "./globals.css";
+
+const sans = Geist({ subsets: ["latin"], variable: "--imeal-sans-font" });
+
+// Only the wordmark uses it, so it loads one weight and nothing else.
+const brand = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--imeal-brand-font",
+  weight: "700",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +26,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html className="light" data-theme="light" lang="en">
+    <html
+      className={`light ${sans.variable} ${brand.variable}`}
+      data-theme="light"
+      lang="en"
+    >
       <body className="bg-background font-sans text-foreground antialiased">
         {children}
       </body>
