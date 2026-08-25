@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { redirect } from "next/navigation";
 
+import { AppFooter } from "@/components/ui/app-footer";
 import { AppHeader } from "@/components/ui/app-header";
 import { StickyHeader } from "@/components/ui/sticky-header";
 import { AccountMenu } from "@/features/auth/components/account-menu";
@@ -52,6 +53,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8">
         {children}
+        <AppFooter />
       </div>
     </div>
   );

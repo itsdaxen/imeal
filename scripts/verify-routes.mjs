@@ -53,6 +53,8 @@ const SIGNED_IN = [
   ["/sign-in", 307],
   ["/forgot-password", 200],
   ["/reset-password", 200],
+  ["/privacy", 200],
+  ["/terms", 200],
 ];
 
 const admin = createClient(url, service, {
@@ -129,6 +131,18 @@ try {
       pass: response.status === expected,
       detail: `expected ${expected}, got ${response.status}`,
     });
+
+    // A page is for one thing. Two primary actions means the page has not decided
+    // which, and that is a judgement no test but this one can make.
+    if (response.status === 200) {
+      const html = await response.text();
+      const primaries = html.match(/data-action-tier="primary"/g)?.length ?? 0;
+      results.push({
+        label: `${headers ? "in " : "out"} ${path} — one primary action`,
+        pass: primaries <= 1,
+        detail: `found ${primaries}`,
+      });
+    }
   };
 
   for (const [path, expected] of SIGNED_OUT) {
