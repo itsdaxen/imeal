@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button, Link } from "@heroui/react";
@@ -12,19 +13,6 @@ import {
 type MobileNavigationProps = {
   items: ReadonlyArray<AppHeaderNavigationItem>;
 };
-
-function MenuIcon() {
-  return (
-    <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M4 7h16M4 12h16M4 17h16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
 
 export function MobileNavigation({ items }: MobileNavigationProps) {
   const pathname = usePathname();
@@ -61,7 +49,7 @@ export function MobileNavigation({ items }: MobileNavigationProps) {
         onPress={() => setIsOpen(true)}
         variant="ghost"
       >
-        <MenuIcon />
+        <Menu aria-hidden="true" className="size-5" />
       </Button>
 
       <button
@@ -92,19 +80,7 @@ export function MobileNavigation({ items }: MobileNavigationProps) {
             onPress={() => setIsOpen(false)}
             variant="ghost"
           >
-            <svg
-              aria-hidden="true"
-              className="size-5"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="1.8"
-              />
-            </svg>
+            <X aria-hidden="true" className="size-5" />
           </Button>
         </div>
 
