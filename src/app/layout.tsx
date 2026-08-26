@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { Dancing_Script, Geist } from "next/font/google";
 
+import { AppRouterProvider } from "@/components/ui/app-router-provider";
+
 import "./globals.css";
 
 const sans = Geist({ subsets: ["latin"], variable: "--imeal-sans-font" });
@@ -28,11 +30,12 @@ export default function RootLayout({
   return (
     <html
       className={`light ${sans.variable} ${brand.variable}`}
+      data-scroll-behavior="smooth"
       data-theme="light"
       lang="en"
     >
       <body className="bg-background font-sans text-foreground antialiased">
-        {children}
+        <AppRouterProvider>{children}</AppRouterProvider>
       </body>
     </html>
   );
