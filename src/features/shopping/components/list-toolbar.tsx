@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
 import {
@@ -54,19 +55,18 @@ export function ListToolbar({
     <div className="flex shrink-0 items-center gap-1">
       {children}
 
-      <Button
-        aria-label="Share this list"
-        isIconOnly
+      <IconButton
+        label="Share this list"
         onPress={() => setOpen("share")}
         variant="ghost"
       >
         <Share2 aria-hidden="true" className="size-5" />
-      </Button>
+      </IconButton>
 
       <Dropdown>
-        <Button aria-label="List options" isIconOnly variant="ghost">
+        <IconButton label="List options" variant="ghost">
           <MoreHorizontal aria-hidden="true" className="size-5" />
-        </Button>
+        </IconButton>
         <Dropdown.Popover placement="bottom end">
           <Dropdown.Menu>
             {isOwn ? (

@@ -16,6 +16,8 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { IconButton } from "@/components/ui/icon-button";
+
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
 
@@ -153,15 +155,14 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
         </button>
 
         <Dropdown>
-          <Button
-            aria-label={`Options for ${item.name}`}
+          <IconButton
             className="shrink-0"
-            isIconOnly
+            label={`Options for ${item.name}`}
             size="sm"
             variant="ghost"
           >
             <MoreHorizontal aria-hidden="true" className="size-4" />
-          </Button>
+          </IconButton>
           <Dropdown.Popover placement="bottom end">
             <Dropdown.Menu>
               <Dropdown.Item

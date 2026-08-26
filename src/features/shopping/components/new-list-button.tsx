@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 
+import { IconButton } from "@/components/ui/icon-button";
+
 import { createShoppingList } from "../shopping.actions";
 
 /** Sits at the end of the list tabs, where "one more list" belongs. */
@@ -12,15 +14,14 @@ export function NewListButton() {
 
   return (
     <>
-      <Button
-        aria-label="New list"
+      <IconButton
         className="min-h-11"
-        isIconOnly
+        label="New list"
         onPress={() => setIsOpen(true)}
         variant="ghost"
       >
         <Plus aria-hidden="true" className="size-5" />
-      </Button>
+      </IconButton>
 
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
         <Modal.Backdrop variant="blur">

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Button, Modal, Typography } from "@heroui/react";
 
+import { IconButton } from "@/components/ui/icon-button";
 import { FormMessage } from "@/features/auth/components/form-message";
 
 import { applyTidy, proposeTidy, type TidyState } from "../ai.actions";
@@ -53,15 +54,14 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
     <>
       <form action={formAction}>
         <input name="listId" type="hidden" value={listId} />
-        <Button
-          aria-label="Tidy up the list"
-          isIconOnly
+        <IconButton
           isPending={isPending}
+          label="Tidy up the list"
           type="submit"
           variant="ghost"
         >
           <Sparkles aria-hidden="true" className="size-5" />
-        </Button>
+        </IconButton>
       </form>
 
       {/* The proposal is a decision, so it interrupts rather than appending below. */}

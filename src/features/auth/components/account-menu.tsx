@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ComponentPropsWithoutRef } from "react";
+
 import { Avatar, Button, Link, Popover } from "@heroui/react";
 
 import { signOut } from "../auth.actions";
@@ -27,26 +29,29 @@ export function AccountMenu({
     <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
       {/* The trigger is a circle concentric with the avatar, sized to the
           minimum touch target so the hover state reads as intentional. */}
-      <Popover.Trigger>
-        <Button
-          aria-label={`Signed in as ${displayName}. Open the account menu`}
-          className="size-11 rounded-full p-0"
-          isIconOnly
-          variant="ghost"
-        >
-          <Avatar size="sm" variant="soft">
-            {avatarUrl ? <Avatar.Image alt="" src={avatarUrl} /> : null}
-            <Avatar.Fallback className="bg-identity text-identity-foreground">
-              {initials}
-            </Avatar.Fallback>
-          </Avatar>
-        </Button>
-      </Popover.Trigger>
+      <Popover.Trigger<"button">
+        render={(triggerProps) => (
+          <Button
+            {...(triggerProps as ComponentPropsWithoutRef<typeof Button>)}
+            aria-label={`Signed in as ${displayName}. Open the account menu`}
+            className="size-11 rounded-full p-0"
+            isIconOnly
+            variant="ghost"
+          >
+            <Avatar size="sm" variant="soft">
+              {avatarUrl ? <Avatar.Image alt="" src={avatarUrl} /> : null}
+              <Avatar.Fallback className="bg-identity text-identity-foreground">
+                {initials}
+              </Avatar.Fallback>
+            </Avatar>
+          </Button>
+        )}
+      />
 
       <Popover.Content className="w-64 p-2" placement="bottom end">
         <Popover.Dialog className="outline-none">
           <Link
-            className="flex items-center gap-3 rounded-xl px-3 py-3 no-underline transition-colors hover:bg-default motion-reduce:transition-none"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 no-underline transition-colors hover:bg-default motion-reduce:transition-none"
             href="/profile"
             onPress={() => setIsOpen(false)}
           >
