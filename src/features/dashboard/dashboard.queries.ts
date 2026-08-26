@@ -17,6 +17,7 @@ export type DashboardData = {
   week: {
     label: string;
     plannedMeals: number;
+    approvedMeals: number;
     totalSlots: number;
     days: Array<{
       label: string;
@@ -32,6 +33,7 @@ export type DashboardData = {
     dayLabel: string;
     slot: MealSlot;
     prepMinutes: number;
+    approved: boolean;
     imageUrl: string | null;
     artwork: Artwork;
   } | null;
@@ -39,7 +41,12 @@ export type DashboardData = {
     label: string;
     slots: Array<{
       slot: MealSlot;
-      meal: { id: string; title: string; prepMinutes: number } | null;
+      meal: {
+        id: string;
+        title: string;
+        prepMinutes: number;
+        approved: boolean;
+      } | null;
     }>;
   };
   shopping: { completedItems: number; totalItems: number; nextItems: string[] };
@@ -105,6 +112,7 @@ export async function getDashboardData(
             id: meal.recipe.id,
             title: meal.recipe.title,
             prepMinutes: meal.recipe.prepMinutes,
+            approved: meal.approved,
           }
         : null,
     };
@@ -115,6 +123,7 @@ export async function getDashboardData(
     week: {
       label: formatWeekLabel(weekStart),
       plannedMeals: plan.meals.length,
+      approvedMeals: plan.meals.filter((meal) => meal.approved).length,
       totalSlots: plan.enabledSlots.length * days.length,
       days: days.map((day) => ({
         label: day.label,
@@ -131,6 +140,7 @@ export async function getDashboardData(
           dayLabel: days[upcoming.dayIndex].label,
           slot: upcoming.slot,
           prepMinutes: upcoming.recipe.prepMinutes,
+          approved: upcoming.approved,
           imageUrl: upcoming.recipe.imageUrl,
           artwork: artworkFor(upcoming.recipe.id),
         }

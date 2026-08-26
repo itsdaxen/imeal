@@ -1,5 +1,12 @@
 import Image from "next/image";
-import { Card, cn, Link, ProgressCircle, Typography } from "@heroui/react";
+import {
+  Card,
+  Chip,
+  cn,
+  Link,
+  ProgressCircle,
+  Typography,
+} from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
@@ -30,6 +37,13 @@ function WeekBand({ week }: Pick<DashboardData, "week">) {
             ? "Nothing planned yet"
             : `${week.plannedMeals} of ${week.totalSlots} meals planned`}
         </PanelTitle>
+        {week.plannedMeals > 0 ? (
+          <Card.Description>
+            {week.approvedMeals === week.plannedMeals
+              ? "The whole week is ready to cook."
+              : `${week.approvedMeals} approved · ${week.plannedMeals - week.approvedMeals} to review`}
+          </Card.Description>
+        ) : null}
       </Card.Header>
 
       <Card.Content className="flex-none">
@@ -118,17 +132,22 @@ function NextMealCard({
             {nextMeal.title}
           </PanelTitle>
           <Card.Description className="text-media-muted">
-            {nextMeal.prepMinutes} minutes
+            {nextMeal.prepMinutes} minutes ·{" "}
+            {nextMeal.approved ? "ready to cook" : "awaiting approval"}
           </Card.Description>
         </Card.Header>
 
         <Card.Footer>
           <ActionLink
             className="rounded-full bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline transition-transform [--link-hover:var(--imeal-media-action-foreground)] motion-safe:hover:scale-[1.03]"
-            href={`/cook/${nextMeal.id}`}
+            href={
+              nextMeal.approved
+                ? `/cook/${nextMeal.id}`
+                : `/planner?week=${weekStart}`
+            }
             tier="primary"
           >
-            Start cooking
+            {nextMeal.approved ? "Start cooking" : "Review the plan"}
           </ActionLink>
         </Card.Footer>
       </div>
@@ -170,12 +189,27 @@ function TodayCard({
                 </span>
               </span>
 
-              <Link
-                className="shrink-0 text-sm"
-                href={meal ? `/cook/${meal.id}` : `/planner?week=${weekStart}`}
-              >
-                {meal ? "Cook" : "Plan"}
-              </Link>
+              <span className="flex shrink-0 items-center gap-2">
+                {meal ? (
+                  <Chip
+                    color={meal.approved ? "accent" : "default"}
+                    size="sm"
+                    variant="soft"
+                  >
+                    {meal.approved ? "Ready" : "Draft"}
+                  </Chip>
+                ) : null}
+                <Link
+                  className="text-sm"
+                  href={
+                    meal?.approved
+                      ? `/cook/${meal.id}`
+                      : `/planner?week=${weekStart}`
+                  }
+                >
+                  {meal ? (meal.approved ? "Cook" : "Review") : "Plan"}
+                </Link>
+              </span>
             </li>
           ))}
         </ul>
@@ -202,7 +236,7 @@ function ShoppingBand({
       >
         <Card.Header className="gap-1">
           <Eyebrow>Shopping</Eyebrow>
-          <Typography type="body">No list for this week yet.</Typography>
+          <Typography type="body">Your shopping list is empty.</Typography>
         </Card.Header>
         <Card.Footer>
           <ActionLink href={href} tier="neutral">
