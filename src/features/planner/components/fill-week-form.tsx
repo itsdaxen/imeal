@@ -34,7 +34,7 @@ export function FillWeekForm({ enabledSlots, weekStart }: FillWeekFormProps) {
         <FormMessage tone="error">{state.error}</FormMessage>
       ) : null}
 
-      <div className="flex flex-wrap items-end gap-6">
+      <div className="flex flex-col gap-5 md:flex-row md:flex-wrap md:gap-8">
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-foreground">
             Fill from
@@ -78,15 +78,16 @@ export function FillWeekForm({ enabledSlots, weekStart }: FillWeekFormProps) {
             ))}
           </div>
         </fieldset>
-
-        <Button isPending={isPending} type="submit">
-          {isPending ? "Filling…" : "Fill the week"}
-        </Button>
       </div>
 
-      <Typography className="text-muted" type="body-xs">
-        Approved meals stay where they are. Everything else is replaced.
-      </Typography>
+      <div className="flex flex-wrap items-center gap-4 border-t border-separator pt-4">
+        <Button data-action-tier="primary" isPending={isPending} type="submit">
+          {isPending ? "Filling…" : "Fill the week"}
+        </Button>
+        <Typography color="muted" type="body-sm">
+          Approved meals stay where they are. Everything else is replaced.
+        </Typography>
+      </div>
     </form>
   );
 }

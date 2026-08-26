@@ -18,14 +18,17 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
 
   return (
     <div
-      className={`flex min-h-24 flex-col gap-1.5 rounded-2xl border p-3 ${
-        meal?.approved
-          ? "border-accent/60 bg-accent-soft/40"
-          : "border-border/80"
+      className={`flex flex-col gap-1.5 rounded-2xl p-3 ${
+        meal
+          ? meal.approved
+            ? "min-h-24 bg-accent-soft/40 ring-1 ring-accent/40"
+            : "min-h-24 bg-surface-secondary"
+          : "min-h-16 border border-dashed border-border"
       }`}
     >
       <Typography
-        className="text-muted capitalize"
+        className="capitalize"
+        color="muted"
         type="body-xs"
         weight="semibold"
       >
@@ -40,7 +43,7 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
           >
             {meal.recipe.title}
           </Link>
-          <Typography className="text-muted" type="body-xs">
+          <Typography color="muted" type="body-xs">
             {meal.recipe.prepMinutes} min
           </Typography>
           <MealControls
