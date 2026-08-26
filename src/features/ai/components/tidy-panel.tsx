@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { Button, Typography } from "@heroui/react";
+import { useActionState, useState } from "react";
+import { Sparkles } from "lucide-react";
+import { Button, Modal, Typography } from "@heroui/react";
 
 import { FormMessage } from "@/features/auth/components/form-message";
 
@@ -40,57 +41,84 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
     proposeTidy,
     {},
   );
+  const [dismissed, setDismissed] = useState(false);
   const before = new Map(items.map((item) => [item.id, item]));
   const proposed = (state.changes ?? [])
     .map((change) => ({ change, notes: describe(change, before) }))
     .filter(({ notes }) => notes.length > 0);
 
+  const answered = state.changes !== undefined || state.error !== undefined;
+
   return (
-    <section className="flex flex-col gap-4">
+    <>
       <form action={formAction}>
         <input name="listId" type="hidden" value={listId} />
-        <Button isPending={isPending} type="submit" variant="tertiary">
-          Tidy up
+        <Button
+          aria-label="Tidy up the list"
+          isIconOnly
+          isPending={isPending}
+          type="submit"
+          variant="ghost"
+        >
+          <Sparkles aria-hidden="true" className="size-5" />
         </Button>
       </form>
 
-      {state.error ? (
-        <FormMessage tone="error">{state.error}</FormMessage>
-      ) : null}
+      {/* The proposal is a decision, so it interrupts rather than appending below. */}
+      <Modal
+        isOpen={answered && !dismissed}
+        onOpenChange={() => setDismissed(true)}
+      >
+        <Modal.Backdrop variant="blur">
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-lg">
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>Tidy up</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="flex flex-col gap-4">
+                {state.error ? (
+                  <FormMessage tone="error">{state.error}</FormMessage>
+                ) : null}
 
-      {state.changes && proposed.length === 0 ? (
-        <Typography className="text-muted" type="body-sm">
-          The list is already tidy. Nothing to change.
-        </Typography>
-      ) : null}
+                {state.changes && proposed.length === 0 ? (
+                  <Typography color="muted" type="body-sm">
+                    The list is already tidy. Nothing to change.
+                  </Typography>
+                ) : null}
 
-      {proposed.length > 0 ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 p-4">
-          <Typography type="body-sm" weight="medium">
-            {proposed.length} {proposed.length === 1 ? "change" : "changes"}{" "}
-            proposed
-          </Typography>
+                {proposed.length > 0 ? (
+                  <>
+                    <Typography type="body-sm" weight="medium">
+                      {proposed.length}{" "}
+                      {proposed.length === 1 ? "change" : "changes"} proposed
+                    </Typography>
 
-          <ul className="flex list-none flex-col gap-2 p-0">
-            {proposed.map(({ change, notes }) => (
-              <li className="flex flex-col" key={change.id}>
-                <Typography type="body-sm">
-                  {change.name}
-                  {change.quantity > 1 ? ` × ${change.quantity}` : ""}
-                </Typography>
-                <Typography className="text-muted" type="body-xs">
-                  {notes.join(" · ")}
-                </Typography>
-              </li>
-            ))}
-          </ul>
+                    <ul className="flex list-none flex-col gap-2 p-0">
+                      {proposed.map(({ change, notes }) => (
+                        <li className="flex flex-col" key={change.id}>
+                          <Typography type="body-sm">
+                            {change.name}
+                            {change.quantity > 1 ? ` × ${change.quantity}` : ""}
+                          </Typography>
+                          <Typography color="muted" type="body-xs">
+                            {notes.join(" · ")}
+                          </Typography>
+                        </li>
+                      ))}
+                    </ul>
 
-          <form action={applyTidy}>
-            <input name="listId" type="hidden" value={listId} />
-            <Button type="submit">Apply these changes</Button>
-          </form>
-        </div>
-      ) : null}
-    </section>
+                    <form action={applyTidy}>
+                      <input name="listId" type="hidden" value={listId} />
+                      <Button type="submit">Apply these changes</Button>
+                    </form>
+                  </>
+                ) : null}
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </>
   );
 }

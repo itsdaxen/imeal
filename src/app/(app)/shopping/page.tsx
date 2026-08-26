@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Link, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
-import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { TidyPanel } from "@/features/ai/components/tidy-panel";
 import { getCurrentUser } from "@/features/auth/current-user";
@@ -11,6 +10,7 @@ import { listFriends } from "@/features/friends/friend.queries";
 import { resolveWeekStart } from "@/features/planner/week";
 import { AddItemForm } from "@/features/shopping/components/add-item-form";
 import { ListToolbar } from "@/features/shopping/components/list-toolbar";
+import { NewListButton } from "@/features/shopping/components/new-list-button";
 import { ShoppingItems } from "@/features/shopping/components/shopping-items";
 import {
   getShoppingList,
@@ -56,12 +56,12 @@ export default async function ShoppingPage({
   return (
     <main className="flex flex-col gap-6 pt-10 sm:pt-14">
       <header className="flex flex-col gap-1">
-        <Eyebrow tone="info">Shopping</Eyebrow>
         <Typography type="h1" weight="semibold">
           {list.listName}
         </Typography>
         <Typography color="muted" type="body">
           {list.remaining} {list.remaining === 1 ? "item" : "items"} left
+          {members.length > 1 ? ` · ${members.length} collaborators` : ""}
         </Typography>
       </header>
 
@@ -82,6 +82,7 @@ export default async function ShoppingPage({
               {entry.isOwn ? "" : " · shared"}
             </Link>
           ))}
+          <NewListButton />
         </nav>
 
         {list.listId ? (
@@ -92,7 +93,11 @@ export default async function ShoppingPage({
             listId={list.listId}
             listName={list.listName}
             members={members}
-          />
+          >
+            {list.items.length > 0 ? (
+              <TidyPanel items={list.items} listId={list.listId} />
+            ) : null}
+          </ListToolbar>
         ) : null}
       </div>
 
@@ -107,14 +112,7 @@ export default async function ShoppingPage({
                 list menu.
               </Typography>
             ) : (
-              <>
-                <ShoppingItems items={list.items} />
-                <TidyPanel
-                  items={list.items}
-                  key={list.listId}
-                  listId={list.listId}
-                />
-              </>
+              <ShoppingItems items={list.items} />
             )}
           </ContentCard>
         ) : (

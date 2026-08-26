@@ -1,7 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { useState } from "react";
-import { MoreHorizontal, Plus, Share2 } from "lucide-react";
+import { MoreHorizontal, Share2 } from "lucide-react";
 import {
   Button,
   Dropdown,
@@ -18,7 +20,6 @@ import {
   addListMember,
   addStaplesToList,
   clearShoppingList,
-  createShoppingList,
   deleteShoppingList,
   removeListMember,
   renameShoppingList,
@@ -27,6 +28,8 @@ import {
 type Member = { displayName: string; id: string };
 
 type ListToolbarProps = {
+  /** Controls that belong with the list, rendered before the built-in ones. */
+  children?: ReactNode;
   currentUserId: string;
   friends: Person[];
   isOwn: boolean;
@@ -36,6 +39,7 @@ type ListToolbarProps = {
 };
 
 export function ListToolbar({
+  children,
   currentUserId,
   friends,
   isOwn,
@@ -43,11 +47,13 @@ export function ListToolbar({
   listName,
   members,
 }: ListToolbarProps) {
-  const [open, setOpen] = useState<"none" | "share" | "new" | "rename">("none");
+  const [open, setOpen] = useState<"none" | "rename" | "share">("none");
   const memberIds = new Set(members.map((member) => member.id));
 
   return (
     <div className="flex shrink-0 items-center gap-1">
+      {children}
+
       <Button
         aria-label="Share this list"
         isIconOnly
@@ -55,15 +61,6 @@ export function ListToolbar({
         variant="ghost"
       >
         <Share2 aria-hidden="true" className="size-5" />
-      </Button>
-
-      <Button
-        aria-label="New list"
-        isIconOnly
-        onPress={() => setOpen("new")}
-        variant="ghost"
-      >
-        <Plus aria-hidden="true" className="size-5" />
       </Button>
 
       <Dropdown>
@@ -168,33 +165,6 @@ export function ListToolbar({
                     </Button>
                   </form>
                 ) : null}
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
-
-      <Modal isOpen={open === "new"} onOpenChange={() => setOpen("none")}>
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>New list</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <form action={createShoppingList} className="flex gap-2">
-                  <TextField className="flex-1" isRequired name="name">
-                    <Label>Name</Label>
-                    <Input
-                      autoFocus
-                      placeholder="Market, party, the other house"
-                    />
-                  </TextField>
-                  <Button className="self-end" type="submit">
-                    Create
-                  </Button>
-                </form>
               </Modal.Body>
             </Modal.Dialog>
           </Modal.Container>
