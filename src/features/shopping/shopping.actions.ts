@@ -138,6 +138,44 @@ export async function removeItem(formData: FormData) {
   revalidatePath("/shopping");
 }
 
+const itemEditSchema = itemSchema.extend({
+  name: z.string().trim().min(1, "Name the item.").max(200).optional(),
+  quantity: z.coerce.number().int().min(1).max(999).optional(),
+});
+
+export async function updateItem(formData: FormData) {
+  const name = formData.get("name");
+  const quantity = formData.get("quantity");
+  const parsed = itemEditSchema.safeParse({
+    itemId: formData.get("itemId"),
+    ...(name === null ? {} : { name }),
+    ...(quantity === null ? {} : { quantity }),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Check that value.");
+  }
+
+  const { itemId, ...changes } = parsed.data;
+
+  if (Object.keys(changes).length === 0) {
+    return;
+  }
+
+  const { supabase } = await requireUserId();
+  // RLS decides whether this row is reachable; a forged id updates nothing.
+  const { error } = await supabase
+    .from("shopping_items")
+    .update(changes)
+    .eq("id", itemId);
+
+  if (error) {
+    throw new Error(`Could not update the item: ${error.message}`);
+  }
+
+  revalidatePath("/shopping");
+}
+
 export async function addStaplesToList(formData: FormData) {
   const parsed = listSchema.safeParse({ listId: formData.get("listId") });
 
@@ -250,6 +288,32 @@ export async function createShoppingList(formData: FormData) {
 
   revalidatePath("/shopping");
   redirect(`/shopping?list=${list.id}`);
+}
+
+export async function renameShoppingList(formData: FormData) {
+  const parsed = listSchema
+    .extend(listNameSchema.shape)
+    .safeParse({ listId: formData.get("listId"), name: formData.get("name") });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Name the list.");
+  }
+
+  const { supabase, userId } = await requireUserId();
+  // Only the owner renames a list; a member sees the name they were shared with.
+  const { data: list, error } = await supabase
+    .from("shopping_lists")
+    .update({ name: parsed.data.name })
+    .eq("id", parsed.data.listId)
+    .eq("owner_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !list) {
+    throw new Error("Could not rename this list.");
+  }
+
+  revalidatePath("/shopping");
 }
 
 export async function deleteShoppingList(formData: FormData) {
