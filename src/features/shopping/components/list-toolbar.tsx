@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
@@ -122,6 +123,7 @@ export function ListToolbar({
       </Dropdown>
 
       <Modal isOpen={open === "share"} onOpenChange={() => setOpen("none")}>
+        <ControlledDialogTrigger />
         <Modal.Backdrop variant="blur">
           <Modal.Container>
             <Modal.Dialog className="sm:max-w-md">
@@ -172,6 +174,7 @@ export function ListToolbar({
       </Modal>
 
       <Modal isOpen={open === "rename"} onOpenChange={() => setOpen("none")}>
+        <ControlledDialogTrigger />
         <Modal.Backdrop variant="blur">
           <Modal.Container>
             <Modal.Dialog className="sm:max-w-md">

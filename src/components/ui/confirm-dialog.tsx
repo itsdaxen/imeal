@@ -2,11 +2,7 @@
 
 import { AlertDialog, Button } from "@heroui/react";
 
-// HeroUI's controlled AlertDialog root still requires a pressable trigger child to
-// satisfy its underlying React Aria DialogTrigger contract.
-function HiddenTrigger() {
-  return <Button aria-hidden="true" className="hidden" isDisabled />;
-}
+import { ControlledDialogTrigger } from "./controlled-dialog-trigger";
 
 type ConfirmDialogProps = {
   cancelLabel?: string;
@@ -31,7 +27,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog isOpen={isOpen} onOpenChange={onOpenChange}>
-      <HiddenTrigger />
+      <ControlledDialogTrigger />
       <AlertDialog.Backdrop>
         <AlertDialog.Container placement="auto" size="md">
           <AlertDialog.Dialog className="sm:max-w-md">

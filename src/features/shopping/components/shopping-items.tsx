@@ -16,6 +16,7 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
@@ -242,6 +243,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
       )}
 
       <Modal isOpen={editing !== null} onOpenChange={() => setEditing(null)}>
+        <ControlledDialogTrigger />
         <Modal.Backdrop variant="blur">
           <Modal.Container>
             <Modal.Dialog className="sm:max-w-sm">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 
+import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 
 import { createShoppingList } from "../shopping.actions";
@@ -24,6 +25,7 @@ export function NewListButton() {
       </IconButton>
 
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
+        <ControlledDialogTrigger />
         <Modal.Backdrop variant="blur">
           <Modal.Container>
             <Modal.Dialog className="sm:max-w-md">
