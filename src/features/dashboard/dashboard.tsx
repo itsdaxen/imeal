@@ -3,6 +3,7 @@ import { Card, cn, Link, ProgressCircle, Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
+import { MealArtwork } from "@/components/ui/meal-artwork";
 import { LinkCard } from "@/components/ui/link-card";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { PanelTitle } from "@/components/ui/panel-title";
@@ -10,36 +11,8 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 
-import {
-  getDashboardData,
-  type Artwork,
-  type DashboardData,
-} from "./dashboard.queries";
+import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
-
-// Placeholder artwork stands in until recipe images exist.
-const artworkClasses: Record<Artwork, string> = {
-  citrus:
-    "bg-[linear-gradient(150deg,oklch(0.58_0.12_72),oklch(0.82_0.10_88))]",
-  herb: "bg-[linear-gradient(150deg,oklch(0.48_0.10_158),oklch(0.74_0.08_152))]",
-  tomato:
-    "bg-[linear-gradient(150deg,oklch(0.50_0.15_28),oklch(0.74_0.12_44))]",
-};
-
-function MealArtwork({
-  artwork,
-  className,
-}: {
-  artwork: Artwork;
-  className?: string;
-}) {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn(artworkClasses[artwork], className)}
-    />
-  );
-}
 
 function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (

@@ -1,4 +1,11 @@
-import { Button, Input, Label, TextField } from "@heroui/react";
+import {
+  Button,
+  Input,
+  Label,
+  ListBox,
+  Select,
+  TextField,
+} from "@heroui/react";
 
 import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
 
@@ -24,20 +31,35 @@ export function RecipeSearch({ mealTag, search }: RecipeSearchProps) {
       </TextField>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="mealTag">Meal</Label>
-        <select
-          className="h-10 rounded-xl border border-border bg-surface px-3 text-sm"
-          defaultValue={mealTag ?? ""}
-          id="mealTag"
+        <Label id="mealTag">Meal</Label>
+        <Select
+          aria-labelledby="mealTag"
+          className="w-40"
+          defaultSelectedKey={mealTag ?? "any"}
           name="mealTag"
         >
-          <option value="">Any</option>
-          {MEAL_SLOTS.map((slot) => (
-            <option className="capitalize" key={slot} value={slot}>
-              {slot}
-            </option>
-          ))}
-        </select>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              <ListBox.Item id="any" textValue="Any">
+                Any
+              </ListBox.Item>
+              {MEAL_SLOTS.map((slot) => (
+                <ListBox.Item
+                  className="capitalize"
+                  id={slot}
+                  key={slot}
+                  textValue={slot}
+                >
+                  {slot}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
       </div>
 
       <Button type="submit" variant="tertiary">

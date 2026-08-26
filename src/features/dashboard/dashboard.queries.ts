@@ -7,12 +7,10 @@ import {
 import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { getShoppingList } from "@/features/shopping/shopping.queries";
+import { artworkFor, type Artwork } from "@/components/ui/meal-artwork";
 
 const RECENT_RECIPE_COUNT = 3;
 const NEXT_SHOPPING_ITEM_COUNT = 6;
-const ARTWORKS = ["tomato", "citrus", "herb"] as const;
-
-export type Artwork = (typeof ARTWORKS)[number];
 
 export type DashboardData = {
   weekStart: string;
@@ -54,16 +52,6 @@ export type DashboardData = {
     artwork: Artwork;
   }>;
 };
-
-// Stable per recipe so a card does not change colour between renders.
-function artworkFor(id: string): Artwork {
-  const sum = [...id].reduce(
-    (total, character) => total + character.charCodeAt(0),
-    0,
-  );
-
-  return ARTWORKS[sum % ARTWORKS.length];
-}
 
 function slotRank(slot: MealSlot) {
   return MEAL_SLOTS.indexOf(slot);

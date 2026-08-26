@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Card } from "@heroui/react";
 
 import { LinkCard } from "@/components/ui/link-card";
+import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 
 import type { RecipeSummary } from "../recipe.queries";
@@ -9,8 +10,8 @@ import type { RecipeSummary } from "../recipe.queries";
 export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
   return (
     <LinkCard className="h-full hover:shadow-lg" density="compact">
-      {recipe.image_url ? (
-        <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+      <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+        {recipe.image_url ? (
           <Image
             alt=""
             className="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
@@ -19,8 +20,13 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
             src={recipe.image_url}
             width={256}
           />
-        </Card.Content>
-      ) : null}
+        ) : (
+          <MealArtwork
+            artwork={artworkFor(recipe.id)}
+            className="size-full transition-transform duration-300 motion-safe:group-hover:scale-105"
+          />
+        )}
+      </Card.Content>
 
       <Card.Header className="gap-2">
         <TagList label="Meals this suits" tags={recipe.meal_tags} />
