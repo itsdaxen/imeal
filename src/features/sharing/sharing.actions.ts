@@ -6,7 +6,8 @@ import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const shareSchema = z.object({ recipeId: z.uuid(), friendId: z.uuid() });
+const recipeSchema = z.object({ recipeId: z.uuid() });
+const shareSchema = recipeSchema.extend({ friendId: z.uuid() });
 
 async function requireUserId() {
   const supabase = await createSupabaseServerClient();
@@ -66,9 +67,11 @@ export async function unshareRecipe(formData: FormData) {
 }
 
 export async function dropSharedRecipe(formData: FormData) {
-  const recipeId = z.uuid().safeParse(formData.get("recipeId"));
+  const parsed = recipeSchema.safeParse({
+    recipeId: formData.get("recipeId"),
+  });
 
-  if (!recipeId.success) {
+  if (!parsed.success) {
     return;
   }
 
@@ -77,8 +80,89 @@ export async function dropSharedRecipe(formData: FormData) {
   await supabase
     .from("recipe_shares")
     .delete()
-    .eq("recipe_id", recipeId.data)
+    .eq("recipe_id", parsed.data.recipeId)
     .eq("shared_with", userId);
 
   revalidatePath("/recipes/shared");
+}
+
+export async function copySharedRecipe(formData: FormData) {
+  const parsed = recipeSchema.safeParse({
+    recipeId: formData.get("recipeId"),
+  });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { data: share, error: shareError } = await supabase
+    .from("recipe_shares")
+    .select(
+      `recipes (
+        id, title, ingredients, steps, tip, image_url,
+        prep_minutes, servings, meal_tags, visibility, status
+      )`,
+    )
+    .eq("recipe_id", parsed.data.recipeId)
+    .eq("shared_with", userId)
+    .maybeSingle();
+  const source = share?.recipes;
+
+  if (shareError) {
+    throw new Error("Could not read the shared recipe. Try again.");
+  }
+
+  if (
+    !source ||
+    source.visibility !== "private" ||
+    source.status !== "active"
+  ) {
+    return;
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from("recipes")
+    .select("id")
+    .eq("owner_id", userId)
+    .eq("source_recipe_id", source.id)
+    .eq("visibility", "private")
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (existingError) {
+    throw new Error("Could not check your recipes. Try again.");
+  }
+
+  if (existing) {
+    redirect(`/recipes/${existing.id}`);
+  }
+
+  const { data: copied, error: copyError } = await supabase
+    .from("recipes")
+    .insert({
+      owner_id: userId,
+      title: source.title,
+      ingredients: source.ingredients,
+      steps: source.steps,
+      tip: source.tip,
+      image_url: source.image_url,
+      prep_minutes: source.prep_minutes,
+      servings: source.servings,
+      meal_tags: source.meal_tags,
+      source_recipe_id: source.id,
+    })
+    .select("id")
+    .single();
+
+  if (copyError) {
+    throw new Error("Could not save the recipe. Try again.");
+  }
+
+  revalidatePath("/recipes");
+  revalidatePath("/recipes/shared");
+
+  if (copied) {
+    redirect(`/recipes/${copied.id}`);
+  }
 }

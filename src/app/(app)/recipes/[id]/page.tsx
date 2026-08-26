@@ -10,12 +10,14 @@ import { listFriends } from "@/features/friends/friend.queries";
 import { DeleteRecipeForm } from "@/features/recipes/components/delete-recipe-form";
 import { archiveRecipe } from "@/features/recipes/recipe.actions";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
+import { saveCatalogRecipe } from "@/features/catalog/catalog.actions";
 import { Button } from "@heroui/react";
 import { getRecipe } from "@/features/recipes/recipe.queries";
 import { SuggestForm } from "@/features/catalog/components/suggest-form";
 import { listMySuggestions } from "@/features/catalog/catalog.queries";
 import { SharePanel } from "@/features/sharing/components/share-panel";
 import { listShareRecipients } from "@/features/sharing/sharing.queries";
+import { copySharedRecipe } from "@/features/sharing/sharing.actions";
 
 type RecipePageProps = { params: Promise<{ id: string }> };
 
@@ -42,6 +44,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   // A shared recipe is readable but not the recipient's to change.
   const isOwner = Boolean(user && recipe.owner_id === user.id);
+  const isCatalogRecipe = recipe.owner_id === null;
   const [friends, recipientIds, suggestions] = isOwner
     ? await Promise.all([
         listFriends(),
@@ -89,10 +92,22 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
               <DeleteRecipeForm id={recipe.id} />
             </>
-          ) : isAdmin ? (
+          ) : isCatalogRecipe && isAdmin ? (
             <Link href={`/recipes/${recipe.id}/edit`}>Edit as moderator</Link>
+          ) : isCatalogRecipe ? (
+            <form action={saveCatalogRecipe}>
+              <input name="recipeId" type="hidden" value={recipe.id} />
+              <Button size="sm" type="submit" variant="tertiary">
+                Save a copy
+              </Button>
+            </form>
           ) : (
-            <span className="text-sm text-muted">Shared with you</span>
+            <form action={copySharedRecipe}>
+              <input name="recipeId" type="hidden" value={recipe.id} />
+              <Button size="sm" type="submit" variant="tertiary">
+                Save a copy
+              </Button>
+            </form>
           )}
         </div>
       </header>

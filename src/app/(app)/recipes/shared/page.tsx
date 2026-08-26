@@ -4,7 +4,10 @@ import { Button, Card, Link, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { dropSharedRecipe } from "@/features/sharing/sharing.actions";
+import {
+  copySharedRecipe,
+  dropSharedRecipe,
+} from "@/features/sharing/sharing.actions";
 import { listRecipesSharedWithMe } from "@/features/sharing/sharing.queries";
 
 export const metadata: Metadata = { title: "Shared with you" };
@@ -20,8 +23,8 @@ export default async function SharedRecipesPage() {
             Shared with you
           </Typography>
           <Typography className="text-muted" type="body-sm">
-            Recipes your friends have shared. You can cook them, but not change
-            them.
+            Cook from a friend&apos;s recipe as-is, or save your own copy to
+            change later.
           </Typography>
         </div>
         <Link href="/recipes">Your recipes</Link>
@@ -48,17 +51,25 @@ export default async function SharedRecipesPage() {
                   </Typography>
                 </Card.Header>
 
-                <Card.Footer className="justify-between">
+                <Card.Footer className="flex-wrap justify-between gap-3">
                   <Typography className="text-muted" type="body-sm">
                     {recipe.prepMinutes} min · serves {recipe.servings}
                   </Typography>
 
-                  <form action={dropSharedRecipe}>
-                    <input name="recipeId" type="hidden" value={recipe.id} />
-                    <Button size="sm" type="submit" variant="ghost">
-                      Remove
-                    </Button>
-                  </form>
+                  <div className="flex items-center gap-1">
+                    <form action={copySharedRecipe}>
+                      <input name="recipeId" type="hidden" value={recipe.id} />
+                      <Button size="sm" type="submit" variant="tertiary">
+                        Save a copy
+                      </Button>
+                    </form>
+                    <form action={dropSharedRecipe}>
+                      <input name="recipeId" type="hidden" value={recipe.id} />
+                      <Button size="sm" type="submit" variant="ghost">
+                        Remove
+                      </Button>
+                    </form>
+                  </div>
                 </Card.Footer>
               </ContentCard>
             </li>
