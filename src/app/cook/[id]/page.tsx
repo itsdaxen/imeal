@@ -26,7 +26,7 @@ export default async function CookPage({ params }: CookPageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-8 px-5 py-8 sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-2">
         <Link className="text-sm" href={`/recipes/${recipe.id}`}>
           Leave cooking mode
@@ -39,7 +39,11 @@ export default async function CookPage({ params }: CookPageProps) {
         </Typography>
       </header>
 
-      <CookingSession ingredients={recipe.ingredients} steps={recipe.steps} />
+      <CookingSession
+        ingredients={recipe.ingredients}
+        steps={recipe.steps}
+        tip={recipe.tip}
+      />
     </main>
   );
 }
