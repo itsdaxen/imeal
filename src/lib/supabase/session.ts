@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/auth/callback",
   "/privacy",
   "/terms",
+  "/robots.txt",
 ];
 
 function isPublic(pathname: string) {

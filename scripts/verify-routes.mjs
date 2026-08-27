@@ -32,6 +32,7 @@ const SIGNED_OUT = [
   ["/sign-in", 200],
   ["/sign-up", 200],
   ["/forgot-password", 200],
+  ["/robots.txt", 200],
   ["/reset-password", 307],
 ];
 
