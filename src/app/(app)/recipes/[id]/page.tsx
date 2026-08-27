@@ -4,6 +4,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Link, Typography } from "@heroui/react";
 
+import { ActionLink } from "@/components/ui/action";
+import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { listFriends } from "@/features/friends/friend.queries";
@@ -18,6 +20,8 @@ import { listMySuggestions } from "@/features/catalog/catalog.queries";
 import { SharePanel } from "@/features/sharing/components/share-panel";
 import { listShareRecipients } from "@/features/sharing/sharing.queries";
 import { copySharedRecipe } from "@/features/sharing/sharing.actions";
+import { PlanRecipeDialog } from "@/features/planner/components/plan-recipe-dialog";
+import { currentWeekStart, weekDays } from "@/features/planner/week";
 
 type RecipePageProps = { params: Promise<{ id: string }> };
 
@@ -55,84 +59,110 @@ export default async function RecipePage({ params }: RecipePageProps) {
   const suggestion = suggestions.find((item) => item.recipe.id === recipe.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
-      {recipe.image_url ? (
-        <Image
-          alt=""
-          className="aspect-video w-full rounded-3xl object-cover"
-          height={420}
-          priority
-          sizes="(min-width: 768px) 48rem, 100vw"
-          src={recipe.image_url}
-          width={768}
-        />
-      ) : null}
-
-      <header className="flex flex-col gap-3">
-        <TagList label="Meals this suits" tags={recipe.meal_tags} />
-        <Typography type="h1" weight="semibold">
-          {recipe.title}
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          {recipe.prep_minutes} min · serves {recipe.servings}
-        </Typography>
-
-        <div className="flex items-center gap-4">
-          <Link href={`/cook/${recipe.id}`}>Cook this</Link>
-          {isOwner ? (
-            <>
-              <Link href={`/recipes/${recipe.id}/edit`}>Edit</Link>
-
-              <form action={archiveRecipe}>
-                <input name="recipeId" type="hidden" value={recipe.id} />
-                <Button size="sm" type="submit" variant="ghost">
-                  Archive
-                </Button>
-              </form>
-
-              <DeleteRecipeForm id={recipe.id} />
-            </>
-          ) : isCatalogRecipe && isAdmin ? (
-            <Link href={`/recipes/${recipe.id}/edit`}>Edit as moderator</Link>
-          ) : isCatalogRecipe ? (
-            <form action={saveCatalogRecipe}>
-              <input name="recipeId" type="hidden" value={recipe.id} />
-              <Button size="sm" type="submit" variant="tertiary">
-                Save a copy
-              </Button>
-            </form>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+      <div className="grid overflow-hidden rounded-3xl border border-border/80 bg-surface md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
+        <div className="min-h-64 overflow-hidden md:min-h-[30rem]">
+          {recipe.image_url ? (
+            <Image
+              alt=""
+              className="size-full object-cover"
+              height={640}
+              priority
+              sizes="(min-width: 768px) 34rem, 100vw"
+              src={recipe.image_url}
+              width={720}
+            />
           ) : (
-            <form action={copySharedRecipe}>
-              <input name="recipeId" type="hidden" value={recipe.id} />
-              <Button size="sm" type="submit" variant="tertiary">
-                Save a copy
-              </Button>
-            </form>
+            <MealArtwork
+              artwork={artworkFor(recipe.id)}
+              className="size-full"
+            />
           )}
         </div>
-      </header>
 
-      <section className="flex flex-col gap-3">
-        <Typography type="h2" weight="semibold">
-          Ingredients
-        </Typography>
-        <ul className="flex flex-col gap-1.5 pl-5">
-          {recipe.ingredients.map((ingredient) => (
-            <li key={ingredient}>{ingredient}</li>
-          ))}
-        </ul>
-      </section>
+        <header className="flex flex-col justify-center gap-5 p-6 sm:p-8 lg:p-10">
+          <TagList label="Meals this suits" tags={recipe.meal_tags} />
+          <Typography type="h1" weight="semibold">
+            {recipe.title}
+          </Typography>
+          <Typography className="text-muted" type="body-sm">
+            {recipe.prep_minutes} min · serves {recipe.servings}
+          </Typography>
 
-      <section className="flex flex-col gap-3">
-        <Typography type="h2" weight="semibold">
-          Steps
-        </Typography>
-        <ol className="flex flex-col gap-3 pl-5">
-          {recipe.steps.map((step, index) => (
-            <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
-          ))}
-        </ol>
-      </section>
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {isOwner ? (
+                <PlanRecipeDialog
+                  days={weekDays(currentWeekStart())}
+                  recipeId={recipe.id}
+                  slots={recipe.meal_tags}
+                  weekStart={currentWeekStart()}
+                />
+              ) : null}
+              <ActionLink
+                href={`/cook/${recipe.id}`}
+                tier={isOwner ? "neutral" : "primary"}
+              >
+                Cook this
+              </ActionLink>
+            </div>
+            {isOwner ? (
+              <div className="flex w-full flex-wrap items-center gap-4 border-t border-separator pt-4">
+                <Link href={`/recipes/${recipe.id}/edit`}>Edit</Link>
+
+                <form action={archiveRecipe}>
+                  <input name="recipeId" type="hidden" value={recipe.id} />
+                  <Button size="sm" type="submit" variant="ghost">
+                    Archive
+                  </Button>
+                </form>
+
+                <DeleteRecipeForm id={recipe.id} />
+              </div>
+            ) : isCatalogRecipe && isAdmin ? (
+              <Link href={`/recipes/${recipe.id}/edit`}>Edit as moderator</Link>
+            ) : isCatalogRecipe ? (
+              <form action={saveCatalogRecipe}>
+                <input name="recipeId" type="hidden" value={recipe.id} />
+                <Button size="sm" type="submit" variant="tertiary">
+                  Save a copy
+                </Button>
+              </form>
+            ) : (
+              <form action={copySharedRecipe}>
+                <input name="recipeId" type="hidden" value={recipe.id} />
+                <Button size="sm" type="submit" variant="tertiary">
+                  Save a copy
+                </Button>
+              </form>
+            )}
+          </div>
+        </header>
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-12">
+        <section className="flex flex-col gap-4 rounded-3xl bg-surface-secondary p-6 sm:p-8">
+          <Typography type="h2" weight="semibold">
+            Ingredients
+          </Typography>
+          <ul className="flex flex-col gap-1.5 pl-5">
+            {recipe.ingredients.map((ingredient) => (
+              <li key={ingredient}>{ingredient}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="flex flex-col gap-4 p-1 sm:p-2">
+          <Typography type="h2" weight="semibold">
+            Steps
+          </Typography>
+          <ol className="flex flex-col gap-5 pl-6">
+            {recipe.steps.map((step, index) => (
+              <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
+            ))}
+          </ol>
+        </section>
+      </div>
 
       {recipe.tip ? (
         <section className="flex flex-col gap-2">
