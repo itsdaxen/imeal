@@ -13,11 +13,11 @@ type WeekGridProps = {
 
 export function WeekGrid({ plan, weekStart }: WeekGridProps) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-7 xl:gap-3">
       {weekDays(weekStart).map((day) => (
-        <ContentCard density="compact" key={day.date}>
+        <ContentCard className="h-full" density="compact" key={day.date}>
           <Card.Header>
-            <Typography type="h2" weight="semibold">
+            <Typography className="xl:text-lg" type="h2" weight="semibold">
               {day.label}
             </Typography>
             <Typography className="text-muted" type="body-xs">
@@ -26,7 +26,7 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
           </Card.Header>
 
           <Card.Content>
-            <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-1">
               {plan.enabledSlots.map((slot) => (
                 <SlotCell
                   dayIndex={day.index}

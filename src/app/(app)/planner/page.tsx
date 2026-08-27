@@ -62,31 +62,59 @@ export default async function PlannerPage({
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
 
-      <section className="flex flex-col gap-4 rounded-3xl border border-border/80 p-4 sm:p-5">
-        <Typography type="h2" weight="semibold">
-          Fill the week
-        </Typography>
-        <FillWeekForm enabledSlots={plan.enabledSlots} weekStart={weekStart} />
-      </section>
-
-      {plan.meals.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <form action={approveWholeWeek}>
-            <input name="weekStart" type="hidden" value={weekStart} />
-            <Button size="sm" type="submit" variant="tertiary">
-              Approve the whole week
-            </Button>
-          </form>
-
-          <ConfirmActionForm
-            action={deleteWeekPlan}
-            confirmLabel="Empty the week"
-            description="Every meal in this week goes, approved ones included, and anyone you shared it with loses their copy of the invitation."
-            fields={{ weekStart }}
-            heading="Empty this week?"
-            label="Empty the week"
+      <details
+        className="group rounded-3xl border border-border/80 bg-surface"
+        open={plan.meals.length === 0}
+      >
+        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 marker:hidden sm:px-6 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block font-semibold">Fill automatically</span>
+            <span className="block text-sm text-muted">
+              Build a fresh week from your recipe collection.
+            </span>
+          </span>
+          <span
+            aria-hidden="true"
+            className="text-xl text-muted transition-transform group-open:rotate-45 motion-reduce:transition-none"
+          >
+            +
+          </span>
+        </summary>
+        <div className="border-t border-separator px-5 py-5 sm:px-6">
+          <FillWeekForm
+            enabledSlots={plan.enabledSlots}
+            weekStart={weekStart}
           />
         </div>
+      </details>
+
+      {plan.meals.length > 0 ? (
+        <section
+          aria-label="Week actions"
+          className="flex flex-wrap items-center justify-between gap-3"
+        >
+          <Typography className="text-muted" type="body-sm">
+            {plan.meals.filter((meal) => meal.approved).length} of{" "}
+            {plan.meals.length} planned meals approved
+          </Typography>
+          <div className="flex flex-wrap items-center gap-3">
+            <form action={approveWholeWeek}>
+              <input name="weekStart" type="hidden" value={weekStart} />
+              <Button size="sm" type="submit" variant="tertiary">
+                Approve the whole week
+              </Button>
+            </form>
+
+            <ConfirmActionForm
+              action={deleteWeekPlan}
+              confirmLabel="Empty the week"
+              description="Every meal in this week goes, approved ones included, and anyone you shared it with loses their copy of the invitation."
+              fields={{ weekStart }}
+              heading="Empty this week?"
+              label="Empty the week"
+            />
+          </div>
+        </section>
       ) : null}
 
       <WeekGrid plan={plan} weekStart={weekStart} />
