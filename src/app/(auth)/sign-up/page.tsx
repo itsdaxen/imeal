@@ -8,14 +8,19 @@ export const metadata: Metadata = { title: "Create account" };
 
 export default function SignUpPage() {
   return (
-    <section className="flex flex-col gap-6">
-      <Typography type="h1" weight="semibold">
-        Create your account
-      </Typography>
+    <section className="flex flex-col gap-7">
+      <div className="space-y-2">
+        <Typography type="h1" weight="semibold">
+          Create your account
+        </Typography>
+        <Typography className="text-muted" type="body-sm">
+          Keep your recipes, weekly plans, and shopping lists in one calm place.
+        </Typography>
+      </div>
 
       <SignUpForm />
 
-      <Typography type="body-sm">
+      <Typography className="border-t border-separator pt-6" type="body-sm">
         Already have an account? <Link href="/sign-in">Sign in</Link>
       </Typography>
     </section>

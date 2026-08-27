@@ -38,7 +38,7 @@ export function SignUpForm() {
         <Description>At least 8 characters.</Description>
       </TextField>
 
-      <Button isPending={isPending} type="submit">
+      <Button className="w-full" isPending={isPending} type="submit">
         {isPending ? "Creating account…" : "Create account"}
       </Button>
     </form>

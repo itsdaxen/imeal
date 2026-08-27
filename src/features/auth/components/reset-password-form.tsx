@@ -29,7 +29,7 @@ export function ResetPasswordForm() {
         <Input autoComplete="new-password" />
       </TextField>
 
-      <Button isPending={isPending} type="submit">
+      <Button className="w-full" isPending={isPending} type="submit">
         {isPending ? "Saving…" : "Set the new password"}
       </Button>
     </form>

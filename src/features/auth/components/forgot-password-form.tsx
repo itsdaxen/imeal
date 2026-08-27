@@ -27,7 +27,7 @@ export function ForgotPasswordForm() {
         <Input autoComplete="email" placeholder="you@example.com" />
       </TextField>
 
-      <Button isPending={isPending} type="submit">
+      <Button className="w-full" isPending={isPending} type="submit">
         {isPending ? "Sending…" : "Send a reset link"}
       </Button>
     </form>

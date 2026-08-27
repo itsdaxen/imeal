@@ -30,7 +30,7 @@ export function SignInForm({ next }: { next?: string }) {
         <Input autoComplete="current-password" />
       </TextField>
 
-      <Button isPending={isPending} type="submit">
+      <Button className="w-full" isPending={isPending} type="submit">
         {isPending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
