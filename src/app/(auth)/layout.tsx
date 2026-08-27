@@ -4,7 +4,7 @@ import { Link } from "@heroui/react";
 import { Check } from "lucide-react";
 import Image from "next/image";
 
-import authKitchen from "../../../public/auth-kitchen.jpg";
+import authKitchen from "../../../public/auth-kitchen.webp";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -43,8 +43,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           alt="A colorful grain bowl and vegetables ready for the week"
           className="object-cover"
           fill
+          loading="eager"
           placeholder="blur"
-          priority
           sizes="(min-width: 1024px) 55vw, 0px"
           src={authKitchen}
         />
