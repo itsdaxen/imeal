@@ -8,6 +8,7 @@ export type CatalogRecipe = {
   prepMinutes: number;
   servings: number;
   mealTags: MealSlot[];
+  imageUrl: string | null;
 };
 
 export type Suggestion = {
@@ -28,7 +29,7 @@ export async function listCatalog(search?: string): Promise<CatalogRecipe[]> {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("recipes")
-    .select("id, title, prep_minutes, servings, meal_tags")
+    .select("id, title, prep_minutes, servings, meal_tags, image_url")
     .eq("visibility", "public")
     .eq("status", "active")
     .order("title", { ascending: true });
@@ -54,6 +55,7 @@ export async function listCatalog(search?: string): Promise<CatalogRecipe[]> {
     prepMinutes: recipe.prep_minutes,
     servings: recipe.servings,
     mealTags: recipe.meal_tags,
+    imageUrl: recipe.image_url,
   }));
 }
 

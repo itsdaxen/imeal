@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import {
   Button,
   Card,
@@ -11,6 +12,7 @@ import {
 } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import {
   saveCatalogRecipe,
@@ -79,7 +81,24 @@ export default async function CatalogPage({
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <li key={recipe.id}>
-              <ContentCard density="compact">
+              <ContentCard className="h-full" density="compact">
+                <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+                  {recipe.imageUrl ? (
+                    <Image
+                      alt=""
+                      className="size-full object-cover"
+                      height={192}
+                      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+                      src={recipe.imageUrl}
+                      width={320}
+                    />
+                  ) : (
+                    <MealArtwork
+                      artwork={artworkFor(recipe.id)}
+                      className="size-full"
+                    />
+                  )}
+                </Card.Content>
                 <Card.Header>
                   <TagList label="Meals this suits" tags={recipe.mealTags} />
                   <Typography type="h2" weight="semibold">
