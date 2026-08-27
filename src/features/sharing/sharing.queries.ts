@@ -8,6 +8,7 @@ export type SharedRecipe = {
   prepMinutes: number;
   servings: number;
   mealTags: MealSlot[];
+  imageUrl: string | null;
   sharedBy: string;
 };
 
@@ -24,7 +25,7 @@ export async function listRecipesSharedWithMe(): Promise<SharedRecipe[]> {
   const { data, error } = await supabase
     .from("recipe_shares")
     .select(
-      `recipes (id, title, prep_minutes, servings, meal_tags),
+      `recipes (id, title, prep_minutes, servings, meal_tags, image_url),
        owner:profiles!recipe_shares_shared_by_fkey (display_name)`,
     )
     .eq("shared_with", user.id);
@@ -41,6 +42,7 @@ export async function listRecipesSharedWithMe(): Promise<SharedRecipe[]> {
       prepMinutes: row.recipes.prep_minutes,
       servings: row.recipes.servings,
       mealTags: row.recipes.meal_tags,
+      imageUrl: row.recipes.image_url,
       sharedBy: row.owner?.display_name?.trim() || "A friend",
     }));
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
-import { Typography } from "@heroui/react";
+import { Link, Typography } from "@heroui/react";
 
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { getCurrentUser } from "@/features/auth/current-user";
@@ -35,10 +35,18 @@ export default async function EditRecipePage({
   const updateThisRecipe = updateRecipe.bind(null, recipe.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-8 pt-10 sm:pt-14">
-      <Typography type="h1" weight="semibold">
-        Edit recipe
-      </Typography>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex max-w-2xl flex-col gap-2">
+          <Typography type="h1" weight="semibold">
+            Edit recipe
+          </Typography>
+          <Typography className="text-muted" type="body">
+            Keep the version you plan and cook accurate.
+          </Typography>
+        </div>
+        <Link href={`/recipes/${recipe.id}`}>Back to recipe</Link>
+      </header>
 
       <RecipeForm
         action={updateThisRecipe}

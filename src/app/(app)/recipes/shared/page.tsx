@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import { Button, Card, Link, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
+import { TagList } from "@/components/ui/tag-list";
+import { ActionLink } from "@/components/ui/action";
 import {
   copySharedRecipe,
   dropSharedRecipe,
@@ -31,15 +35,48 @@ export default async function SharedRecipesPage() {
       </header>
 
       {recipes.length === 0 ? (
-        <Typography className="text-muted" type="body">
-          Nothing yet. When a friend shares a recipe it will appear here.
-        </Typography>
+        <section className="flex flex-col items-start gap-4 rounded-3xl border border-dashed border-border p-7 sm:p-10">
+          <div className="flex max-w-xl flex-col gap-2">
+            <Typography type="h2" weight="semibold">
+              Your shared cookbook starts with a friend
+            </Typography>
+            <Typography className="text-muted" type="body">
+              Add people you cook with, then recipes they send you will collect
+              here until you remove them.
+            </Typography>
+          </div>
+          <ActionLink href="/friends" tier="primary">
+            Find friends
+          </ActionLink>
+        </section>
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <li key={recipe.id}>
-              <ContentCard density="compact">
-                <Card.Header>
+              <ContentCard className="h-full overflow-hidden" density="flush">
+                <Link
+                  aria-label={`Open ${recipe.title}`}
+                  className="block h-40 w-full flex-none overflow-hidden"
+                  href={`/recipes/${recipe.id}`}
+                >
+                  {recipe.imageUrl ? (
+                    <Image
+                      alt=""
+                      className="size-full object-cover transition-transform duration-300 hover:scale-105 motion-reduce:transition-none"
+                      height={192}
+                      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+                      src={recipe.imageUrl}
+                      width={352}
+                    />
+                  ) : (
+                    <MealArtwork
+                      artwork={artworkFor(recipe.id)}
+                      className="size-full transition-transform duration-300 hover:scale-105 motion-reduce:transition-none"
+                    />
+                  )}
+                </Link>
+
+                <Card.Header className="gap-2 px-5 pt-5">
                   <Eyebrow>From {recipe.sharedBy}</Eyebrow>
                   <Typography type="h2" weight="semibold">
                     <Link
@@ -49,14 +86,15 @@ export default async function SharedRecipesPage() {
                       {recipe.title}
                     </Link>
                   </Typography>
-                </Card.Header>
-
-                <Card.Footer className="flex-wrap justify-between gap-3">
+                  <TagList label="Meals this suits" tags={recipe.mealTags} />
                   <Typography className="text-muted" type="body-sm">
                     {recipe.prepMinutes} min · serves {recipe.servings}
                   </Typography>
+                </Card.Header>
 
-                  <div className="flex items-center gap-1">
+                <Card.Footer className="mt-auto flex-wrap justify-between gap-2 px-5 pb-5">
+                  <Link href={`/recipes/${recipe.id}`}>View recipe</Link>
+                  <div className="flex flex-wrap items-center gap-1">
                     <form action={copySharedRecipe}>
                       <input name="recipeId" type="hidden" value={recipe.id} />
                       <Button size="sm" type="submit" variant="tertiary">
