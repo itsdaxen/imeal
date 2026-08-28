@@ -93,7 +93,40 @@ export function CookingSession({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-      <div className="flex flex-col gap-10">
+      <ContentCard
+        className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
+        density="compact"
+      >
+        <Card.Header className="flex-row items-center gap-2">
+          <Clock3 aria-hidden="true" className="size-4 text-accent" />
+          <Typography type="h2" weight="semibold">
+            Elapsed time
+          </Typography>
+        </Card.Header>
+        <Card.Content className="gap-4">
+          <time
+            aria-live="off"
+            className="font-mono text-4xl font-semibold tracking-tight tabular-nums"
+          >
+            {formatElapsed(elapsedSeconds)}
+          </time>
+          <div className="flex gap-2">
+            <Button onPress={toggleTimer} size="sm" variant="tertiary">
+              {isRunning ? "Pause" : elapsedSeconds > 0 ? "Resume" : "Start"}
+            </Button>
+            <Button
+              isDisabled={elapsedSeconds === 0 && !isRunning}
+              onPress={resetTimer}
+              size="sm"
+              variant="ghost"
+            >
+              Reset
+            </Button>
+          </div>
+        </Card.Content>
+      </ContentCard>
+
+      <div className="flex flex-col gap-10 lg:col-start-1 lg:row-span-2 lg:row-start-1">
         <section className="flex flex-col gap-4">
           <Typography type="h2" weight="semibold">
             Ingredients
@@ -171,37 +204,7 @@ export function CookingSession({
         </section>
       </div>
 
-      <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
-        <ContentCard density="compact">
-          <Card.Header className="flex-row items-center gap-2">
-            <Clock3 aria-hidden="true" className="size-4 text-accent" />
-            <Typography type="h2" weight="semibold">
-              Elapsed time
-            </Typography>
-          </Card.Header>
-          <Card.Content className="gap-4">
-            <time
-              aria-live="off"
-              className="font-mono text-4xl font-semibold tracking-tight tabular-nums"
-            >
-              {formatElapsed(elapsedSeconds)}
-            </time>
-            <div className="flex gap-2">
-              <Button onPress={toggleTimer} size="sm" variant="tertiary">
-                {isRunning ? "Pause" : elapsedSeconds > 0 ? "Resume" : "Start"}
-              </Button>
-              <Button
-                isDisabled={elapsedSeconds === 0 && !isRunning}
-                onPress={resetTimer}
-                size="sm"
-                variant="ghost"
-              >
-                Reset
-              </Button>
-            </div>
-          </Card.Content>
-        </ContentCard>
-
+      <aside className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <ContentCard density="compact">
           <Card.Header>
             <Typography type="h2" weight="semibold">
