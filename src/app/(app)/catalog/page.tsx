@@ -118,7 +118,11 @@ export default async function CatalogPage({
 
                   <form action={saveCatalogRecipe}>
                     <input name="recipeId" type="hidden" value={recipe.id} />
-                    <Button size="sm" type="submit" variant="tertiary">
+                    <Button
+                      className="min-h-11"
+                      type="submit"
+                      variant="tertiary"
+                    >
                       Save a copy
                     </Button>
                   </form>
@@ -158,7 +162,7 @@ export default async function CatalogPage({
                       type="hidden"
                       value={suggestion.id}
                     />
-                    <Button size="sm" type="submit" variant="ghost">
+                    <Button className="min-h-11" type="submit" variant="ghost">
                       Withdraw
                     </Button>
                   </form>

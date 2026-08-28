@@ -7,12 +7,12 @@ import {
   Card,
   Input,
   Label,
-  Link,
   TextField,
   Typography,
 } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { ActionLink } from "@/components/ui/action";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
@@ -97,9 +97,12 @@ export default async function AdminPage() {
                         label="Meals this suits"
                         tags={suggestion.recipe.mealTags}
                       />
-                      <Link href={`/recipes/${suggestion.recipe.id}`}>
+                      <ActionLink
+                        href={`/recipes/${suggestion.recipe.id}`}
+                        tier="quiet"
+                      >
                         Open full recipe
-                      </Link>
+                      </ActionLink>
                     </Card.Header>
 
                     <div className="grid gap-6 border-t border-border/70 pt-5 sm:grid-cols-2">

@@ -31,7 +31,9 @@ export default async function SharedRecipesPage() {
             change later.
           </Typography>
         </div>
-        <Link href="/recipes">Your recipes</Link>
+        <ActionLink href="/recipes" tier="quiet">
+          Your recipes
+        </ActionLink>
       </header>
 
       {recipes.length === 0 ? (
@@ -93,17 +95,27 @@ export default async function SharedRecipesPage() {
                 </Card.Header>
 
                 <Card.Footer className="mt-auto flex-wrap justify-between gap-2 px-5 pb-5">
-                  <Link href={`/recipes/${recipe.id}`}>View recipe</Link>
+                  <ActionLink href={`/recipes/${recipe.id}`} tier="quiet">
+                    View recipe
+                  </ActionLink>
                   <div className="flex flex-wrap items-center gap-1">
                     <form action={copySharedRecipe}>
                       <input name="recipeId" type="hidden" value={recipe.id} />
-                      <Button size="sm" type="submit" variant="tertiary">
+                      <Button
+                        className="min-h-11"
+                        type="submit"
+                        variant="tertiary"
+                      >
                         Save a copy
                       </Button>
                     </form>
                     <form action={dropSharedRecipe}>
                       <input name="recipeId" type="hidden" value={recipe.id} />
-                      <Button size="sm" type="submit" variant="ghost">
+                      <Button
+                        className="min-h-11"
+                        type="submit"
+                        variant="ghost"
+                      >
                         Remove
                       </Button>
                     </form>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
-import { Link, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
+import { ActionLink } from "@/components/ui/action";
 import { RecipeImport } from "@/features/ai/components/recipe-import";
 
 export const metadata: Metadata = { title: "Import a recipe" };
@@ -19,7 +20,9 @@ export default function ImportRecipePage() {
             before anything is saved.
           </Typography>
         </div>
-        <Link href="/recipes/new">Enter it manually</Link>
+        <ActionLink href="/recipes/new" tier="neutral">
+          Enter it manually
+        </ActionLink>
       </header>
 
       <RecipeImport />

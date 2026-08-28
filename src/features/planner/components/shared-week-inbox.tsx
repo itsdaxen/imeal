@@ -38,14 +38,14 @@ export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
               <form action={copySharedWeek}>
                 <input name="planId" type="hidden" value={plan.planId} />
                 <input name="weekStart" type="hidden" value={weekStart} />
-                <Button size="sm" type="submit" variant="tertiary">
+                <Button className="min-h-11" type="submit" variant="tertiary">
                   Copy into this week
                 </Button>
               </form>
 
               <form action={dismissSharedWeek}>
                 <input name="planId" type="hidden" value={plan.planId} />
-                <Button size="sm" type="submit" variant="ghost">
+                <Button className="min-h-11" type="submit" variant="ghost">
                   Dismiss
                 </Button>
               </form>

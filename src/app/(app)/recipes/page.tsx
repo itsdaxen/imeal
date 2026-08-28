@@ -78,7 +78,7 @@ export default async function RecipesPage({
               {showArchived ? (
                 <form action={restoreRecipe}>
                   <input name="recipeId" type="hidden" value={recipe.id} />
-                  <Button size="sm" type="submit" variant="tertiary">
+                  <Button className="min-h-11" type="submit" variant="tertiary">
                     Restore
                   </Button>
                 </form>

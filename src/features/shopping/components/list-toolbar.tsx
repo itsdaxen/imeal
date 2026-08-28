@@ -15,6 +15,7 @@ import {
 } from "@heroui/react";
 
 import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
+import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
 import {
@@ -56,10 +57,9 @@ export function ListToolbar({
       {children}
 
       <Dropdown>
-        <Button className="min-h-11" variant="tertiary">
+        <IconButton label="List options" variant="tertiary">
           <MoreHorizontal aria-hidden="true" className="size-4" />
-          List options
-        </Button>
+        </IconButton>
         <Dropdown.Popover placement="bottom end">
           <Dropdown.Menu>
             <Dropdown.Item
@@ -149,7 +149,11 @@ export function ListToolbar({
                         <input name="listId" type="hidden" value={listId} />
                         <input name="userId" type="hidden" value={friend.id} />
                         <span className="text-sm">{friend.displayName}</span>
-                        <Button size="sm" type="submit" variant="tertiary">
+                        <Button
+                          className="min-h-11"
+                          type="submit"
+                          variant="tertiary"
+                        >
                           {isMember ? "Remove" : "Share"}
                         </Button>
                       </form>
@@ -161,7 +165,7 @@ export function ListToolbar({
                   <form action={removeListMember} className="self-start">
                     <input name="listId" type="hidden" value={listId} />
                     <input name="userId" type="hidden" value={currentUserId} />
-                    <Button size="sm" type="submit" variant="ghost">
+                    <Button className="min-h-11" type="submit" variant="ghost">
                       Leave this list
                     </Button>
                   </form>

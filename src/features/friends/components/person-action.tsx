@@ -18,7 +18,7 @@ export function PersonAction({
   return (
     <form action={action}>
       <input name={name} type="hidden" value={value} />
-      <Button size="sm" type="submit" variant={variant}>
+      <Button className="min-h-11" type="submit" variant={variant}>
         {label}
       </Button>
     </form>

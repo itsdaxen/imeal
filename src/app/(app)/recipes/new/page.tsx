@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
-import { Link, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
+import { ActionLink } from "@/components/ui/action";
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { createRecipe } from "@/features/recipes/recipe.actions";
 
@@ -19,7 +20,9 @@ export default function NewRecipePage() {
             Save a favorite in a format that is easy to plan, shop, and cook.
           </Typography>
         </div>
-        <Link href="/recipes/import">Import from pasted text</Link>
+        <ActionLink href="/recipes/import" tier="neutral">
+          Import from pasted text
+        </ActionLink>
       </header>
 
       <RecipeForm action={createRecipe} submitLabel="Save recipe" />

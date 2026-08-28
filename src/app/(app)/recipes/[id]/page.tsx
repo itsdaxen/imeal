@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Card, Link, Typography } from "@heroui/react";
+import { Card, Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
@@ -113,11 +113,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </div>
             {isOwner ? (
               <div className="flex w-full flex-wrap items-center gap-4 border-t border-separator pt-4">
-                <Link href={`/recipes/${recipe.id}/edit`}>Edit</Link>
+                <ActionLink href={`/recipes/${recipe.id}/edit`} tier="quiet">
+                  Edit
+                </ActionLink>
 
                 <form action={archiveRecipe}>
                   <input name="recipeId" type="hidden" value={recipe.id} />
-                  <Button size="sm" type="submit" variant="ghost">
+                  <Button className="min-h-11" type="submit" variant="ghost">
                     Archive
                   </Button>
                 </form>
@@ -125,18 +127,20 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 <DeleteRecipeForm id={recipe.id} />
               </div>
             ) : isCatalogRecipe && isAdmin ? (
-              <Link href={`/recipes/${recipe.id}/edit`}>Edit as moderator</Link>
+              <ActionLink href={`/recipes/${recipe.id}/edit`} tier="neutral">
+                Edit as moderator
+              </ActionLink>
             ) : isCatalogRecipe ? (
               <form action={saveCatalogRecipe}>
                 <input name="recipeId" type="hidden" value={recipe.id} />
-                <Button size="sm" type="submit" variant="tertiary">
+                <Button className="min-h-11" type="submit" variant="tertiary">
                   Save a copy
                 </Button>
               </form>
             ) : (
               <form action={copySharedRecipe}>
                 <input name="recipeId" type="hidden" value={recipe.id} />
-                <Button size="sm" type="submit" variant="tertiary">
+                <Button className="min-h-11" type="submit" variant="tertiary">
                   Save a copy
                 </Button>
               </form>

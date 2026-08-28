@@ -38,6 +38,16 @@ summary,
   cursor: pointer;
 }
 
+:where(button, summary, [role="button"]) {
+  min-height: 2.75rem;
+}
+
+/* Menus and selection controls are rendered in portals, so component-local layout
+   cannot enforce their target size reliably. Keep the interaction rhythm here. */
+:where([role="menuitem"], [role="option"], [role="radio"], [role="tab"]) {
+  min-height: 2.75rem;
+}
+
 button:disabled,
 [aria-disabled="true"] {
   cursor: not-allowed;

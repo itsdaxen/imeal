@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
-import { Link, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
+import { ActionLink } from "@/components/ui/action";
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { updateRecipe } from "@/features/recipes/recipe.actions";
@@ -45,7 +46,9 @@ export default async function EditRecipePage({
             Keep the version you plan and cook accurate.
           </Typography>
         </div>
-        <Link href={`/recipes/${recipe.id}`}>Back to recipe</Link>
+        <ActionLink href={`/recipes/${recipe.id}`} tier="quiet">
+          Back to recipe
+        </ActionLink>
       </header>
 
       <RecipeForm

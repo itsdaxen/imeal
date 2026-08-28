@@ -83,7 +83,7 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
                 <Link
                   className={cn(
                     buttonVariants({ size: "sm", variant: "tertiary" }),
-                    "min-h-10",
+                    "min-h-11",
                   )}
                   href={`/cook/${meal.recipe.id}`}
                 >

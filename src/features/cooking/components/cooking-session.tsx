@@ -111,7 +111,11 @@ export function CookingSession({
             {formatElapsed(elapsedSeconds)}
           </time>
           <div className="flex gap-2">
-            <Button onPress={toggleTimer} size="sm" variant="tertiary">
+            <Button
+              className="min-h-11"
+              onPress={toggleTimer}
+              variant="tertiary"
+            >
               {isRunning ? "Pause" : elapsedSeconds > 0 ? "Resume" : "Start"}
             </Button>
             <Button

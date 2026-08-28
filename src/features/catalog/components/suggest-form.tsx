@@ -24,7 +24,7 @@ export function SuggestForm({ recipeId, suggestion }: SuggestFormProps) {
         <Typography className="text-muted" type="body-sm">
           Waiting for review.
         </Typography>
-        <Button size="sm" type="submit" variant="ghost">
+        <Button className="min-h-11" type="submit" variant="ghost">
           Withdraw
         </Button>
       </form>
@@ -42,7 +42,7 @@ export function SuggestForm({ recipeId, suggestion }: SuggestFormProps) {
 
       <form action={suggestRecipe}>
         <input name="recipeId" type="hidden" value={recipeId} />
-        <Button size="sm" type="submit" variant="tertiary">
+        <Button className="min-h-11" type="submit" variant="tertiary">
           Suggest for the catalog
         </Button>
       </form>

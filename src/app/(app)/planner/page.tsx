@@ -119,7 +119,7 @@ export default async function PlannerPage({
           <div className="flex flex-wrap items-center gap-3">
             <form action={approveWholeWeek}>
               <input name="weekStart" type="hidden" value={weekStart} />
-              <Button size="sm" type="submit" variant="tertiary">
+              <Button className="min-h-11" type="submit" variant="tertiary">
                 Approve the whole week
               </Button>
             </form>

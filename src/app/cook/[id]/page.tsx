@@ -28,7 +28,10 @@ export default async function CookPage({ params }: CookPageProps) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-2">
-        <Link className="text-sm" href={`/recipes/${recipe.id}`}>
+        <Link
+          className="inline-flex min-h-11 items-center text-sm"
+          href={`/recipes/${recipe.id}`}
+        >
           Leave cooking mode
         </Link>
         <Typography type="h1" weight="semibold">
