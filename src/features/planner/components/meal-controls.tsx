@@ -1,6 +1,6 @@
-import { Button } from "@heroui/react";
+import { Button, Chip } from "@heroui/react";
 
-import { setMealApproval, shuffleMeal } from "../plan.actions";
+import { setMealApproval } from "../plan.actions";
 
 type MealControlsProps = {
   isApproved: boolean;
@@ -14,25 +14,22 @@ export function MealControls({
   weekStart,
 }: MealControlsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-1">
-      <form action={setMealApproval}>
-        <input name="itemId" type="hidden" value={itemId} />
-        <input name="weekStart" type="hidden" value={weekStart} />
-        <Button
-          size="sm"
-          type="submit"
-          variant={isApproved ? "secondary" : "ghost"}
-        >
-          {isApproved ? "Approved" : "Approve"}
-        </Button>
-      </form>
-
-      {isApproved ? null : (
-        <form action={shuffleMeal}>
+    <div className="flex items-center">
+      {isApproved ? (
+        <Chip color="accent" size="sm" variant="soft">
+          Approved
+        </Chip>
+      ) : (
+        <form action={setMealApproval}>
           <input name="itemId" type="hidden" value={itemId} />
           <input name="weekStart" type="hidden" value={weekStart} />
-          <Button size="sm" type="submit" variant="ghost">
-            Swap
+          <Button
+            size="sm"
+            type="submit"
+            className="min-h-10"
+            variant="primary"
+          >
+            Approve
           </Button>
         </form>
       )}
