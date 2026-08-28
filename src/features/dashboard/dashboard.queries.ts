@@ -53,6 +53,7 @@ export type DashboardData = {
   recentRecipes: Array<{
     id: string;
     imageUrl: string | null;
+    mealTags: MealSlot[];
     title: string;
     prepMinutes: number;
     servings: number;
@@ -160,6 +161,7 @@ export async function getDashboardData(
     recentRecipes: recipes.slice(0, RECENT_RECIPE_COUNT).map((recipe) => ({
       id: recipe.id,
       imageUrl: recipe.image_url,
+      mealTags: recipe.meal_tags,
       title: recipe.title,
       prepMinutes: recipe.prep_minutes,
       servings: recipe.servings,

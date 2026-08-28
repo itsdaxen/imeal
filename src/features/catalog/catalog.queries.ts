@@ -12,10 +12,11 @@ export type CatalogRecipe = {
 };
 
 export type Suggestion = {
+  createdAt: string;
   id: string;
   status: "pending" | "approved" | "rejected";
   reviewerNote: string | null;
-  recipe: { id: string; title: string };
+  recipe: { id: string; imageUrl: string | null; title: string };
 };
 
 export type ModerationSuggestion = {
@@ -76,17 +77,23 @@ export async function listCatalog(search?: string): Promise<CatalogRecipe[]> {
 }
 
 function toSuggestion(row: {
+  created_at: string;
   id: string;
   status: "pending" | "approved" | "rejected";
   reviewer_note: string | null;
-  recipes: { id: string; title: string } | null;
+  recipes: { id: string; image_url: string | null; title: string } | null;
 }): Suggestion | null {
   return row.recipes
     ? {
+        createdAt: row.created_at,
         id: row.id,
         status: row.status,
         reviewerNote: row.reviewer_note,
-        recipe: { id: row.recipes.id, title: row.recipes.title },
+        recipe: {
+          id: row.recipes.id,
+          imageUrl: row.recipes.image_url,
+          title: row.recipes.title,
+        },
       }
     : null;
 }
@@ -103,7 +110,9 @@ export async function listMySuggestions(): Promise<Suggestion[]> {
 
   const { data, error } = await supabase
     .from("recipe_suggestions")
-    .select("id, status, reviewer_note, recipes (id, title)")
+    .select(
+      "id, created_at, status, reviewer_note, recipes (id, title, image_url)",
+    )
     .eq("suggested_by", user.id)
     .order("created_at", { ascending: false });
 

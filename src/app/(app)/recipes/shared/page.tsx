@@ -6,6 +6,7 @@ import { Button, Card, Link, Typography } from "@heroui/react";
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
+import { PersonAvatar } from "@/components/ui/person-avatar";
 import { TagList } from "@/components/ui/tag-list";
 import { ActionLink } from "@/components/ui/action";
 import {
@@ -79,7 +80,15 @@ export default async function SharedRecipesPage() {
                 </Link>
 
                 <Card.Header className="gap-2 px-5 pt-5">
-                  <Eyebrow>From {recipe.sharedBy}</Eyebrow>
+                  <div className="flex items-center gap-3">
+                    <PersonAvatar name={recipe.sharedBy} />
+                    <div>
+                      <Eyebrow>Shared by</Eyebrow>
+                      <Typography type="body-sm" weight="medium">
+                        {recipe.sharedBy}
+                      </Typography>
+                    </div>
+                  </div>
                   <Typography type="h2" weight="semibold">
                     <Link
                       className="text-foreground no-underline"

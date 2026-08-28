@@ -324,7 +324,8 @@ function RecipeCard({
         )}
       </Card.Content>
 
-      <Card.Header className="gap-0.5">
+      <Card.Header className="gap-1.5">
+        <TagList label="Meals this suits" tags={recipe.mealTags} />
         <Card.Title className="text-base">
           <LinkCard.Target href={`/recipes/${recipe.id}`}>
             {recipe.title}

@@ -123,6 +123,7 @@ export default async function FriendsPage({
                       />
                     )
                   }
+                  context="Search result"
                   key={person.id}
                   name={person.displayName}
                 />
@@ -157,6 +158,7 @@ export default async function FriendsPage({
                       />
                     </>
                   }
+                  context="Sent you a request"
                   key={request.id}
                   name={request.person.displayName}
                 />
@@ -183,6 +185,7 @@ export default async function FriendsPage({
                       variant="ghost"
                     />
                   }
+                  context="Request sent"
                   key={request.id}
                   name={request.person.displayName}
                 />
@@ -213,6 +216,7 @@ export default async function FriendsPage({
                       variant="ghost"
                     />
                   }
+                  context="Can receive shared weeks and recipes"
                   key={person.id}
                   name={person.displayName}
                 />

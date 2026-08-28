@@ -15,6 +15,7 @@ import { ContentCard } from "@/components/ui/content-card";
 import { ActionLink } from "@/components/ui/action";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
+import { PersonAvatar } from "@/components/ui/person-avatar";
 import { TagList } from "@/components/ui/tag-list";
 
 import {
@@ -85,7 +86,15 @@ export default async function AdminPage() {
 
                   <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-7">
                     <Card.Header className="gap-2 p-0">
-                      <Eyebrow>Suggested by {suggestion.author}</Eyebrow>
+                      <div className="flex items-center gap-3">
+                        <PersonAvatar name={suggestion.author} />
+                        <div>
+                          <Eyebrow>Suggested by</Eyebrow>
+                          <Typography type="body-sm" weight="medium">
+                            {suggestion.author}
+                          </Typography>
+                        </div>
+                      </div>
                       <Typography type="h2" weight="semibold">
                         {suggestion.recipe.title}
                       </Typography>

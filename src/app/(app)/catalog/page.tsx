@@ -134,42 +134,76 @@ export default async function CatalogPage({
       )}
 
       {suggestions.length > 0 ? (
-        <section className="flex flex-col gap-3 border-t border-border/60 pt-6">
+        <section className="flex max-w-3xl flex-col gap-3 border-t border-separator pt-6">
           <Typography type="h2" weight="semibold">
             Your suggestions
           </Typography>
 
-          <ul className="flex list-none flex-col p-0">
-            {suggestions.map((suggestion) => (
-              <li
-                className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 py-3"
-                key={suggestion.id}
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{suggestion.recipe.title}</span>
-                  <span className="text-sm text-muted">
-                    {STATUS_LABEL[suggestion.status]}
-                    {suggestion.reviewerNote
-                      ? ` — ${suggestion.reviewerNote}`
-                      : ""}
-                  </span>
-                </div>
+          <ContentCard density="compact">
+            <ul className="flex list-none flex-col p-0">
+              {suggestions.map((suggestion) => (
+                <li
+                  className="flex flex-wrap items-center justify-between gap-4 border-b border-separator py-3 last:border-b-0"
+                  key={suggestion.id}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="size-14 shrink-0 overflow-hidden rounded-xl">
+                      {suggestion.recipe.imageUrl ? (
+                        <Image
+                          alt=""
+                          className="size-full object-cover"
+                          height={56}
+                          src={suggestion.recipe.imageUrl}
+                          width={56}
+                        />
+                      ) : (
+                        <MealArtwork
+                          artwork={artworkFor(suggestion.recipe.id)}
+                          className="size-full"
+                        />
+                      )}
+                    </div>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate font-medium">
+                        {suggestion.recipe.title}
+                      </span>
+                      <span className="text-sm text-muted">
+                        {STATUS_LABEL[suggestion.status]}
+                      </span>
+                      <span className="text-xs text-muted">
+                        Submitted{" "}
+                        {new Intl.DateTimeFormat("en", {
+                          dateStyle: "medium",
+                        }).format(new Date(suggestion.createdAt))}
+                      </span>
+                      {suggestion.reviewerNote ? (
+                        <span className="text-xs text-muted">
+                          {suggestion.reviewerNote}
+                        </span>
+                      ) : null}
+                    </span>
+                  </div>
 
-                {suggestion.status === "pending" ? (
-                  <form action={withdrawSuggestion}>
-                    <input
-                      name="suggestionId"
-                      type="hidden"
-                      value={suggestion.id}
-                    />
-                    <Button className="min-h-11" type="submit" variant="ghost">
-                      Withdraw
-                    </Button>
-                  </form>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+                  {suggestion.status === "pending" ? (
+                    <form action={withdrawSuggestion} className="ml-auto">
+                      <input
+                        name="suggestionId"
+                        type="hidden"
+                        value={suggestion.id}
+                      />
+                      <Button
+                        className="min-h-11"
+                        type="submit"
+                        variant="ghost"
+                      >
+                        Withdraw
+                      </Button>
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </ContentCard>
         </section>
       ) : null}
     </main>
