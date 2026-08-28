@@ -18,6 +18,7 @@ import {
 import { createRecipe } from "@/features/recipes/recipe.actions";
 import { TagList } from "@/components/ui/tag-list";
 import { ContentCard } from "@/components/ui/content-card";
+import { PanelTitle } from "@/components/ui/panel-title";
 
 import { draftRecipe, type RecipeDraftState } from "../ai.actions";
 import { MAX_PASTED_CHARACTERS, type DraftRecipe } from "../draft-recipe";
@@ -63,12 +64,10 @@ export function RecipeImport() {
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
       <ContentCard density="spacious">
         <Card.Header className="flex-col items-start gap-1 p-0">
-          <Typography type="h2" weight="semibold">
-            Paste the whole recipe
-          </Typography>
-          <Typography className="text-muted" type="body-sm">
+          <PanelTitle level={2}>Paste the whole recipe</PanelTitle>
+          <Card.Description>
             Copied webpage text, notes, or rough instructions all work.
-          </Typography>
+          </Card.Description>
         </Card.Header>
         <form action={formAction} className="flex flex-col gap-4">
           {state.error ? (
@@ -105,13 +104,11 @@ export function RecipeImport() {
 
       <ContentCard className="gap-5" density="spacious">
         <Card.Header className="flex-col items-start gap-1 p-0">
-          <Typography type="h2" weight="semibold">
-            You stay in control
-          </Typography>
-          <Typography className="text-muted" type="body-sm">
+          <PanelTitle level={2}>You stay in control</PanelTitle>
+          <Card.Description>
             Importing prepares an editable draft. It never saves behind your
             back.
-          </Typography>
+          </Card.Description>
         </Card.Header>
         <ol className="flex list-none flex-col gap-5 p-0">
           {[
@@ -137,13 +134,14 @@ export function RecipeImport() {
       </ContentCard>
 
       {state.draft ? (
-        <section
+        <ContentCard
           aria-labelledby="draft-heading"
-          className="flex flex-col gap-4 rounded-3xl border border-border/80 bg-surface p-6 lg:col-span-2 lg:p-8"
+          className="lg:col-span-2"
+          density="spacious"
         >
-          <Typography id="draft-heading" type="h2" weight="semibold">
+          <PanelTitle id="draft-heading" level={2}>
             {state.draft.title}
-          </Typography>
+          </PanelTitle>
 
           <Typography className="text-muted" type="body-sm">
             {state.draft.servings} servings · {state.draft.prepMinutes} minutes
@@ -193,7 +191,7 @@ export function RecipeImport() {
               Nothing is saved until you press save on the form.
             </Typography>
           </div>
-        </section>
+        </ContentCard>
       ) : null}
     </div>
   );

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Button, Link, Typography } from "@heroui/react";
+import { Button, Disclosure, Link, Typography } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
 import { ShareWeekPanel } from "@/features/planner/components/share-week-panel";
@@ -12,6 +12,7 @@ import {
 import { listFriends } from "@/features/friends/friend.queries";
 import { WeekGrid } from "@/features/planner/components/week-grid";
 import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
+import { ContentCard } from "@/components/ui/content-card";
 import {
   approveWholeWeek,
   deleteWeekPlan,
@@ -62,31 +63,30 @@ export default async function PlannerPage({
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
 
-      <details
-        className="group rounded-3xl border border-border/80 bg-surface"
-        open={plan.meals.length === 0}
-      >
-        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 marker:hidden sm:px-6 [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="block font-semibold">Fill automatically</span>
-            <span className="block text-sm text-muted">
-              Build a fresh week from your recipe collection.
-            </span>
-          </span>
-          <span
-            aria-hidden="true"
-            className="text-xl text-muted transition-transform group-open:rotate-45 motion-reduce:transition-none"
-          >
-            +
-          </span>
-        </summary>
-        <div className="border-t border-separator px-5 py-5 sm:px-6">
-          <FillWeekForm
-            enabledSlots={plan.enabledSlots}
-            weekStart={weekStart}
-          />
-        </div>
-      </details>
+      <ContentCard density="flush">
+        <Disclosure defaultExpanded={plan.meals.length === 0}>
+          <Disclosure.Heading>
+            <Disclosure.Trigger className="flex min-h-16 w-full items-center gap-4 px-5 text-left sm:px-6">
+              <span>
+                <span className="block font-semibold">Fill automatically</span>
+                <span className="block text-sm text-muted">
+                  Build a fresh week from your recipe collection.
+                </span>
+              </span>
+              <Disclosure.Indicator />
+            </Disclosure.Trigger>
+          </Disclosure.Heading>
+
+          <Disclosure.Content>
+            <Disclosure.Body className="border-t border-separator px-5 py-5 sm:px-6">
+              <FillWeekForm
+                enabledSlots={plan.enabledSlots}
+                weekStart={weekStart}
+              />
+            </Disclosure.Body>
+          </Disclosure.Content>
+        </Disclosure>
+      </ContentCard>
 
       {plan.meals.length > 0 ? (
         <section

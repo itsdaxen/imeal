@@ -14,6 +14,7 @@ import {
 
 import { FormMessage } from "@/features/auth/components/form-message";
 import { ContentCard } from "@/components/ui/content-card";
+import { PanelTitle } from "@/components/ui/panel-title";
 
 import type { RecipeFormState } from "../recipe.actions";
 import { IMAGE_TYPES } from "@/features/images/image";
@@ -75,10 +76,10 @@ export function RecipeForm({
       <div className="flex min-w-0 flex-col gap-6">
         <ContentCard className="gap-5" density="spacious">
           <Card.Header className="flex-col items-start gap-1 p-0">
-            <h2 className="text-xl font-semibold">The recipe</h2>
-            <p className="text-sm text-muted">
+            <PanelTitle level={2}>The recipe</PanelTitle>
+            <Card.Description>
               Give it a name you will recognize and a practical ingredient list.
-            </p>
+            </Card.Description>
           </Card.Header>
           <TextField defaultValue={values.title} isRequired name="title">
             <Label>Title</Label>
@@ -102,11 +103,11 @@ export function RecipeForm({
 
         <ContentCard className="gap-5" density="spacious">
           <Card.Header className="flex-col items-start gap-1 p-0">
-            <h2 className="text-xl font-semibold">Method</h2>
-            <p className="text-sm text-muted">
+            <PanelTitle level={2}>Method</PanelTitle>
+            <Card.Description>
               Keep each instruction focused so it is easy to follow while
               cooking.
-            </p>
+            </Card.Description>
           </Card.Header>
           <TextField defaultValue={values.steps} isRequired name="steps">
             <Label>Steps</Label>
@@ -131,10 +132,10 @@ export function RecipeForm({
 
       <ContentCard className="gap-5 lg:sticky lg:top-24" density="spacious">
         <Card.Header className="flex-col items-start gap-1 p-0">
-          <h2 className="text-xl font-semibold">Finishing details</h2>
-          <p className="text-sm text-muted">
+          <PanelTitle level={2}>Finishing details</PanelTitle>
+          <Card.Description>
             Help iMeal place and scale this recipe later.
-          </p>
+          </Card.Description>
         </Card.Header>
 
         <div className="flex flex-col gap-2">

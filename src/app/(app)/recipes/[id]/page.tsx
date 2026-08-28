@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Link, Typography } from "@heroui/react";
+import { Card, Link, Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
+import { ContentCard } from "@/components/ui/content-card";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
@@ -60,14 +61,18 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
-      <div className="grid overflow-hidden rounded-3xl border border-border/80 bg-surface md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
-        <div className="min-h-64 overflow-hidden md:min-h-[30rem]">
+      <ContentCard
+        appearance="media"
+        className="grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
+        density="flush"
+      >
+        <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
           {recipe.image_url ? (
             <Image
               alt=""
               className="size-full object-cover"
               height={640}
-              priority
+              preload
               sizes="(min-width: 768px) 34rem, 100vw"
               src={recipe.image_url}
               width={720}
@@ -78,9 +83,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
               className="size-full"
             />
           )}
-        </div>
+        </Card.Content>
 
-        <header className="flex flex-col justify-center gap-5 p-6 sm:p-8 lg:p-10">
+        <Card.Header className="flex-col items-start justify-center gap-5 p-6 sm:p-8 lg:p-10">
           <TagList label="Meals this suits" tags={recipe.meal_tags} />
           <Typography type="h1" weight="semibold">
             {recipe.title}
@@ -137,11 +142,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
               </form>
             )}
           </div>
-        </header>
-      </div>
+        </Card.Header>
+      </ContentCard>
 
       <div className="grid gap-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-12">
-        <section className="flex flex-col gap-4 rounded-3xl bg-surface-secondary p-6 sm:p-8">
+        <ContentCard density="spacious">
           <Typography type="h2" weight="semibold">
             Ingredients
           </Typography>
@@ -150,7 +155,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               <li key={ingredient}>{ingredient}</li>
             ))}
           </ul>
-        </section>
+        </ContentCard>
 
         <section className="flex flex-col gap-4 p-1 sm:p-2">
           <Typography type="h2" weight="semibold">

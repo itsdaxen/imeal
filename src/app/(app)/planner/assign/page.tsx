@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Button, Link, Typography } from "@heroui/react";
+import { Button, Card, Link, Typography } from "@heroui/react";
 
+import { ContentCard } from "@/components/ui/content-card";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import { assignRecipeToSlot } from "@/features/planner/plan.actions";
@@ -63,38 +64,35 @@ export default async function AssignPage({
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <li
-              className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border/80 bg-surface"
-              key={recipe.id}
-            >
-              <div className="h-36 overflow-hidden">
-                {recipe.image_url ? (
-                  <Image
-                    alt=""
-                    className="size-full object-cover"
-                    height={192}
-                    sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
-                    src={recipe.image_url}
-                    width={320}
-                  />
-                ) : (
-                  <MealArtwork
-                    artwork={artworkFor(recipe.id)}
-                    className="size-full"
-                  />
-                )}
-              </div>
+            <li key={recipe.id}>
+              <ContentCard className="h-full" density="compact">
+                <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+                  {recipe.image_url ? (
+                    <Image
+                      alt=""
+                      className="size-full object-cover"
+                      height={192}
+                      sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
+                      src={recipe.image_url}
+                      width={320}
+                    />
+                  ) : (
+                    <MealArtwork
+                      artwork={artworkFor(recipe.id)}
+                      className="size-full"
+                    />
+                  )}
+                </Card.Content>
 
-              <div className="flex flex-1 flex-col gap-4 p-5">
-                <div className="flex flex-col gap-2">
+                <Card.Header className="gap-2">
                   <TagList label="Meals this suits" tags={recipe.meal_tags} />
-                  <span className="font-medium">{recipe.title}</span>
-                  <span className="text-sm text-muted">
+                  <Card.Title className="text-base">{recipe.title}</Card.Title>
+                  <Card.Description>
                     {recipe.prep_minutes} min · serves {recipe.servings}
-                  </span>
-                </div>
+                  </Card.Description>
+                </Card.Header>
 
-                <div className="mt-auto flex flex-wrap items-center gap-3">
+                <Card.Footer className="mt-auto flex-wrap gap-3">
                   <form action={assignRecipeToSlot}>
                     <input name="weekStart" type="hidden" value={weekStart} />
                     <input name="dayIndex" type="hidden" value={dayIndex} />
@@ -107,8 +105,8 @@ export default async function AssignPage({
                   <Link className="text-sm" href={`/recipes/${recipe.id}`}>
                     View recipe
                   </Link>
-                </div>
-              </div>
+                </Card.Footer>
+              </ContentCard>
             </li>
           ))}
         </ul>

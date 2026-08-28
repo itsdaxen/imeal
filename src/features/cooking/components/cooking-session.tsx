@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Clock3, Lightbulb } from "lucide-react";
-import { Button, Card, Typography } from "@heroui/react";
+import { Button, Card, ProgressBar, Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 
@@ -203,28 +203,22 @@ export function CookingSession({
         </ContentCard>
 
         <ContentCard density="compact">
-          <Card.Header className="flex-row items-baseline justify-between gap-3">
+          <Card.Header>
             <Typography type="h2" weight="semibold">
               Steps
             </Typography>
-            <Typography className="text-muted" type="body-xs">
-              {completed}%
-            </Typography>
           </Card.Header>
           <Card.Content>
-            <div
-              aria-label={`${completed}% through the recipe`}
-              aria-valuemax={100}
-              aria-valuemin={0}
-              aria-valuenow={completed}
-              className="h-1.5 overflow-hidden rounded-full bg-default"
-              role="progressbar"
+            <ProgressBar
+              aria-label="Progress through the recipe"
+              size="sm"
+              value={completed}
             >
-              <div
-                className="h-full rounded-full bg-accent transition-[width] motion-reduce:transition-none"
-                style={{ width: `${completed}%` }}
-              />
-            </div>
+              <ProgressBar.Output />
+              <ProgressBar.Track>
+                <ProgressBar.Fill />
+              </ProgressBar.Track>
+            </ProgressBar>
 
             <ol className="mt-3 flex list-none flex-col gap-1 p-0">
               {steps.map((step, index) => (
