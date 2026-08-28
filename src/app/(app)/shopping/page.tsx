@@ -54,36 +54,17 @@ export default async function ShoppingPage({
   const open = lists.find((entry) => entry.id === list.listId);
 
   return (
-    <main className="flex flex-col gap-6 pt-10 sm:pt-14">
-      <header className="flex flex-col gap-1">
-        <Typography type="h1" weight="semibold">
-          {list.listName}
-        </Typography>
-        <Typography color="muted" type="body">
-          {list.remaining} {list.remaining === 1 ? "item" : "items"} left
-          {members.length > 1 ? ` · ${members.length} collaborators` : ""}
-        </Typography>
-      </header>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="Shopping lists" className="flex flex-wrap gap-2">
-          {lists.map((entry) => (
-            <Link
-              aria-current={entry.id === list.listId ? "page" : undefined}
-              className={`min-h-11 rounded-full px-4 py-3 text-sm no-underline ${
-                entry.id === list.listId
-                  ? "bg-foreground font-medium text-background"
-                  : "bg-surface text-foreground"
-              }`}
-              href={`/shopping?week=${weekStart}&list=${entry.id}`}
-              key={entry.id}
-            >
-              {entry.name}
-              {entry.isOwn ? "" : " · shared"}
-            </Link>
-          ))}
-          <NewListButton />
-        </nav>
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 pt-10 sm:pt-14">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Typography type="h1" weight="semibold">
+            {list.listName}
+          </Typography>
+          <Typography color="muted" type="body">
+            {list.remaining} {list.remaining === 1 ? "item" : "items"} left
+            {members.length > 1 ? ` · ${members.length} collaborators` : ""}
+          </Typography>
+        </div>
 
         {list.listId ? (
           <ListToolbar
@@ -99,7 +80,34 @@ export default async function ShoppingPage({
             ) : null}
           </ListToolbar>
         ) : null}
-      </div>
+      </header>
+
+      <nav
+        aria-label="Shopping lists"
+        className="flex flex-col gap-2 border-y border-separator py-4"
+      >
+        <Typography color="muted" type="body-xs" weight="semibold">
+          YOUR LISTS
+        </Typography>
+        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
+          {lists.map((entry) => (
+            <Link
+              aria-current={entry.id === list.listId ? "page" : undefined}
+              className={`min-h-11 shrink-0 rounded-full px-4 py-3 text-sm no-underline ${
+                entry.id === list.listId
+                  ? "bg-foreground font-medium text-background"
+                  : "bg-surface text-foreground"
+              }`}
+              href={`/shopping?week=${weekStart}&list=${entry.id}`}
+              key={entry.id}
+            >
+              {entry.name}
+              {entry.isOwn ? "" : " · shared"}
+            </Link>
+          ))}
+          <NewListButton />
+        </div>
+      </nav>
 
       <PageGrid>
         {list.listId ? (

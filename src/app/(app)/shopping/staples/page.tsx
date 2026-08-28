@@ -1,29 +1,51 @@
 import type { Metadata } from "next";
 
-import {
-  Button,
-  Input,
-  Label,
-  Link,
-  TextField,
-  Typography,
-} from "@heroui/react";
+import { ShoppingBasket } from "lucide-react";
+import { Input, Label, TextField, Typography } from "@heroui/react";
 
-import {
-  addStaple,
-  removeStaple,
-  toggleStaple,
-} from "@/features/shopping/shopping.actions";
+import { ActionButton, ActionLink } from "@/components/ui/action";
+import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageGrid, span } from "@/components/ui/page-grid";
+import { StapleMenu } from "@/features/shopping/components/staple-menu";
+import { addStaple } from "@/features/shopping/shopping.actions";
 import { listStaples } from "@/features/shopping/shopping.queries";
 
 export const metadata: Metadata = { title: "Staples" };
 
 export default async function StaplesPage() {
   const staples = await listStaples();
+  const active = staples.filter((staple) => staple.active);
+  const paused = staples.filter((staple) => !staple.active);
+
+  function rows(items: typeof staples) {
+    return (
+      <ul className="flex list-none flex-col p-0">
+        {items.map((staple) => (
+          <li
+            className="flex min-h-14 items-center justify-between gap-3 border-b border-separator last:border-b-0"
+            key={staple.id}
+          >
+            <span className={staple.active ? undefined : "text-muted"}>
+              {staple.name}
+            </span>
+            <StapleMenu
+              active={staple.active}
+              id={staple.id}
+              name={staple.name}
+            />
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-col gap-8 pt-10 sm:pt-14">
-      <header className="flex flex-col gap-2">
+    <main className="flex w-full flex-col gap-6 pt-10 sm:pt-14">
+      <header className="flex max-w-2xl flex-col gap-2">
+        <ActionLink className="self-start" href="/shopping" tier="quiet">
+          ← Shopping
+        </ActionLink>
         <Typography type="h1" weight="semibold">
           Staples
         </Typography>
@@ -31,54 +53,64 @@ export default async function StaplesPage() {
           Things you buy most weeks. Add them to a list in one step, and pause
           the ones you do not need right now.
         </Typography>
-        <Link href="/shopping">Back to shopping</Link>
       </header>
 
-      <form action={addStaple} className="flex flex-wrap items-end gap-3">
-        <TextField className="min-w-56 flex-1" isRequired name="name">
-          <Label>Add a staple</Label>
-          <Input placeholder="Milk" />
-        </TextField>
-        <Button type="submit" variant="tertiary">
-          Add
-        </Button>
-      </form>
+      <PageGrid>
+        <ContentCard
+          aria-label="Add a staple"
+          className="col-span-12 lg:col-span-6"
+        >
+          <form action={addStaple} className="flex items-end gap-3">
+            <TextField className="min-w-0 flex-1" isRequired name="name">
+              <Label>Add a staple</Label>
+              <Input placeholder="Milk" />
+            </TextField>
+            <ActionButton tier="primary" type="submit">
+              Add
+            </ActionButton>
+          </form>
+        </ContentCard>
 
-      {staples.length === 0 ? (
-        <Typography className="text-muted" type="body">
-          No staples yet.
-        </Typography>
-      ) : (
-        <ul className="flex list-none flex-col p-0">
-          {staples.map((staple) => (
-            <li
-              className="flex items-center justify-between border-b border-border/60 py-2.5"
-              key={staple.id}
+        {staples.length === 0 ? (
+          <div className={span.full}>
+            <EmptyState
+              description="Add the things you buy most weeks, then send them to any shopping list in one step."
+              icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
+              title="No staples yet"
+            />
+          </div>
+        ) : (
+          <>
+            <ContentCard
+              aria-label="Active staples"
+              className="col-span-12 lg:col-span-6"
             >
-              <span className={staple.active ? undefined : "text-muted"}>
-                {staple.name}
-                {staple.active ? "" : " · paused"}
-              </span>
+              <Typography type="h2" weight="semibold">
+                Ready to add · {active.length}
+              </Typography>
+              {active.length > 0 ? (
+                rows(active)
+              ) : (
+                <Typography color="muted" type="body-sm">
+                  Resume a paused staple when you need it again.
+                </Typography>
+              )}
+            </ContentCard>
 
-              <div className="flex items-center gap-2">
-                <form action={toggleStaple}>
-                  <input name="stapleId" type="hidden" value={staple.id} />
-                  <Button size="sm" type="submit" variant="tertiary">
-                    {staple.active ? "Pause" : "Resume"}
-                  </Button>
-                </form>
-
-                <form action={removeStaple}>
-                  <input name="stapleId" type="hidden" value={staple.id} />
-                  <Button size="sm" type="submit" variant="ghost">
-                    Remove
-                  </Button>
-                </form>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            {paused.length > 0 ? (
+              <ContentCard
+                aria-label="Paused staples"
+                className="col-span-12 lg:col-span-6"
+              >
+                <Typography type="h2" weight="semibold">
+                  Paused · {paused.length}
+                </Typography>
+                {rows(paused)}
+              </ContentCard>
+            ) : null}
+          </>
+        )}
+      </PageGrid>
     </main>
   );
 }

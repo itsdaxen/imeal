@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { useState } from "react";
-import { MoreHorizontal, Share2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   Button,
   Dropdown,
@@ -15,7 +15,6 @@ import {
 } from "@heroui/react";
 
 import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
-import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
 import {
@@ -53,23 +52,23 @@ export function ListToolbar({
   const memberIds = new Set(members.map((member) => member.id));
 
   return (
-    <div className="flex shrink-0 items-center gap-1">
+    <div className="flex flex-wrap items-center gap-2">
       {children}
 
-      <IconButton
-        label="Share this list"
-        onPress={() => setOpen("share")}
-        variant="ghost"
-      >
-        <Share2 aria-hidden="true" className="size-5" />
-      </IconButton>
-
       <Dropdown>
-        <IconButton label="List options" variant="ghost">
-          <MoreHorizontal aria-hidden="true" className="size-5" />
-        </IconButton>
+        <Button className="min-h-11" variant="tertiary">
+          <MoreHorizontal aria-hidden="true" className="size-4" />
+          List options
+        </Button>
         <Dropdown.Popover placement="bottom end">
           <Dropdown.Menu>
+            <Dropdown.Item
+              id="share"
+              onAction={() => setOpen("share")}
+              textValue="Share list"
+            >
+              Share list
+            </Dropdown.Item>
             {isOwn ? (
               <Dropdown.Item
                 id="rename"

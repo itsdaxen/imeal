@@ -81,6 +81,8 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   );
 
   const ordered = useMemo(() => sortItems(shown, sort), [shown, sort]);
+  const needed = ordered.filter((item) => !item.checked);
+  const collected = ordered.filter((item) => item.checked);
   const groups = useMemo(() => {
     if (sort !== "category") {
       return null;
@@ -88,13 +90,13 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
 
     const found = new Map<string, ShoppingItem[]>();
 
-    for (const item of ordered) {
+    for (const item of needed) {
       const name = categoryOf(item);
       found.set(name, [...(found.get(name) ?? []), item]);
     }
 
     return [...found.entries()];
-  }, [ordered, sort]);
+  }, [needed, sort]);
 
   function run(change: Change, action: (data: FormData) => Promise<void>) {
     const data = new FormData();
@@ -133,7 +135,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
           </span>
 
           <span
-            className={`min-w-0 flex-1 break-words ${
+            className={`min-w-0 break-words ${
               item.checked ? "text-muted line-through" : "text-foreground"
             }`}
           >
@@ -147,6 +149,8 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
               {item.category}
             </Chip>
           ) : null}
+
+          <span className="flex-1" />
 
           <span className="sr-only">
             {item.checked
@@ -201,21 +205,25 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   return (
     <>
       {shown.length > 1 ? (
-        <ToggleButtonGroup
-          aria-label="Sort the list"
-          className="self-start"
-          disallowEmptySelection
-          onSelectionChange={(keys) => setSort([...keys][0] as SortMode)}
-          selectedKeys={new Set([sort])}
-          selectionMode="single"
-          size="sm"
-        >
-          {SORTS.map((option) => (
-            <ToggleButton id={option.id} key={option.id}>
-              {option.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <div className="flex flex-wrap items-center gap-3 border-t border-separator pt-5">
+          <Typography color="muted" type="body-sm" weight="medium">
+            Sort
+          </Typography>
+          <ToggleButtonGroup
+            aria-label="Sort the list"
+            className="self-start"
+            disallowEmptySelection
+            onSelectionChange={(keys) => setSort([...keys][0] as SortMode)}
+            selectedKeys={new Set([sort])}
+            selectionMode="single"
+          >
+            {SORTS.map((option) => (
+              <ToggleButton className="min-h-11" id={option.id} key={option.id}>
+                {option.label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </div>
       ) : null}
 
       {groups ? (
@@ -238,9 +246,20 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
         </div>
       ) : (
         <ul className="flex list-none flex-col p-0">
-          {ordered.map((item) => row(item))}
+          {needed.map((item) => row(item))}
         </ul>
       )}
+
+      {collected.length > 0 ? (
+        <section className="flex flex-col gap-1 border-t border-separator pt-4">
+          <Typography color="muted" type="body-sm" weight="semibold">
+            Collected · {collected.length}
+          </Typography>
+          <ul className="flex list-none flex-col p-0">
+            {collected.map((item) => row(item))}
+          </ul>
+        </section>
+      ) : null}
 
       <Modal isOpen={editing !== null} onOpenChange={() => setEditing(null)}>
         <ControlledDialogTrigger />

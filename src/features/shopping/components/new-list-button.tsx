@@ -5,7 +5,6 @@ import { Plus } from "lucide-react";
 import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 
 import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
-import { IconButton } from "@/components/ui/icon-button";
 
 import { createShoppingList } from "../shopping.actions";
 
@@ -15,14 +14,14 @@ export function NewListButton() {
 
   return (
     <>
-      <IconButton
-        className="min-h-11"
-        label="New list"
+      <Button
+        className="min-h-11 shrink-0"
         onPress={() => setIsOpen(true)}
-        variant="ghost"
+        variant="tertiary"
       >
-        <Plus aria-hidden="true" className="size-5" />
-      </IconButton>
+        <Plus aria-hidden="true" className="size-4" />
+        New list
+      </Button>
 
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
         <ControlledDialogTrigger />
