@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   Button,
+  Card,
   Input,
   Label,
   Link,
   TextField,
   Typography,
 } from "@heroui/react";
+
+import { ContentCard } from "@/components/ui/content-card";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
+import { TagList } from "@/components/ui/tag-list";
 
 import {
   approveSuggestion,
@@ -31,7 +38,7 @@ export default async function AdminPage() {
   const pending = await listPendingSuggestions();
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
       <header className="flex flex-col gap-2">
         <Typography type="h1" weight="semibold">
           Moderation
@@ -43,50 +50,117 @@ export default async function AdminPage() {
       </header>
 
       {pending.length === 0 ? (
-        <Typography className="text-muted" type="body">
-          Nothing is waiting for review.
-        </Typography>
+        <section className="rounded-3xl border border-dashed border-border p-8 text-center sm:p-12">
+          <Typography type="h2" weight="semibold">
+            The queue is clear
+          </Typography>
+          <Typography className="mt-2 text-muted" type="body">
+            New catalog suggestions will appear here with everything needed to
+            review them.
+          </Typography>
+        </section>
       ) : (
-        <ul className="flex list-none flex-col gap-4 p-0">
+        <ul className="flex list-none flex-col gap-6 p-0">
           {pending.map((suggestion) => (
-            <li
-              className="flex flex-col gap-3 rounded-2xl border border-border/80 p-4"
-              key={suggestion.id}
-            >
-              <Link href={`/recipes/${suggestion.recipe.id}`}>
-                {suggestion.recipe.title}
-              </Link>
+            <li key={suggestion.id}>
+              <ContentCard className="overflow-hidden" density="flush">
+                <div className="grid md:grid-cols-[15rem_minmax(0,1fr)]">
+                  <div className="h-48 overflow-hidden md:h-full md:min-h-64">
+                    {suggestion.recipe.imageUrl ? (
+                      <Image
+                        alt=""
+                        className="size-full object-cover"
+                        height={320}
+                        sizes="(min-width: 768px) 15rem, 100vw"
+                        src={suggestion.recipe.imageUrl}
+                        width={400}
+                      />
+                    ) : (
+                      <MealArtwork
+                        artwork={artworkFor(suggestion.recipe.id)}
+                        className="size-full"
+                      />
+                    )}
+                  </div>
 
-              <div className="flex flex-wrap items-end gap-3">
-                <form action={approveSuggestion}>
-                  <input
-                    name="suggestionId"
-                    type="hidden"
-                    value={suggestion.id}
-                  />
-                  <Button size="sm" type="submit">
-                    Publish
-                  </Button>
-                </form>
+                  <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-7">
+                    <Card.Header className="gap-2 p-0">
+                      <Eyebrow>Suggested by {suggestion.author}</Eyebrow>
+                      <Typography type="h2" weight="semibold">
+                        {suggestion.recipe.title}
+                      </Typography>
+                      <Typography className="text-muted" type="body-sm">
+                        {suggestion.recipe.prepMinutes} min · serves{" "}
+                        {suggestion.recipe.servings}
+                      </Typography>
+                      <TagList
+                        label="Meals this suits"
+                        tags={suggestion.recipe.mealTags}
+                      />
+                      <Link href={`/recipes/${suggestion.recipe.id}`}>
+                        Open full recipe
+                      </Link>
+                    </Card.Header>
 
-                <form
-                  action={rejectSuggestion}
-                  className="flex items-end gap-2"
-                >
-                  <input
-                    name="suggestionId"
-                    type="hidden"
-                    value={suggestion.id}
-                  />
-                  <TextField className="min-w-56" name="note">
-                    <Label>Reason</Label>
-                    <Input placeholder="Optional note for the author" />
-                  </TextField>
-                  <Button size="sm" type="submit" variant="ghost">
-                    Decline
-                  </Button>
-                </form>
-              </div>
+                    <div className="grid gap-6 border-t border-border/70 pt-5 sm:grid-cols-2">
+                      <section>
+                        <h3 className="font-semibold">Ingredients</h3>
+                        <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-muted">
+                          {suggestion.recipe.ingredients.map((ingredient) => (
+                            <li key={ingredient}>{ingredient}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      <section>
+                        <h3 className="font-semibold">Method</h3>
+                        <ol className="mt-2 flex list-decimal flex-col gap-1 pl-5 text-sm text-muted">
+                          {suggestion.recipe.steps.map((step) => (
+                            <li key={step}>{step}</li>
+                          ))}
+                        </ol>
+                      </section>
+                    </div>
+
+                    {suggestion.recipe.tip ? (
+                      <p className="rounded-2xl bg-accent-soft/50 p-4 text-sm">
+                        <span className="font-medium">Cook&apos;s note:</span>{" "}
+                        {suggestion.recipe.tip}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <Card.Footer className="flex-col items-stretch gap-4 border-t border-border/70 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-7">
+                  <form action={approveSuggestion}>
+                    <input
+                      name="suggestionId"
+                      type="hidden"
+                      value={suggestion.id}
+                    />
+                    <Button className="w-full sm:w-auto" type="submit">
+                      Publish to catalog
+                    </Button>
+                  </form>
+
+                  <form
+                    action={rejectSuggestion}
+                    className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end"
+                  >
+                    <input
+                      name="suggestionId"
+                      type="hidden"
+                      value={suggestion.id}
+                    />
+                    <TextField className="min-w-0 sm:w-72" name="note">
+                      <Label>Reason for declining</Label>
+                      <Input placeholder="Optional note for the author" />
+                    </TextField>
+                    <Button type="submit" variant="ghost">
+                      Decline
+                    </Button>
+                  </form>
+                </Card.Footer>
+              </ContentCard>
             </li>
           ))}
         </ul>

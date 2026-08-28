@@ -18,6 +18,22 @@ export type Suggestion = {
   recipe: { id: string; title: string };
 };
 
+export type ModerationSuggestion = {
+  id: string;
+  author: string;
+  recipe: {
+    id: string;
+    title: string;
+    ingredients: string[];
+    steps: string[];
+    tip: string | null;
+    prepMinutes: number;
+    servings: number;
+    mealTags: MealSlot[];
+    imageUrl: string | null;
+  };
+};
+
 export async function isCurrentUserAdmin(): Promise<boolean> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("is_admin");
@@ -77,9 +93,18 @@ function toSuggestion(row: {
 
 export async function listMySuggestions(): Promise<Suggestion[]> {
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("recipe_suggestions")
     .select("id, status, reviewer_note, recipes (id, title)")
+    .eq("suggested_by", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -89,11 +114,17 @@ export async function listMySuggestions(): Promise<Suggestion[]> {
   return data.map(toSuggestion).filter((item) => item !== null);
 }
 
-export async function listPendingSuggestions(): Promise<Suggestion[]> {
+export async function listPendingSuggestions(): Promise<
+  ModerationSuggestion[]
+> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("recipe_suggestions")
-    .select("id, status, reviewer_note, recipes (id, title)")
+    .select(
+      `id,
+       author:profiles!recipe_suggestions_suggested_by_fkey (display_name),
+       recipes (id, title, ingredients, steps, tip, prep_minutes, servings, meal_tags, image_url)`,
+    )
     .eq("status", "pending")
     .order("created_at", { ascending: true });
 
@@ -101,5 +132,21 @@ export async function listPendingSuggestions(): Promise<Suggestion[]> {
     throw new Error(`Could not load the moderation queue: ${error.message}`);
   }
 
-  return data.map(toSuggestion).filter((item) => item !== null);
+  return data
+    .filter((row) => row.recipes !== null)
+    .map((row) => ({
+      id: row.id,
+      author: row.author?.display_name?.trim() || "A cook",
+      recipe: {
+        id: row.recipes.id,
+        title: row.recipes.title,
+        ingredients: row.recipes.ingredients,
+        steps: row.recipes.steps,
+        tip: row.recipes.tip,
+        prepMinutes: row.recipes.prep_minutes,
+        servings: row.recipes.servings,
+        mealTags: row.recipes.meal_tags,
+        imageUrl: row.recipes.image_url,
+      },
+    }));
 }
