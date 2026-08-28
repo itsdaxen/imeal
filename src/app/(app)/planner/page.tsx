@@ -52,13 +52,32 @@ export default async function PlannerPage({
           </Typography>
         </div>
 
-        <nav aria-label="Change week" className="flex items-center gap-4">
-          <Link href={`/planner?week=${addWeeks(weekStart, -1)}`}>
-            Previous
-          </Link>
-          <Link href="/planner">This week</Link>
-          <Link href={`/planner?week=${addWeeks(weekStart, 1)}`}>Next</Link>
-        </nav>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {plan.planId ? (
+            <ShareWeekPanel
+              friends={friends}
+              recipientIds={recipientIds}
+              weekStart={weekStart}
+            />
+          ) : null}
+          <nav aria-label="Change week" className="flex items-center gap-4">
+            <Link
+              className="inline-flex min-h-11 items-center"
+              href={`/planner?week=${addWeeks(weekStart, -1)}`}
+            >
+              Previous
+            </Link>
+            <Link className="inline-flex min-h-11 items-center" href="/planner">
+              This week
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center"
+              href={`/planner?week=${addWeeks(weekStart, 1)}`}
+            >
+              Next
+            </Link>
+          </nav>
+        </div>
       </header>
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
@@ -118,14 +137,6 @@ export default async function PlannerPage({
       ) : null}
 
       <WeekGrid plan={plan} weekStart={weekStart} />
-
-      {plan.planId ? (
-        <ShareWeekPanel
-          friends={friends}
-          recipientIds={recipientIds}
-          weekStart={weekStart}
-        />
-      ) : null}
     </main>
   );
 }
