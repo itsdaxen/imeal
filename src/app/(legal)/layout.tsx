@@ -17,7 +17,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
         </Link>
       </header>
 
-      {children}
+      <main>{children}</main>
 
       <AppFooter />
     </div>

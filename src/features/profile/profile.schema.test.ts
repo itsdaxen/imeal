@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseProfileForm } from "./profile.schema";
+import { parseDeleteAccountForm, parseProfileForm } from "./profile.schema";
 
 function form(entries: Array<[string, string]>) {
   const data = new FormData();
@@ -61,5 +61,16 @@ describe("parseProfileForm", () => {
       .concat(overrides as Array<[string, string]>);
 
     expect(parseProfileForm(form(entries)).success).toBe(false);
+  });
+});
+
+describe("parseDeleteAccountForm", () => {
+  it("requires the exact destructive confirmation", () => {
+    expect(
+      parseDeleteAccountForm(form([["confirmation", "DELETE"]])).success,
+    ).toBe(true);
+    expect(
+      parseDeleteAccountForm(form([["confirmation", "delete"]])).success,
+    ).toBe(false);
   });
 });

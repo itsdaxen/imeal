@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Link, Typography } from "@heroui/react";
 
 import { SignInForm } from "@/features/auth/components/sign-in-form";
+import { FormMessage } from "@/features/auth/components/form-message";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -10,9 +11,9 @@ export const metadata: Metadata = { title: "Sign in" };
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ accountDeleted?: string; next?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { accountDeleted, next } = await searchParams;
 
   return (
     <section className="flex flex-col gap-7">
@@ -24,6 +25,12 @@ export default async function SignInPage({
           Pick up your plan, recipes, and shopping list where you left them.
         </Typography>
       </div>
+
+      {accountDeleted === "1" ? (
+        <FormMessage tone="notice">
+          Your account and personal data have been deleted.
+        </FormMessage>
+      ) : null}
 
       <SignInForm next={safeInternalPath(next, "/")} />
 

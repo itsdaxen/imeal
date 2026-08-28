@@ -30,3 +30,15 @@ export function parseProfileForm(formData: FormData) {
     defaultEnabledSlots: formData.getAll("defaultEnabledSlots"),
   });
 }
+
+export const deleteAccountSchema = z.object({
+  confirmation: z.literal("DELETE", {
+    error: "Type DELETE exactly to confirm.",
+  }),
+});
+
+export function parseDeleteAccountForm(formData: FormData) {
+  return deleteAccountSchema.safeParse({
+    confirmation: formData.get("confirmation"),
+  });
+}

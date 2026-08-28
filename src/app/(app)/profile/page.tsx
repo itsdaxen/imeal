@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Typography } from "@heroui/react";
 
 import { ProfileForm } from "@/features/profile/components/profile-form";
+import { DeleteAccountForm } from "@/features/profile/components/delete-account-form";
 import { getProfile } from "@/features/profile/profile.queries";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -27,6 +28,7 @@ export default async function ProfilePage() {
       </header>
 
       <ProfileForm profile={profile} />
+      <DeleteAccountForm />
     </main>
   );
 }
