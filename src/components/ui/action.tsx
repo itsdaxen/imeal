@@ -8,13 +8,15 @@ import { Button, buttonVariants, cn, Link } from "@heroui/react";
  * - `primary` — the one thing a view is for. At most one per page.
  * - `neutral` — a supporting action, weighted but not the point.
  * - `quiet` — navigation that happens to be an action.
+ * - `danger` — an irreversible or destructive action.
  *
  * Naming the rank puts it in the markup as `data-action-tier`, so "one primary per
  * page" is something `verify:routes` can check rather than something to remember.
  */
-export type ActionTier = "primary" | "neutral" | "quiet";
+export type ActionTier = "primary" | "neutral" | "quiet" | "danger";
 
 const tierVariant = {
+  danger: "danger",
   neutral: "tertiary",
   primary: "primary",
 } as const;
@@ -32,8 +34,9 @@ export function ActionLink({ className, tier, ...props }: ActionLinkProps) {
     <Link
       className={cn(
         tier === "quiet"
-          ? undefined
+          ? "inline-flex min-h-11 items-center rounded-lg px-1"
           : buttonVariants({ variant: tierVariant[tier] }),
+        tier === "quiet" ? undefined : "min-h-11",
         className,
       )}
       data-action-tier={tier}
@@ -49,8 +52,13 @@ type ActionButtonProps = Omit<
   tier: Exclude<ActionTier, "quiet">;
 };
 
-export function ActionButton({ tier, ...props }: ActionButtonProps) {
+export function ActionButton({ className, tier, ...props }: ActionButtonProps) {
   return (
-    <Button data-action-tier={tier} variant={tierVariant[tier]} {...props} />
+    <Button
+      className={cn("min-h-11", className)}
+      data-action-tier={tier}
+      variant={tierVariant[tier]}
+      {...props}
+    />
   );
 }
