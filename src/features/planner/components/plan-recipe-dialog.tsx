@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Label, ListBox, Modal, Select } from "@heroui/react";
 
+import { ActionButton } from "@/components/ui/action";
 import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
@@ -34,9 +35,9 @@ export function PlanRecipeDialog({
 
   return (
     <>
-      <Button data-action-tier="primary" onPress={() => setIsOpen(true)}>
+      <ActionButton onPress={() => setIsOpen(true)} tier="primary">
         Add to this week
-      </Button>
+      </ActionButton>
 
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
         <ControlledDialogTrigger />

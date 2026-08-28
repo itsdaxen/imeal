@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import {
-  Button,
-  Card,
-  Input,
-  Label,
-  TextField,
-  Typography,
-} from "@heroui/react";
+import { Card, Input, Label, TextField, Typography } from "@heroui/react";
 
+import { ActionButton } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageGrid, span } from "@/components/ui/page-grid";
@@ -100,9 +94,9 @@ export default async function FriendsPage({
               <Label>Search by name</Label>
               <Input placeholder="At least two characters" type="search" />
             </TextField>
-            <Button data-action-tier="primary" type="submit">
+            <ActionButton tier="primary" type="submit">
               Search
-            </Button>
+            </ActionButton>
           </form>
 
           {search && matches.length === 0 ? (

@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
+
+import { ActionButton } from "@/components/ui/action";
 
 import { FormMessage } from "@/features/auth/components/form-message";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
@@ -81,9 +83,9 @@ export function FillWeekForm({ enabledSlots, weekStart }: FillWeekFormProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-4 border-t border-separator pt-4">
-        <Button data-action-tier="primary" isPending={isPending} type="submit">
+        <ActionButton isPending={isPending} tier="primary" type="submit">
           {isPending ? "Filling…" : "Fill the week"}
-        </Button>
+        </ActionButton>
         <Typography color="muted" type="body-sm">
           Approved meals stay where they are. Everything else is replaced.
         </Typography>
