@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-col gap-8 pt-10 sm:pt-14">
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
       <header className="flex flex-col gap-2">
         <Typography type="h1" weight="semibold">
           Profile
