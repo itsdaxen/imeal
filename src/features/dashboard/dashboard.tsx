@@ -199,16 +199,17 @@ function TodayCard({
                     {meal.approved ? "Ready" : "Draft"}
                   </Chip>
                 ) : null}
-                <Link
+                <ActionLink
                   className="text-sm"
                   href={
                     meal?.approved
                       ? `/cook/${meal.id}`
                       : `/planner?week=${weekStart}`
                   }
+                  tier="quiet"
                 >
                   {meal ? (meal.approved ? "Cook" : "Review") : "Plan"}
-                </Link>
+                </ActionLink>
               </span>
             </li>
           ))}

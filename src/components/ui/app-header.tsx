@@ -29,7 +29,10 @@ export function AppHeader({
         panelVariants({ density: "flush" }),
         // A Surface, not a Card, so the radius and shadow that Card supplies are set here.
         "rounded-3xl shadow-surface",
-        "flex items-center justify-between gap-3 px-3 py-2 transition-[border-radius,background-color,box-shadow,padding,border-color] duration-200 ease-out motion-reduce:transition-none sm:px-5 sm:py-3",
+        // Three columns rather than justify-between: the brand is wider than the
+        // avatar, so a flex row leaves the nav visibly closer to one side at every
+        // width. Equal 1fr flanks centre it against the bar, not against its siblings.
+        "grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 py-2 transition-[border-radius,background-color,box-shadow,padding,border-color] duration-200 ease-out motion-reduce:transition-none sm:px-5 sm:py-3",
         // Stuck, the bar around it carries the edge, so the card drops its own.
         "group-data-[stuck=true]:rounded-none group-data-[stuck=true]:bg-transparent group-data-[stuck=true]:py-1 group-data-[stuck=true]:shadow-none sm:group-data-[stuck=true]:py-1.5",
       )}
@@ -40,7 +43,7 @@ export function AppHeader({
 
         <Link
           aria-label="iMeal home"
-          className="flex items-center gap-2.5 text-foreground no-underline"
+          className="flex min-h-11 items-center gap-2.5 px-1 text-foreground no-underline"
           href={homeHref}
         >
           <span className="font-brand text-2xl leading-normal">iMeal</span>
@@ -49,7 +52,7 @@ export function AppHeader({
 
       <HeaderNavigation items={navigationItems} label={navigationLabel} />
 
-      {actions}
+      <div className="flex items-center justify-self-end">{actions}</div>
     </Surface>
   );
 }
