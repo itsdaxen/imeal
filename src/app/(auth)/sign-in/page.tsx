@@ -11,9 +11,16 @@ export const metadata: Metadata = { title: "Sign in" };
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ accountDeleted?: string; next?: string }>;
+  searchParams: Promise<{
+    accountDeleted?: string;
+    error?: string;
+    next?: string;
+  }>;
 }) {
-  const { accountDeleted, next } = await searchParams;
+  const { accountDeleted, error, next } = await searchParams;
+  // A recovery link that cannot be exchanged lands here, so this is the only
+  // place the person can be told why and offered another one.
+  const linkFailed = error === "invalid_code" || error === "missing_code";
 
   return (
     <section className="flex flex-col gap-7">
@@ -29,6 +36,18 @@ export default async function SignInPage({
       {accountDeleted === "1" ? (
         <FormMessage tone="notice">
           Your account and personal data have been deleted.
+        </FormMessage>
+      ) : null}
+
+      {linkFailed ? (
+        <FormMessage tone="error">
+          <span className="flex flex-col items-start gap-2">
+            <span>
+              That link has expired or was already used. Links are good for one
+              sign-in only.
+            </span>
+            <Link href="/forgot-password">Send me a new link</Link>
+          </span>
         </FormMessage>
       ) : null}
 

@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn, Typography } from "@heroui/react";
 
@@ -11,7 +13,7 @@ const formMessageVariants = cva("rounded-2xl px-4 py-3", {
 });
 
 type FormMessageProps = VariantProps<typeof formMessageVariants> & {
-  children: string;
+  children: ReactNode;
   className?: string;
 };
 
