@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { RECIPE_IMAGE_MAX_BYTES } from "@/features/images/image";
-import { chosenFile, storeImage } from "@/features/images/upload";
+import {
+  chosenFile,
+  removeStoredImage,
+  storeImage,
+} from "@/features/images/upload";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { parseRecipeForm } from "./recipe.schema";
@@ -107,6 +111,7 @@ export async function updateRecipe(
   const recipe = parsed.data;
 
   const image = await uploadedImage(formData, supabase, userId);
+  const removeImage = formData.get("remove-image") === "on";
 
   if ("error" in image) {
     return { error: image.error };
@@ -117,7 +122,7 @@ export async function updateRecipe(
   // turning a forbidden write into an empty result rather than a silent success.
   const { data: existing } = await supabase
     .from("recipes")
-    .select("owner_id")
+    .select("owner_id, image_url")
     .eq("id", id)
     .maybeSingle();
 
@@ -125,7 +130,11 @@ export async function updateRecipe(
     .from("recipes")
     .update({
       // Leaving the file input empty keeps whatever photograph is already there.
-      ...(image.url ? { image_url: image.url } : {}),
+      ...(image.url
+        ? { image_url: image.url }
+        : removeImage
+          ? { image_url: null }
+          : {}),
       title: recipe.title,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
@@ -148,6 +157,15 @@ export async function updateRecipe(
 
   if (!data) {
     return { error: "That recipe is no longer yours to edit." };
+  }
+
+  if ((image.url || removeImage) && existing?.image_url) {
+    await removeStoredImage({
+      bucket: "recipe-images",
+      publicUrl: existing.image_url,
+      supabase,
+      userId,
+    });
   }
 
   revalidatePath("/recipes");

@@ -7,13 +7,18 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { AVATAR_MAX_BYTES } from "@/features/images/image";
-import { chosenFile, storeImage } from "@/features/images/upload";
+import {
+  chosenFile,
+  removeStoredImage,
+  storeImage,
+} from "@/features/images/upload";
 
 import { parseDeleteAccountForm, parseProfileForm } from "./profile.schema";
 
 export type ProfileFormState = {
   error?: string;
-  saved?: boolean;
+  /** Changes on every save, so the form can tell one save from the next. */
+  savedAt?: number;
 };
 
 export type DeleteAccountState = {
@@ -136,6 +141,7 @@ export async function updateProfile(
   }
 
   const avatar = chosenFile(formData.get("avatar"));
+  const removeAvatar = formData.get("remove-avatar") === "on";
   let avatarUrl: string | undefined;
 
   if (avatar) {
@@ -154,10 +160,20 @@ export async function updateProfile(
     avatarUrl = stored.url;
   }
 
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single();
+
   const { error } = await supabase
     .from("profiles")
     .update({
-      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+      ...(avatarUrl
+        ? { avatar_url: avatarUrl }
+        : removeAvatar
+          ? { avatar_url: null }
+          : {}),
       display_name: parsed.data.displayName,
       friend_discoverable: parsed.data.discoverable,
       default_meals_per_week: parsed.data.defaultMealsPerWeek,
@@ -169,8 +185,17 @@ export async function updateProfile(
     return { error: "Could not save your profile. Try again." };
   }
 
+  if ((avatarUrl || removeAvatar) && existing?.avatar_url) {
+    await removeStoredImage({
+      bucket: "avatars",
+      publicUrl: existing.avatar_url,
+      supabase,
+      userId: user.id,
+    });
+  }
+
   revalidatePath("/profile");
   revalidatePath("/", "layout");
 
-  return { saved: true };
+  return { savedAt: Date.now() };
 }
