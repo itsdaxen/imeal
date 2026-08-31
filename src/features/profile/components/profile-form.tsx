@@ -1,8 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
-  Avatar,
   Button,
   Card,
   Description,
@@ -12,7 +11,9 @@ import {
 } from "@heroui/react";
 
 import { FormMessage } from "@/features/auth/components/form-message";
+import { CheckChip } from "@/components/ui/check-chip";
 import { ContentCard } from "@/components/ui/content-card";
+import { ImagePicker } from "@/components/ui/image-picker";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { IMAGE_TYPES } from "@/features/images/image";
 import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
@@ -21,25 +22,30 @@ import { updateProfile, type ProfileFormState } from "../profile.actions";
 import type { Profile } from "../profile.queries";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
-  const initials =
-    profile.displayName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? "")
-      .join("") || "?";
-
+  const [isDirty, setIsDirty] = useState(false);
   const [state, formAction, isPending] = useActionState<
     ProfileFormState,
     FormData
   >(updateProfile, {});
+  // Adjusting during render rather than in an effect: a save that lands is not an
+  // event to react to, it is a new state the form is already rendering for.
+  const [seenSave, setSeenSave] = useState(state.savedAt);
+
+  if (state.savedAt !== seenSave) {
+    setSeenSave(state.savedAt);
+    setIsDirty(false);
+  }
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form
+      action={formAction}
+      className="flex flex-col gap-6"
+      onChange={() => setIsDirty(true)}
+    >
       {state.error ? (
         <FormMessage tone="error">{state.error}</FormMessage>
       ) : null}
-      {state.saved ? (
+      {state.savedAt ? (
         <FormMessage tone="notice">Profile saved.</FormMessage>
       ) : null}
 
@@ -51,32 +57,14 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           </Card.Description>
         </Card.Header>
 
-        <div className="grid items-center gap-5 sm:grid-cols-[auto_minmax(0,1fr)]">
-          <Avatar className="size-20" variant="soft">
-            {profile.avatarUrl ? (
-              <Avatar.Image alt="" src={profile.avatarUrl} />
-            ) : null}
-            <Avatar.Fallback className="bg-identity text-xl text-identity-foreground">
-              {initials}
-            </Avatar.Fallback>
-          </Avatar>
-
-          <div className="flex min-w-0 flex-col gap-2">
-            <Label htmlFor="avatar">Profile photograph</Label>
-            <div className="rounded-2xl border border-dashed border-border bg-surface-secondary p-3">
-              <input
-                accept={IMAGE_TYPES.join(",")}
-                className="max-w-full text-sm file:mr-3 file:min-h-11 file:rounded-full file:border-0 file:bg-default file:px-4 file:text-sm file:font-medium file:text-foreground"
-                id="avatar"
-                name="avatar"
-                type="file"
-              />
-            </div>
-            <span className="text-xs text-muted">
-              JPEG, PNG, WebP or AVIF · 2MB max
-            </span>
-          </div>
-        </div>
+        <ImagePicker
+          accept={IMAGE_TYPES.join(",")}
+          currentUrl={profile.avatarUrl}
+          help="JPEG, PNG, WebP or AVIF · 2MB max"
+          label="Profile photograph"
+          name="avatar"
+          shape="avatar"
+        />
 
         <TextField
           defaultValue={profile.displayName}
@@ -112,21 +100,15 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             <legend className="text-sm font-medium text-foreground">
               Meal slots
             </legend>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {MEAL_SLOTS.map((slot) => (
-                <label
-                  className="flex min-h-11 items-center gap-2 text-sm capitalize"
+                <CheckChip
+                  defaultChecked={profile.defaultEnabledSlots.includes(slot)}
                   key={slot}
-                >
-                  <input
-                    className="size-4 accent-accent"
-                    defaultChecked={profile.defaultEnabledSlots.includes(slot)}
-                    name="defaultEnabledSlots"
-                    type="checkbox"
-                    value={slot}
-                  />
-                  {slot}
-                </label>
+                  label={slot}
+                  name="defaultEnabledSlots"
+                  value={slot}
+                />
               ))}
             </div>
           </fieldset>
@@ -142,19 +124,29 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           </Card.Description>
         </Card.Header>
 
-        <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+        <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl bg-surface-secondary px-4 text-sm font-medium">
+          <span>Let other people find me by name</span>
           <input
-            className="size-4 accent-accent"
+            className="peer sr-only"
             defaultChecked={profile.discoverable}
             name="discoverable"
             type="checkbox"
           />
-          Let other people find me by name
+          <span className="relative h-7 w-12 rounded-full bg-default transition-colors peer-checked:bg-accent after:absolute after:top-1 after:left-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5" />
         </label>
       </ContentCard>
 
-      <div className="flex justify-end">
-        <Button isPending={isPending} type="submit">
+      <div className="sticky bottom-4 z-20 flex items-center justify-between gap-4 rounded-2xl bg-surface/95 p-3 shadow-lg backdrop-blur">
+        <span aria-live="polite" className="text-sm text-muted">
+          {isPending
+            ? "Saving your changes…"
+            : state.savedAt && !isDirty
+              ? "All changes saved"
+              : isDirty
+                ? "Unsaved changes"
+                : "No changes to save"}
+        </span>
+        <Button isDisabled={!isDirty} isPending={isPending} type="submit">
           {isPending ? "Saving…" : "Save profile"}
         </Button>
       </div>

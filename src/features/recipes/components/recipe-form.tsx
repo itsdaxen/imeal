@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import Image from "next/image";
 import {
   Button,
   Card,
@@ -13,7 +12,9 @@ import {
 } from "@heroui/react";
 
 import { FormMessage } from "@/features/auth/components/form-message";
+import { CheckChip } from "@/components/ui/check-chip";
 import { ContentCard } from "@/components/ui/content-card";
+import { ImagePicker } from "@/components/ui/image-picker";
 import { PanelTitle } from "@/components/ui/panel-title";
 
 import type { RecipeFormState } from "../recipe.actions";
@@ -138,30 +139,13 @@ export function RecipeForm({
           </Card.Description>
         </Card.Header>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="image">Photograph</Label>
-          {values.imageUrl ? (
-            <Image
-              alt="Current recipe photograph"
-              className="aspect-4/3 w-full rounded-2xl object-cover"
-              height={228}
-              src={values.imageUrl}
-              width={304}
-            />
-          ) : null}
-          <div className="rounded-2xl border border-dashed border-border bg-surface-secondary p-4">
-            <input
-              accept={IMAGE_TYPES.join(",")}
-              className="max-w-full text-sm file:mr-3 file:min-h-11 file:rounded-full file:border-0 file:bg-default file:px-4 file:text-sm file:font-medium file:text-foreground"
-              id="image"
-              name="image"
-              type="file"
-            />
-          </div>
-          <span className="text-xs text-muted">
-            Optional · JPEG, PNG, WebP or AVIF · 5MB max
-          </span>
-        </div>
+        <ImagePicker
+          accept={IMAGE_TYPES.join(",")}
+          currentUrl={values.imageUrl}
+          help="Optional · JPEG, PNG, WebP or AVIF · 5MB max"
+          label="Photograph"
+          name="image"
+        />
 
         <div className="grid grid-cols-2 gap-3">
           <TextField
@@ -189,21 +173,15 @@ export function RecipeForm({
           <legend className="text-sm font-medium text-foreground">
             Works well for
           </legend>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+          <div className="grid grid-cols-2 gap-2">
             {MEAL_SLOTS.map((slot) => (
-              <label
-                className="flex min-h-11 items-center gap-2 text-sm capitalize"
+              <CheckChip
+                defaultChecked={values.mealTags.includes(slot)}
                 key={slot}
-              >
-                <input
-                  className="size-4 accent-accent"
-                  defaultChecked={values.mealTags.includes(slot)}
-                  name="mealTags"
-                  type="checkbox"
-                  value={slot}
-                />
-                {slot}
-              </label>
+                label={slot}
+                name="mealTags"
+                value={slot}
+              />
             ))}
           </div>
         </fieldset>
