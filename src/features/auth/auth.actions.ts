@@ -16,6 +16,8 @@ import {
 export type AuthFormState = {
   error?: string;
   notice?: string;
+  /** Echoed back so a sent-link screen can name the address it went to. */
+  sentTo?: string;
 };
 
 const SIGNED_IN_HOME = "/";
@@ -116,6 +118,7 @@ export async function requestPasswordReset(
   // The same answer either way: telling the sender whether an account exists
   // would turn this form into an account-existence oracle.
   return {
+    sentTo: parsed.data.email,
     notice: "If that address has an account, a reset link is on its way.",
   };
 }
