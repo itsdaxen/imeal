@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link, Typography } from "@heroui/react";
 
+import { ShoppingBasket } from "lucide-react";
+
 import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { TidyPanel } from "@/features/ai/components/tidy-panel";
 import { getCurrentUser } from "@/features/auth/current-user";
@@ -115,10 +118,12 @@ export default async function ShoppingPage({
             <AddItemForm key={list.listId} listId={list.listId} />
 
             {list.items.length === 0 ? (
-              <Typography color="muted" type="body">
-                This list is empty. Add an item, or add your staples from the
-                list menu.
-              </Typography>
+              <EmptyState
+                bare
+                description="Add something above, or send your staples across from the list menu."
+                icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
+                title="Nothing on this list yet"
+              />
             ) : (
               <ShoppingItems items={list.items} />
             )}

@@ -11,7 +11,12 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { Library, SearchX } from "lucide-react";
+
+import { ActionLink } from "@/components/ui/action";
+
 import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import {
@@ -72,11 +77,28 @@ export default async function CatalogPage({
       </form>
 
       {recipes.length === 0 ? (
-        <Typography className="text-muted" type="body">
-          {search
-            ? "Nothing matches that search."
-            : "The catalog is empty for now."}
-        </Typography>
+        <EmptyState
+          actions={
+            search ? (
+              <ActionLink href="/catalog" tier="neutral">
+                Clear the search
+              </ActionLink>
+            ) : null
+          }
+          description={
+            search
+              ? "No published recipe matches that name. Try a shorter word."
+              : "Published recipes appear here once they clear moderation. Suggest one of yours to get it started."
+          }
+          icon={
+            search ? (
+              <SearchX aria-hidden="true" className="size-6" />
+            ) : (
+              <Library aria-hidden="true" className="size-6" />
+            )
+          }
+          title={search ? "Nothing matches" : "The catalog is still empty"}
+        />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (

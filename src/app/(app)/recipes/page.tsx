@@ -6,7 +6,10 @@ import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { RecipeSearch } from "@/features/recipes/components/recipe-search";
 import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
 import { restoreRecipe } from "@/features/recipes/recipe.actions";
+import { BookOpen, SearchX } from "lucide-react";
+
 import { ActionLink } from "@/components/ui/action";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 export const metadata: Metadata = { title: "Recipes" };
@@ -62,13 +65,49 @@ export default async function RecipesPage({
       <RecipeSearch mealTag={filters.mealTag} search={filters.search} />
 
       {recipes.length === 0 ? (
-        <Typography color="muted" type="body">
-          {showArchived
-            ? "Nothing archived."
-            : isFiltered
-              ? "No recipes match that search."
-              : "No recipes yet. Add the first one you actually want to cook."}
-        </Typography>
+        <EmptyState
+          actions={
+            isFiltered ? (
+              <ActionLink href="/recipes" tier="neutral">
+                Clear the filters
+              </ActionLink>
+            ) : showArchived ? (
+              <ActionLink href="/recipes" tier="neutral">
+                Back to your recipes
+              </ActionLink>
+            ) : (
+              <>
+                <ActionLink href="/recipes/new" tier="neutral">
+                  Add a recipe
+                </ActionLink>
+                <ActionLink href="/recipes/import" tier="quiet">
+                  Import from text
+                </ActionLink>
+              </>
+            )
+          }
+          description={
+            showArchived
+              ? "Recipes you archive are kept here, out of the way but not deleted."
+              : isFiltered
+                ? "Nothing in your collection matches that search yet."
+                : "Start with something you already cook often. You can paste it in rather than typing it out."
+          }
+          icon={
+            isFiltered ? (
+              <SearchX aria-hidden="true" className="size-6" />
+            ) : (
+              <BookOpen aria-hidden="true" className="size-6" />
+            )
+          }
+          title={
+            showArchived
+              ? "Nothing archived"
+              : isFiltered
+                ? "No recipes match"
+                : "Your cookbook is empty"
+          }
+        />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (

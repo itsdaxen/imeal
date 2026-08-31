@@ -3,7 +3,10 @@ import type { ReactNode } from "react";
 
 import { Card, Input, Label, TextField, Typography } from "@heroui/react";
 
+import { UsersRound } from "lucide-react";
+
 import { ActionButton } from "@/components/ui/action";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageGrid, span } from "@/components/ui/page-grid";
@@ -101,7 +104,8 @@ export default async function FriendsPage({
 
           {search && matches.length === 0 ? (
             <Typography className="mt-3" color="muted" type="body-sm">
-              Nobody discoverable matches that name.
+              Nobody discoverable matches that name. They may have turned off
+              friend discovery.
             </Typography>
           ) : null}
 
@@ -200,9 +204,12 @@ export default async function FriendsPage({
           width={pending ? span.wide : span.full}
         >
           {friends.length === 0 ? (
-            <Typography color="muted" type="body-sm">
-              Nobody yet. Search for someone above.
-            </Typography>
+            <EmptyState
+              bare
+              description="Search for someone by name above. Once you are connected you can share recipes and shop from the same list."
+              icon={<UsersRound aria-hidden="true" className="size-6" />}
+              title="No friends yet"
+            />
           ) : (
             <ul className="flex list-none flex-col p-0">
               {friends.map((person) => (
