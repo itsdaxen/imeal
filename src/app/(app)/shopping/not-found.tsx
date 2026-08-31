@@ -17,6 +17,7 @@ export default function ShoppingNotFound() {
           </>
         }
         description="It may have been deleted or is no longer shared with you."
+        level={1}
         icon={<ListX className="size-6" />}
         title="This list is unavailable"
       />

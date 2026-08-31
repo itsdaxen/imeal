@@ -26,6 +26,7 @@ export default function NotFound() {
             </>
           }
           description="The page may have moved, been deleted, or no longer be available to you."
+          level={1}
           icon={<MapPinOff className="size-6" />}
           title="We couldn't find that page"
         />

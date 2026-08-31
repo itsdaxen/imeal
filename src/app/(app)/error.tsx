@@ -25,6 +25,7 @@ export default function AppError({ retry }: { retry: () => void }) {
           </>
         }
         description="Something went wrong on our side. Nothing you had saved is affected."
+        level={1}
         icon={<TriangleAlert className="size-6" />}
         title="That did not load"
       />
