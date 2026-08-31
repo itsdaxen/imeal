@@ -58,7 +58,7 @@ export default async function StaplesPage() {
       <PageGrid>
         <ContentCard
           aria-label="Add a staple"
-          className="col-span-12 lg:col-span-6"
+          className={`${span.narrow} self-start`}
         >
           <form action={addStaple} className="flex items-end gap-3">
             <TextField className="min-w-0 flex-1" isRequired name="name">
@@ -81,10 +81,7 @@ export default async function StaplesPage() {
           </div>
         ) : (
           <>
-            <ContentCard
-              aria-label="Active staples"
-              className="col-span-12 lg:col-span-6"
-            >
+            <ContentCard aria-label="Active staples" className={span.wide}>
               <Typography type="h2" weight="semibold">
                 Ready to add · {active.length}
               </Typography>
@@ -97,10 +94,11 @@ export default async function StaplesPage() {
               )}
             </ContentCard>
 
+            {/* Sits under the active list rather than beside the composer. */}
             {paused.length > 0 ? (
               <ContentCard
                 aria-label="Paused staples"
-                className="col-span-12 lg:col-span-6"
+                className={`${span.wide} lg:col-start-5`}
               >
                 <Typography type="h2" weight="semibold">
                   Paused · {paused.length}

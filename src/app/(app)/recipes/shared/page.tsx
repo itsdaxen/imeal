@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Button, Card, Link, Typography } from "@heroui/react";
 
+import { UsersRound } from "lucide-react";
+
 import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { PersonAvatar } from "@/components/ui/person-avatar";
@@ -22,36 +25,30 @@ export default async function SharedRecipesPage() {
 
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <Typography type="h1" weight="semibold">
-            Shared with you
-          </Typography>
-          <Typography className="text-muted" type="body-sm">
-            Cook from a friend&apos;s recipe as-is, or save your own copy to
-            change later.
-          </Typography>
-        </div>
-        <ActionLink href="/recipes" tier="quiet">
-          Your recipes
+      <header className="flex max-w-2xl flex-col gap-2">
+        <ActionLink className="self-start" href="/recipes" tier="quiet">
+          ← Your recipes
         </ActionLink>
+        <Typography type="h1" weight="semibold">
+          Shared with you
+        </Typography>
+        <Typography className="text-muted" type="body-sm">
+          Cook from a friend&apos;s recipe as-is, or save your own copy to
+          change later.
+        </Typography>
       </header>
 
       {recipes.length === 0 ? (
-        <section className="flex flex-col items-start gap-4 rounded-3xl border border-dashed border-border p-7 sm:p-10">
-          <div className="flex max-w-xl flex-col gap-2">
-            <Typography type="h2" weight="semibold">
-              Your shared cookbook starts with a friend
-            </Typography>
-            <Typography className="text-muted" type="body">
-              Add people you cook with, then recipes they send you will collect
-              here until you remove them.
-            </Typography>
-          </div>
-          <ActionLink href="/friends" tier="primary">
-            Find friends
-          </ActionLink>
-        </section>
+        <EmptyState
+          actions={
+            <ActionLink href="/friends" tier="primary">
+              Find friends
+            </ActionLink>
+          }
+          description="Add people you cook with, then recipes they send you will collect here until you remove them."
+          icon={<UsersRound aria-hidden="true" className="size-6" />}
+          title="Your shared cookbook starts with a friend"
+        />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
