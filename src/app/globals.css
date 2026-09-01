@@ -14,6 +14,17 @@ html {
   html {
     scroll-behavior: auto;
   }
+
+  /* Component libraries animate from their own stylesheets, so honouring the
+     preference per component would mean trusting every one of them. !important is
+     the idiom here because this has to win against anything a library declares. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {

@@ -15,9 +15,11 @@ export default function ImportRecipeLoading() {
         <ContentCard className="gap-5" density="spacious">
           <Skeleton className="h-7 w-52" />
           <FieldSkeleton rows={15} />
-          <div className="flex items-center justify-between gap-3">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-11 w-36 rounded-full" />
+          {/* Fixed widths here set the card's min-content, so at 320px they have
+              to be allowed to wrap rather than force the page sideways. */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Skeleton className="h-4 w-40 max-w-full" />
+            <Skeleton className="h-11 w-36 max-w-full rounded-full" />
           </div>
         </ContentCard>
 
