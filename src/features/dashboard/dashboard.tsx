@@ -9,7 +9,10 @@ import {
 } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
+import { CalendarPlus } from "lucide-react";
+
 import { ActionLink } from "@/components/ui/action";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { MealArtwork } from "@/components/ui/meal-artwork";
 import { LinkCard } from "@/components/ui/link-card";
@@ -73,22 +76,20 @@ function NextMealCard({
 }: Pick<DashboardData, "nextMeal" | "weekStart">) {
   if (!nextMeal) {
     return (
-      <ContentCard
-        className={cn(span.wide, "justify-center gap-5")}
-        id="next-meal"
-      >
-        <Card.Header className="gap-1">
-          <Eyebrow>Next up</Eyebrow>
-          <PanelTitle>Nothing planned yet</PanelTitle>
-          <Card.Description>
-            Place a few recipes into the week and the next one shows up here.
-          </Card.Description>
-        </Card.Header>
-        <Card.Footer>
-          <ActionLink href={`/planner?week=${weekStart}`} tier="neutral">
-            Plan the week
-          </ActionLink>
-        </Card.Footer>
+      // Empty, this is the biggest object on the page and the least informative, so
+      // it uses the same empty state as everywhere else rather than a bespoke one.
+      <ContentCard className={cn(span.wide, "justify-center")} id="next-meal">
+        <EmptyState
+          actions={
+            <ActionLink href={`/planner?week=${weekStart}`} tier="primary">
+              Plan the week
+            </ActionLink>
+          }
+          bare
+          description="Place a few recipes into the week and the next one shows up here."
+          icon={<CalendarPlus aria-hidden="true" className="size-6" />}
+          title="Nothing planned yet"
+        />
       </ContentCard>
     );
   }
