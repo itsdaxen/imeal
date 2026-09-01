@@ -20,7 +20,7 @@ export function SlotCell({ dayIndex, meal, slot, weekStart }: SlotCellProps) {
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-2xl ${
+      className={`flex flex-col overflow-hidden rounded-xl ${
         meal
           ? meal.approved
             ? "bg-accent-soft/35 ring-1 ring-accent/40"

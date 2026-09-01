@@ -105,7 +105,7 @@ export default async function CatalogPage({
           {recipes.map((recipe) => (
             <li key={recipe.id}>
               <ContentCard className="h-full" density="compact">
-                <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+                <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
                   {recipe.imageUrl ? (
                     <Image
                       alt=""

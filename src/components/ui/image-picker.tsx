@@ -56,7 +56,7 @@ export function ImagePicker({
         className={`relative grid place-items-center overflow-hidden bg-surface-secondary ${
           shape === "avatar"
             ? "size-28 rounded-full"
-            : "aspect-4/3 w-full rounded-2xl"
+            : "aspect-4/3 w-full rounded-xl"
         }`}
       >
         {visibleUrl ? (

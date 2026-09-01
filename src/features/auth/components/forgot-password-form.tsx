@@ -65,7 +65,7 @@ function SentPanel({ email }: { email: string }) {
     <div className="flex flex-col gap-5">
       <span
         aria-hidden="true"
-        className="grid size-12 place-items-center rounded-2xl bg-accent-soft text-accent"
+        className="grid size-12 place-items-center rounded-xl bg-accent-soft text-accent"
       >
         <MailCheck className="size-6" />
       </span>

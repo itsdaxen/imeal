@@ -131,7 +131,7 @@ export default async function AdminPage() {
                     </div>
 
                     {suggestion.recipe.tip ? (
-                      <p className="rounded-2xl bg-accent-soft/50 p-4 text-sm">
+                      <p className="rounded-xl bg-accent-soft/50 p-4 text-sm">
                         <span className="font-medium">Cook&apos;s note:</span>{" "}
                         {suggestion.recipe.tip}
                       </p>

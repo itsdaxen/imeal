@@ -28,7 +28,7 @@ export function RecipeFormSkeleton() {
 
         <ContentCard className="gap-5" density="spacious">
           <Skeleton className="h-7 w-44" />
-          <Skeleton className="aspect-4/3 w-full rounded-2xl" />
+          <Skeleton className="aspect-4/3 w-full rounded-xl" />
           <div className="grid grid-cols-2 gap-3">
             <FieldSkeleton />
             <FieldSkeleton />

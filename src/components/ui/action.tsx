@@ -35,7 +35,7 @@ export function ActionLink({ className, tier, ...props }: ActionLinkProps) {
     <Link
       className={cn(
         tier === "quiet"
-          ? "inline-flex min-h-11 items-center rounded-lg px-1"
+          ? "inline-flex min-h-11 items-center rounded-xl px-1"
           : buttonVariants({ variant: tierVariant[tier] }),
         tier === "quiet" ? undefined : "min-h-11",
         className,

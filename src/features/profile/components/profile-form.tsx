@@ -136,7 +136,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         </label>
       </ContentCard>
 
-      <div className="sticky bottom-4 z-20 flex items-center justify-between gap-4 rounded-2xl bg-surface/95 p-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-20 flex items-center justify-between gap-4 rounded-3xl bg-surface/95 p-3 shadow-lg backdrop-blur">
         <span aria-live="polite" className="text-sm text-muted">
           {isPending
             ? "Saving your changes…"

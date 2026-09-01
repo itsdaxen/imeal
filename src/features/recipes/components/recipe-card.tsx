@@ -10,7 +10,7 @@ import type { RecipeSummary } from "../recipe.queries";
 export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
   return (
     <LinkCard className="h-full hover:shadow-lg" density="compact">
-      <Card.Content className="h-36 flex-none overflow-hidden rounded-lg">
+      <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
         {recipe.image_url ? (
           <Image
             alt=""

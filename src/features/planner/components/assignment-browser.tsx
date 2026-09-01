@@ -75,7 +75,7 @@ export function AssignmentBrowser({
             <li key={recipe.id}>
               <ContentCard className="h-full" density="compact">
                 <Link
-                  className="block h-40 w-full flex-none overflow-hidden rounded-lg"
+                  className="block h-40 w-full flex-none overflow-hidden rounded-xl"
                   href={`/recipes/${recipe.id}`}
                   aria-label={`View ${recipe.title}`}
                 >

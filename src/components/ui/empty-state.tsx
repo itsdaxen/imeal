@@ -31,7 +31,7 @@ export function EmptyState({
     <>
       <span
         aria-hidden="true"
-        className="grid size-14 place-items-center rounded-2xl bg-surface-secondary text-muted"
+        className="grid size-14 place-items-center rounded-xl bg-surface-secondary text-muted"
       >
         {icon}
       </span>

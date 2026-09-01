@@ -90,6 +90,31 @@ button:disabled,
 }
 
 /**
+ * Selection is position, and position is black. HeroUI's toggle defaults to the accent,
+ * which would make a sort control look like product state — the same green that means
+ * "approved" elsewhere. The tokens are declared on the button, not the group, so they
+ * have to be re-pointed there or the child's own declaration shadows them.
+ */
+[data-slot="toggle-button"] {
+  --toggle-button-bg-selected: var(--foreground);
+  --toggle-button-bg-selected-hover: var(--foreground);
+  --toggle-button-bg-selected-pressed: var(--foreground);
+  --toggle-button-fg-selected: var(--background);
+}
+
+/**
+ * Corner radius has four steps and each one has a job:
+ *
+ *   full     controls — buttons, pills, avatars
+ *   1.5rem   surface  — cards and panels (HeroUI's `.card` supplies this)
+ *   0.75rem  inset    — anything nested inside a surface: media, cells, tiles, fields
+ *   0.375rem micro    — checkbox-sized squares, where an inset radius reads as a circle
+ *
+ * `rounded-lg` and `rounded-2xl` are deliberately absent: they were the two values the
+ * codebase reached for when nobody had decided which step applied.
+ */
+
+/**
  * Where every field in a form is required, the asterisk distinguishes nothing and is
  * only noise stacked on a label. The field keeps `isRequired`, so validation and the
  * accessible name are unchanged — this hides the marker, not the meaning.

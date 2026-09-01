@@ -29,7 +29,7 @@ export function CardSkeleton({
 }) {
   return (
     <ContentCard className={className} density="compact">
-      {media ? <Skeleton className="h-36 w-full rounded-lg" /> : null}
+      {media ? <Skeleton className="h-36 w-full rounded-xl" /> : null}
       <div className="flex flex-col gap-2 p-1">
         <Skeleton className="h-5 w-3/4" />
         {Array.from({ length: lines - 1 }, (_, index) => (

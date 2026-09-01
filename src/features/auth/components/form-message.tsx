@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn, Typography } from "@heroui/react";
 
-const formMessageVariants = cva("rounded-2xl px-4 py-3", {
+const formMessageVariants = cva("rounded-xl px-4 py-3", {
   variants: {
     tone: {
       error: "bg-danger-soft text-danger-soft-foreground",

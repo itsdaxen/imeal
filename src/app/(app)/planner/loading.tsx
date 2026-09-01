@@ -16,7 +16,7 @@ export default function PlannerLoading() {
             <Skeleton className="h-3.5 w-16" />
             <div className="flex flex-col gap-3 xl:gap-2">
               {[0, 1, 2].map((slot) => (
-                <Skeleton className="h-14 w-full rounded-2xl" key={slot} />
+                <Skeleton className="h-14 w-full rounded-xl" key={slot} />
               ))}
             </div>
           </ContentCard>
