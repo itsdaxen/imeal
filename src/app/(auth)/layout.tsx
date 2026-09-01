@@ -8,8 +8,8 @@ import authKitchen from "../../../public/auth-kitchen.webp";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(32rem,0.82fr)]">
-      <section className="flex min-h-[100svh] flex-col px-5 py-6 sm:px-10 lg:order-2 lg:px-14 lg:py-10 xl:px-20">
+    <main className="grid min-h-screen md:grid-cols-[minmax(0,1fr)_minmax(22rem,1.05fr)] lg:grid-cols-[minmax(0,1fr)_minmax(32rem,0.82fr)]">
+      <section className="flex min-h-[100svh] flex-col px-5 py-6 sm:px-10 md:order-2 md:px-10 md:py-8 lg:px-14 lg:py-10 xl:px-20">
         <header className="flex items-center justify-between gap-6">
           <Link
             aria-label="iMeal home"
@@ -38,25 +38,25 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </footer>
       </section>
 
-      <aside className="relative hidden min-h-screen overflow-hidden bg-foreground lg:block">
+      <aside className="relative hidden min-h-screen overflow-hidden bg-foreground md:block">
         <Image
           alt="A colorful grain bowl and vegetables ready for the week"
           className="object-cover"
           fill
           loading="eager"
           placeholder="blur"
-          sizes="(min-width: 1024px) 55vw, 0px"
+          sizes="(min-width: 768px) 50vw, 0px"
           src={authKitchen}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/10" />
-        <div className="absolute inset-x-0 bottom-0 p-10 text-white xl:p-14">
-          <p className="mb-4 text-xs font-semibold tracking-[0.2em] text-white/75 uppercase">
+        <div className="absolute inset-x-0 bottom-0 p-8 text-white lg:p-10 xl:p-14">
+          <p className="mb-4 text-xs font-semibold tracking-[0.15em] text-white/75 uppercase">
             Your week, brought together
           </p>
-          <h2 className="max-w-xl text-4xl leading-tight font-semibold text-balance xl:text-5xl">
+          <h2 className="max-w-xl text-3xl leading-tight font-semibold text-balance lg:text-4xl xl:text-5xl">
             From recipes you trust to one useful shopping list.
           </h2>
-          <ul className="mt-8 grid gap-3 text-sm text-white/90 xl:grid-cols-2">
+          <ul className="mt-8 hidden gap-3 text-sm text-white/90 lg:grid xl:grid-cols-2">
             {[
               "Plan every meal",
               "Cook step by step",
