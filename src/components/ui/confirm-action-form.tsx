@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Button } from "@heroui/react";
-
+import { ActionButton } from "./action";
 import { ConfirmDialog } from "./confirm-dialog";
 
 type ConfirmActionFormProps = {
@@ -35,14 +34,15 @@ export function ConfirmActionForm({
           <input key={name} name={name} type="hidden" value={value} />
         ))}
 
-        <Button
+        {/* Everything routed through a confirmation is irreversible, so the
+            trigger carries the danger tier rather than looking like navigation. */}
+        <ActionButton
           onPress={() => setIsConfirming(true)}
-          size="sm"
+          tier="danger"
           type="button"
-          variant="ghost"
         >
           {label}
-        </Button>
+        </ActionButton>
       </form>
 
       <ConfirmDialog

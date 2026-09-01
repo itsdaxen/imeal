@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { Button } from "@heroui/react";
 
+import { ActionButton } from "@/components/ui/action";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormMessage } from "@/features/auth/components/form-message";
 
@@ -19,15 +19,14 @@ export function DeleteRecipeForm({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-2">
       <form action={formAction} ref={formRef}>
-        <Button
+        <ActionButton
           isPending={isPending}
           onPress={() => setIsConfirming(true)}
-          size="sm"
+          tier="danger"
           type="button"
-          variant="ghost"
         >
           Delete
-        </Button>
+        </ActionButton>
       </form>
 
       <ConfirmDialog
