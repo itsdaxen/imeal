@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import { ShoppingBasket } from "lucide-react";
 import { Input, Label, TextField, Typography } from "@heroui/react";
 
+import { BackLink } from "@/components/ui/back-link";
 import { SectionTitle } from "@/components/ui/section-title";
-import { ActionButton, ActionLink } from "@/components/ui/action";
+import { ActionButton } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageGrid, span } from "@/components/ui/page-grid";
@@ -44,9 +45,7 @@ export default async function StaplesPage() {
   return (
     <main className="flex w-full flex-col gap-6 pt-10 sm:pt-14">
       <header className="flex max-w-2xl flex-col gap-2">
-        <ActionLink className="self-start" href="/shopping" tier="quiet">
-          ← Shopping
-        </ActionLink>
+        <BackLink href="/shopping">Shopping</BackLink>
         <Typography type="h1" weight="semibold">
           Staples
         </Typography>

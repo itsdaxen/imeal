@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { Typography } from "@heroui/react";
 
+import { BackLink } from "@/components/ui/back-link";
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,13 +45,9 @@ export default async function AssignPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
       <header className="flex flex-col gap-3">
-        <ActionLink
-          className="w-fit"
-          href={`/planner?week=${weekStart}`}
-          tier="quiet"
-        >
-          ← Back to the week
-        </ActionLink>
+        <BackLink href={`/planner?week=${weekStart}`}>
+          Back to the week
+        </BackLink>
         <Typography type="h1" weight="semibold">
           Plan {mealSlot} for {dayLabel}
         </Typography>

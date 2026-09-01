@@ -5,6 +5,7 @@ import { Button, Card, Link, Typography } from "@heroui/react";
 
 import { UsersRound } from "lucide-react";
 
+import { BackLink } from "@/components/ui/back-link";
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -27,9 +28,7 @@ export default async function SharedRecipesPage() {
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
       <header className="flex max-w-2xl flex-col gap-2">
-        <ActionLink className="self-start" href="/recipes" tier="quiet">
-          ← Your recipes
-        </ActionLink>
+        <BackLink href="/recipes">Your recipes</BackLink>
         <Typography type="h1" weight="semibold">
           Shared with you
         </Typography>
