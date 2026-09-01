@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Card, Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
@@ -112,14 +113,14 @@ export default async function RecipePage({ params }: RecipePageProps) {
               </ActionLink>
             </div>
             {isOwner ? (
-              <div className="flex w-full flex-wrap items-center gap-4 border-t border-separator pt-4">
-                <ActionLink href={`/recipes/${recipe.id}/edit`} tier="quiet">
+              <div className="flex w-full flex-wrap items-center gap-3 border-t border-separator pt-4">
+                <ActionLink href={`/recipes/${recipe.id}/edit`} tier="neutral">
                   Edit
                 </ActionLink>
 
                 <form action={archiveRecipe}>
                   <input name="recipeId" type="hidden" value={recipe.id} />
-                  <Button className="min-h-11" type="submit" variant="ghost">
+                  <Button className="min-h-11" type="submit" variant="tertiary">
                     Archive
                   </Button>
                 </form>
@@ -151,10 +152,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       <div className="grid gap-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-12">
         <ContentCard density="spacious">
-          <Typography type="h2" weight="semibold">
-            Ingredients
-          </Typography>
-          <ul className="flex flex-col gap-1.5 pl-5">
+          <SectionTitle>Ingredients</SectionTitle>
+          <ul className="flex list-disc flex-col gap-1.5 pl-5 marker:text-muted">
             {recipe.ingredients.map((ingredient) => (
               <li key={ingredient}>{ingredient}</li>
             ))}
@@ -162,12 +161,21 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </ContentCard>
 
         <section className="flex flex-col gap-4 p-1 sm:p-2">
-          <Typography type="h2" weight="semibold">
-            Steps
-          </Typography>
-          <ol className="flex flex-col gap-5 pl-6">
+          <SectionTitle>Steps</SectionTitle>
+          <ol className="flex list-none flex-col gap-5 p-0">
             {recipe.steps.map((step, index) => (
-              <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
+              <li
+                className="grid grid-cols-[1.75rem_1fr] gap-3"
+                key={`${index}-${step.slice(0, 24)}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="grid size-7 place-items-center rounded-full bg-accent-soft text-sm font-semibold text-accent tabular-nums"
+                >
+                  {index + 1}
+                </span>
+                <span className="pt-0.5">{step}</span>
+              </li>
             ))}
           </ol>
         </section>
@@ -175,17 +183,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       {recipe.tip ? (
         <section className="flex flex-col gap-2">
-          <Typography type="h2" weight="semibold">
-            Tip
-          </Typography>
+          <SectionTitle>Tip</SectionTitle>
           <Typography type="body">{recipe.tip}</Typography>
         </section>
       ) : null}
       {isOwner ? (
         <section className="flex flex-col gap-3 border-t border-border/60 pt-6">
-          <Typography type="h2" weight="semibold">
-            The catalog
-          </Typography>
+          <SectionTitle>The catalog</SectionTitle>
           <SuggestForm recipeId={recipe.id} suggestion={suggestion} />
         </section>
       ) : null}
