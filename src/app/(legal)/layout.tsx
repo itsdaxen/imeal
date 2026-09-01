@@ -6,7 +6,7 @@ import { AppFooter } from "@/components/ui/app-footer";
 
 export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 lg:px-8">
       <header className="py-6">
         <Link
           aria-label="iMeal home"
