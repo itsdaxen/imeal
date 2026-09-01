@@ -11,6 +11,7 @@ import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
 
 type WeekGridProps = {
+  listId: string | null;
   plan: WeekPlan;
   weekStart: string;
 };
@@ -21,7 +22,7 @@ function mealAt(plan: WeekPlan, dayIndex: number, slot: string) {
   );
 }
 
-export function WeekGrid({ plan, weekStart }: WeekGridProps) {
+export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
   const days = weekDays(weekStart);
   const firstPlannedDay = days.find((day) =>
     plan.meals.some((meal) => meal.dayIndex === day.index),
@@ -39,11 +40,12 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
         </Card.Header>
 
         <Card.Content>
-          <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-1">
             {plan.enabledSlots.map((slot) => (
               <SlotCell
                 dayIndex={day.index}
                 key={slot}
+                listId={listId}
                 meal={mealAt(plan, day.index, slot)}
                 slot={slot}
                 weekStart={weekStart}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Typography } from "@heroui/react";
+import { Label, ListBox, Select, Typography } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 
@@ -18,15 +18,42 @@ const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
 };
 
 type FillWeekFormProps = {
+  compact?: boolean;
   enabledSlots: ReadonlyArray<MealSlot>;
+  lists: ReadonlyArray<{ id: string; name: string }>;
+  targetListId: string | null;
   weekStart: string;
 };
 
-export function FillWeekForm({ enabledSlots, weekStart }: FillWeekFormProps) {
+export function FillWeekForm({
+  compact = false,
+  enabledSlots,
+  lists,
+  targetListId,
+  weekStart,
+}: FillWeekFormProps) {
   const [state, formAction, isPending] = useActionState<
     PlannerFormState,
     FormData
   >(generateWeekPlan, {});
+
+  if (compact) {
+    return (
+      <form action={formAction}>
+        <input name="weekStart" type="hidden" value={weekStart} />
+        <input name="source" type="hidden" value="both" />
+        {enabledSlots.map((slot) => (
+          <input key={slot} name="slots" type="hidden" value={slot} />
+        ))}
+        {targetListId ? (
+          <input name="listId" type="hidden" value={targetListId} />
+        ) : null}
+        <ActionButton isPending={isPending} tier="primary" type="submit">
+          {isPending ? "Generating…" : "Generate plan"}
+        </ActionButton>
+      </form>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -82,12 +109,42 @@ export function FillWeekForm({ enabledSlots, weekStart }: FillWeekFormProps) {
         </fieldset>
       </div>
 
+      {lists.length > 0 ? (
+        <div className="flex max-w-sm flex-col gap-1">
+          <Label id="shoppingList">Shopping list</Label>
+          <Select
+            aria-labelledby="shoppingList"
+            defaultSelectedKey={targetListId ?? lists[0]?.id}
+            name="listId"
+          >
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {lists.map((list) => (
+                  <ListBox.Item
+                    id={list.id}
+                    key={list.id}
+                    textValue={list.name}
+                  >
+                    {list.name}
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
+          </Select>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-4 border-t border-separator pt-4">
-        <ActionButton isPending={isPending} tier="primary" type="submit">
-          {isPending ? "Filling…" : "Fill the week"}
+        <ActionButton isPending={isPending} tier="neutral" type="submit">
+          {isPending ? "Generating…" : "Generate plan"}
         </ActionButton>
         <Typography color="muted" type="body-sm">
-          Approved meals stay where they are. Everything else is replaced.
+          Existing generated meals are replaced. The selected list becomes this
+          week&apos;s shopping destination.
         </Typography>
       </div>
     </form>

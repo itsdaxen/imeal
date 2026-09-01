@@ -133,6 +133,7 @@ export async function generateWeekPlan(
     weekStart: formData.get("weekStart"),
     source: formData.get("source"),
     slots: formData.getAll("slots"),
+    listId: formData.get("listId") || undefined,
   });
 
   if (!parsed.success) {
@@ -140,31 +141,23 @@ export async function generateWeekPlan(
   }
 
   const { supabase, userId } = await requireUserId();
-  const { weekStart, source, slots } = parsed.data;
+  const { weekStart, source, slots, listId } = parsed.data;
 
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", weekStart)
-    .maybeSingle();
+  if (listId) {
+    const { data: destination } = await supabase
+      .from("shopping_lists")
+      .select("id")
+      .eq("id", listId)
+      .maybeSingle();
 
-  // Approved meals are decisions already made; they are kept and their recipes spent.
-  const { data: approved } = plan
-    ? await supabase
-        .from("meal_plan_items")
-        .select("day_index, slot, recipe_id")
-        .eq("meal_plan_id", plan.id)
-        .eq("approved", true)
-    : { data: [] };
+    if (!destination) {
+      return { error: "That shopping list is no longer available." };
+    }
+  }
 
   const recipes = await listPlannableRecipes(source);
   const result = planWeek({
-    locked: (approved ?? []).map((meal) => ({
-      dayIndex: meal.day_index,
-      slot: meal.slot,
-      recipeId: meal.recipe_id,
-    })),
+    locked: [],
     recipes,
     slots,
   });
@@ -185,7 +178,22 @@ export async function generateWeekPlan(
     return { error: "Could not fill the week. Try again." };
   }
 
+  if (listId) {
+    const { error: destinationError } = await supabase
+      .from("meal_plans")
+      .update({ target_list_id: listId })
+      .eq("user_id", userId)
+      .eq("week_start", weekStart);
+
+    if (destinationError) {
+      return {
+        error: "The plan was made, but its shopping list could not be saved.",
+      };
+    }
+  }
+
   revalidatePath("/planner");
+  revalidatePath("/shopping");
   redirect(`/planner?week=${weekStart}`);
 }
 

@@ -13,11 +13,13 @@ import { listFriends } from "@/features/friends/friend.queries";
 import { WeekGrid } from "@/features/planner/components/week-grid";
 import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
 import { ContentCard } from "@/components/ui/content-card";
-import {
-  approveWholeWeek,
-  deleteWeekPlan,
-} from "@/features/planner/plan.actions";
+import { deleteWeekPlan } from "@/features/planner/plan.actions";
 import { getWeekPlan } from "@/features/planner/plan.queries";
+import { generateShoppingList } from "@/features/shopping/shopping.actions";
+import {
+  listShoppingLists,
+  resolveWeekList,
+} from "@/features/shopping/shopping.queries";
 import {
   addWeeks,
   formatWeekLabel,
@@ -33,12 +35,15 @@ export default async function PlannerPage({
 }) {
   const { week } = await searchParams;
   const weekStart = resolveWeekStart(week);
-  const [plan, sharedWithMe, friends, recipientIds] = await Promise.all([
-    getWeekPlan(weekStart),
-    listPlansSharedWithMe(),
-    listFriends(),
-    listPlanRecipients(weekStart),
-  ]);
+  const [plan, sharedWithMe, friends, recipientIds, lists, destination] =
+    await Promise.all([
+      getWeekPlan(weekStart),
+      listPlansSharedWithMe(),
+      listFriends(),
+      listPlanRecipients(weekStart),
+      listShoppingLists(),
+      resolveWeekList(weekStart),
+    ]);
 
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
@@ -60,36 +65,53 @@ export default async function PlannerPage({
               weekStart={weekStart}
             />
           ) : null}
-          <nav aria-label="Change week" className="flex items-center gap-4">
-            <Link
-              className="inline-flex min-h-11 items-center"
-              href={`/planner?week=${addWeeks(weekStart, -1)}`}
-            >
-              Previous
-            </Link>
-            <Link className="inline-flex min-h-11 items-center" href="/planner">
-              This week
-            </Link>
-            <Link
-              className="inline-flex min-h-11 items-center"
-              href={`/planner?week=${addWeeks(weekStart, 1)}`}
-            >
-              Next
-            </Link>
-          </nav>
         </div>
       </header>
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
 
-      <ContentCard density="flush">
-        <Disclosure defaultExpanded={plan.meals.length === 0}>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <FillWeekForm
+          compact
+          enabledSlots={plan.enabledSlots}
+          lists={lists}
+          targetListId={destination.listId}
+          weekStart={weekStart}
+        />
+
+        <form action={generateShoppingList}>
+          <input name="weekStart" type="hidden" value={weekStart} />
+          <input name="listId" type="hidden" value={destination.listId ?? ""} />
+          <Button
+            className="min-h-11"
+            isDisabled={plan.meals.length === 0 || !destination.listId}
+            type="submit"
+            variant="tertiary"
+          >
+            Add to shopping list
+          </Button>
+        </form>
+
+        {plan.meals.length > 0 ? (
+          <ConfirmActionForm
+            action={deleteWeekPlan}
+            confirmLabel="Empty the week"
+            description="Every meal in this week goes, and anyone you shared it with loses their copy of the invitation."
+            fields={{ weekStart }}
+            heading="Empty this week?"
+            label="Empty the week"
+          />
+        ) : null}
+      </div>
+
+      <ContentCard className="mx-auto w-full max-w-2xl" density="flush">
+        <Disclosure>
           <Disclosure.Heading>
             <Disclosure.Trigger className="flex min-h-16 w-full items-center gap-4 px-5 text-left sm:px-6">
               <span>
-                <span className="block font-semibold">Fill automatically</span>
+                <span className="block font-semibold">More options</span>
                 <span className="block text-sm text-muted">
-                  Build a fresh week from your recipe collection.
+                  Choose recipe sources, meals, and a shopping list.
                 </span>
               </span>
               <Disclosure.Indicator />
@@ -100,6 +122,8 @@ export default async function PlannerPage({
             <Disclosure.Body className="border-t border-separator px-5 py-5 sm:px-6">
               <FillWeekForm
                 enabledSlots={plan.enabledSlots}
+                lists={lists}
+                targetListId={destination.listId}
                 weekStart={weekStart}
               />
             </Disclosure.Body>
@@ -107,36 +131,28 @@ export default async function PlannerPage({
         </Disclosure>
       </ContentCard>
 
-      {plan.meals.length > 0 ? (
-        <section
-          aria-label="Week actions"
-          className="flex flex-wrap items-center justify-between gap-3"
+      <WeekGrid listId={destination.listId} plan={plan} weekStart={weekStart} />
+
+      <nav
+        aria-label="Change week"
+        className="flex items-center justify-center gap-6 border-t border-separator pt-5"
+      >
+        <Link
+          className="inline-flex min-h-11 items-center"
+          href={`/planner?week=${addWeeks(weekStart, -1)}`}
         >
-          <Typography className="text-muted" type="body-sm">
-            {plan.meals.filter((meal) => meal.approved).length} of{" "}
-            {plan.meals.length} planned meals approved
-          </Typography>
-          <div className="flex flex-wrap items-center gap-3">
-            <form action={approveWholeWeek}>
-              <input name="weekStart" type="hidden" value={weekStart} />
-              <Button className="min-h-11" type="submit" variant="tertiary">
-                Approve the whole week
-              </Button>
-            </form>
-
-            <ConfirmActionForm
-              action={deleteWeekPlan}
-              confirmLabel="Empty the week"
-              description="Every meal in this week goes, approved ones included, and anyone you shared it with loses their copy of the invitation."
-              fields={{ weekStart }}
-              heading="Empty this week?"
-              label="Empty the week"
-            />
-          </div>
-        </section>
-      ) : null}
-
-      <WeekGrid plan={plan} weekStart={weekStart} />
+          Previous
+        </Link>
+        <Link className="inline-flex min-h-11 items-center" href="/planner">
+          This week
+        </Link>
+        <Link
+          className="inline-flex min-h-11 items-center"
+          href={`/planner?week=${addWeeks(weekStart, 1)}`}
+        >
+          Next
+        </Link>
+      </nav>
     </main>
   );
 }

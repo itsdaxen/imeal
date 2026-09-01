@@ -8,11 +8,10 @@ import { Dropdown } from "@heroui/react";
 import { IconButton } from "@/components/ui/icon-button";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
-import { clearSlot, setMealApproval, shuffleMeal } from "../plan.actions";
+import { clearSlot, shuffleMeal } from "../plan.actions";
 
 type MealMenuProps = {
   dayIndex: number;
-  isApproved: boolean;
   itemId: string;
   recipeId: string;
   slot: MealSlot;
@@ -21,7 +20,6 @@ type MealMenuProps = {
 
 export function MealMenu({
   dayIndex,
-  isApproved,
   itemId,
   recipeId,
   slot,
@@ -52,15 +50,13 @@ export function MealMenu({
       </IconButton>
       <Dropdown.Popover placement="bottom end">
         <Dropdown.Menu>
-          {!isApproved ? (
-            <Dropdown.Item
-              id="cook"
-              onAction={() => router.push(`/cook/${recipeId}`)}
-              textValue="Cook now"
-            >
-              Cook now
-            </Dropdown.Item>
-          ) : null}
+          <Dropdown.Item
+            id="cook"
+            onAction={() => router.push(`/cook/${recipeId}`)}
+            textValue="Cook now"
+          >
+            Cook now
+          </Dropdown.Item>
           <Dropdown.Item
             id="change"
             onAction={() => router.push(assignHref)}
@@ -68,23 +64,13 @@ export function MealMenu({
           >
             Choose another recipe
           </Dropdown.Item>
-          {!isApproved ? (
-            <Dropdown.Item
-              id="swap"
-              onAction={() => run(shuffleMeal, { itemId, weekStart })}
-              textValue="Pick another for me"
-            >
-              Pick another for me
-            </Dropdown.Item>
-          ) : (
-            <Dropdown.Item
-              id="review"
-              onAction={() => run(setMealApproval, { itemId, weekStart })}
-              textValue="Mark for review"
-            >
-              Mark for review
-            </Dropdown.Item>
-          )}
+          <Dropdown.Item
+            id="swap"
+            onAction={() => run(shuffleMeal, { itemId, weekStart })}
+            textValue="Pick another for me"
+          >
+            Pick another for me
+          </Dropdown.Item>
           <Dropdown.Item
             className="text-danger"
             id="remove"

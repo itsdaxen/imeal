@@ -1,38 +1,27 @@
-import { Button, Chip } from "@heroui/react";
+import { Check } from "lucide-react";
 
-import { setMealApproval } from "../plan.actions";
+import { IconButton } from "@/components/ui/icon-button";
+import { generateShoppingList } from "@/features/shopping/shopping.actions";
 
 type MealControlsProps = {
-  isApproved: boolean;
-  itemId: string;
+  listId: string;
   weekStart: string;
 };
 
-export function MealControls({
-  isApproved,
-  itemId,
-  weekStart,
-}: MealControlsProps) {
+export function MealControls({ listId, weekStart }: MealControlsProps) {
   return (
-    <div className="flex items-center">
-      {isApproved ? (
-        <Chip color="accent" size="sm" variant="soft">
-          Approved
-        </Chip>
-      ) : (
-        <form action={setMealApproval}>
-          <input name="itemId" type="hidden" value={itemId} />
-          <input name="weekStart" type="hidden" value={weekStart} />
-          <Button
-            size="sm"
-            type="submit"
-            className="min-h-10"
-            variant="primary"
-          >
-            Approve
-          </Button>
-        </form>
-      )}
-    </div>
+    <form action={generateShoppingList}>
+      <input name="listId" type="hidden" value={listId} />
+      <input name="weekStart" type="hidden" value={weekStart} />
+      <IconButton
+        className="text-accent"
+        label="Add this week to the shopping list"
+        size="sm"
+        type="submit"
+        variant="ghost"
+      >
+        <Check aria-hidden="true" className="size-5" strokeWidth={2.5} />
+      </IconButton>
+    </form>
   );
 }

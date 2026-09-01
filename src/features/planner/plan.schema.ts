@@ -19,6 +19,7 @@ export const generationSchema = z.object({
   weekStart: z.iso.date(),
   source: z.enum(GENERATION_SOURCES),
   slots: z.array(z.enum(MEAL_SLOTS)).min(1, "Choose at least one meal slot."),
+  listId: z.uuid().optional(),
 });
 
 export const mealSchema = z.object({
