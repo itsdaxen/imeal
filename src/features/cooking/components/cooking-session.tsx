@@ -100,7 +100,9 @@ export function CookingSession({
       >
         <Card.Header className="flex-row items-center gap-2">
           <Clock3 aria-hidden="true" className="size-4 text-accent" />
-          <SectionTitle>Elapsed time</SectionTitle>
+          <SectionTitle className="text-base sm:text-lg">
+            Elapsed time
+          </SectionTitle>
         </Card.Header>
         <Card.Content className="gap-4">
           <time
@@ -170,12 +172,10 @@ export function CookingSession({
         </section>
 
         <section className="flex flex-col gap-5">
-          <div className="flex items-baseline justify-between gap-4">
-            <SectionTitle>Step {stepIndex + 1}</SectionTitle>
-            <Typography className="text-muted" type="body-sm">
-              of {steps.length}
-            </Typography>
-          </div>
+          <SectionTitle>
+            Step {stepIndex + 1}{" "}
+            <span className="font-normal text-muted">of {steps.length}</span>
+          </SectionTitle>
 
           <p
             aria-live="polite"
@@ -206,7 +206,7 @@ export function CookingSession({
       <aside className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <ContentCard density="compact">
           <Card.Header>
-            <SectionTitle>Steps</SectionTitle>
+            <SectionTitle className="text-base sm:text-lg">Steps</SectionTitle>
           </Card.Header>
           <Card.Content>
             <ProgressBar
@@ -214,7 +214,6 @@ export function CookingSession({
               size="sm"
               value={completed}
             >
-              <ProgressBar.Output />
               <ProgressBar.Track>
                 <ProgressBar.Fill />
               </ProgressBar.Track>
@@ -249,7 +248,7 @@ export function CookingSession({
           <ContentCard density="compact">
             <Card.Header className="flex-row items-center gap-2">
               <Lightbulb aria-hidden="true" className="size-4 text-accent" />
-              <SectionTitle>Tip</SectionTitle>
+              <SectionTitle className="text-base sm:text-lg">Tip</SectionTitle>
             </Card.Header>
             <Card.Content>
               <Typography className="text-muted" type="body-sm">

@@ -25,7 +25,9 @@ describe("CookingSession", () => {
     expect(
       within(screen.getByTestId("current-step")).getByText("Boil the water"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Step 1" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Step 1 of 3" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
   });
 
@@ -77,7 +79,9 @@ describe("CookingSession", () => {
       screen.getByRole("button", { name: "Go to step 3: Serve" }),
     );
 
-    expect(screen.getByRole("heading", { name: "Step 3" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Step 3 of 3" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("progressbar")).toHaveAttribute(
       "aria-valuenow",
       "100",
