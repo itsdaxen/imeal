@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ShoppingBasket } from "lucide-react";
 import { Input, Label, TextField, Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ActionButton, ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -60,7 +61,10 @@ export default async function StaplesPage() {
           aria-label="Add a staple"
           className={`${span.narrow} self-start`}
         >
-          <form action={addStaple} className="flex items-end gap-3">
+          <form
+            action={addStaple}
+            className="all-required flex items-end gap-3"
+          >
             <TextField className="min-w-0 flex-1" isRequired name="name">
               <Label>Add a staple</Label>
               <Input placeholder="Milk" />
@@ -82,9 +86,7 @@ export default async function StaplesPage() {
         ) : (
           <>
             <ContentCard aria-label="Active staples" className={span.wide}>
-              <Typography type="h2" weight="semibold">
-                Ready to add · {active.length}
-              </Typography>
+              <SectionTitle>Ready to add · {active.length}</SectionTitle>
               {active.length > 0 ? (
                 rows(active)
               ) : (
@@ -100,9 +102,7 @@ export default async function StaplesPage() {
                 aria-label="Paused staples"
                 className={`${span.wide} lg:col-start-5`}
               >
-                <Typography type="h2" weight="semibold">
-                  Paused · {paused.length}
-                </Typography>
+                <SectionTitle>Paused · {paused.length}</SectionTitle>
                 {rows(paused)}
               </ContentCard>
             ) : null}

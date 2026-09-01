@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { MealArtwork } from "@/components/ui/meal-artwork";
@@ -389,9 +390,9 @@ export async function Dashboard() {
             id="recipes"
           >
             <div className="flex items-baseline justify-between gap-4">
-              <Typography id="recent-recipes-title" type="h2" weight="semibold">
+              <SectionTitle id="recent-recipes-title">
                 Recent recipes
-              </Typography>
+              </SectionTitle>
               <ActionLink href="/recipes" tier="quiet">
                 See all
               </ActionLink>

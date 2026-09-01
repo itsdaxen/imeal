@@ -13,7 +13,7 @@ export function SignInForm({ next }: { next?: string }) {
   >(signIn, {});
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} className="all-required flex flex-col gap-5">
       {next ? <input name="next" type="hidden" value={next} /> : null}
 
       {state.error ? (

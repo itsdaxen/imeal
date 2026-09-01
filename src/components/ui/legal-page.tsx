@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { Eyebrow } from "@/components/ui/eyebrow";
 
 export type LegalSection = {
@@ -39,9 +40,7 @@ export function LegalPage({
             className="border-t border-separator pt-6"
             key={section.title}
           >
-            <Typography type="h2" weight="semibold">
-              {section.title}
-            </Typography>
+            <SectionTitle>{section.title}</SectionTitle>
             <div className="mt-3 flex flex-col gap-3 text-sm leading-7 text-muted [&_a]:font-medium [&_a]:text-foreground [&_li]:ml-5 [&_li]:list-disc [&_strong]:text-foreground">
               {section.content}
             </div>

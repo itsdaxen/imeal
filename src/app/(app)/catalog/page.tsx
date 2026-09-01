@@ -13,6 +13,7 @@ import {
 
 import { Library, SearchX } from "lucide-react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
 
 import { ContentCard } from "@/components/ui/content-card";
@@ -123,14 +124,14 @@ export default async function CatalogPage({
                 </Card.Content>
                 <Card.Header>
                   <TagList label="Meals this suits" tags={recipe.mealTags} />
-                  <Typography type="h2" weight="semibold">
+                  <SectionTitle>
                     <Link
                       className="text-foreground no-underline"
                       href={`/recipes/${recipe.id}`}
                     >
                       {recipe.title}
                     </Link>
-                  </Typography>
+                  </SectionTitle>
                 </Card.Header>
 
                 <Card.Footer className="justify-between">
@@ -157,9 +158,7 @@ export default async function CatalogPage({
 
       {suggestions.length > 0 ? (
         <section className="flex max-w-3xl flex-col gap-3 border-t border-separator pt-6">
-          <Typography type="h2" weight="semibold">
-            Your suggestions
-          </Typography>
+          <SectionTitle>Your suggestions</SectionTitle>
 
           <ContentCard density="compact">
             <ul className="flex list-none flex-col p-0">

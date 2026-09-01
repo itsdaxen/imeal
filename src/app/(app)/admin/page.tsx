@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 import { ActionLink } from "@/components/ui/action";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -52,9 +53,7 @@ export default async function AdminPage() {
 
       {pending.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-border p-8 text-center sm:p-12">
-          <Typography type="h2" weight="semibold">
-            The queue is clear
-          </Typography>
+          <SectionTitle>The queue is clear</SectionTitle>
           <Typography className="mt-2 text-muted" type="body">
             New catalog suggestions will appear here with everything needed to
             review them.
@@ -95,9 +94,7 @@ export default async function AdminPage() {
                           </Typography>
                         </div>
                       </div>
-                      <Typography type="h2" weight="semibold">
-                        {suggestion.recipe.title}
-                      </Typography>
+                      <SectionTitle>{suggestion.recipe.title}</SectionTitle>
                       <Typography className="text-muted" type="body-sm">
                         {suggestion.recipe.prepMinutes} min · serves{" "}
                         {suggestion.recipe.servings}

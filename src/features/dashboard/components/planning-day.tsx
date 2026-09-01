@@ -13,8 +13,8 @@ const dayCellVariants = cva(
   },
 );
 
-// Keeps seven labels readable at 320px.
-const dayLabelVariants = cva("text-[0.65rem] font-medium", {
+// Seven labels have to fit at 320px, but not below the type ramp to do it.
+const dayLabelVariants = cva("text-xs font-medium", {
   variants: {
     isToday: {
       false: "text-muted",

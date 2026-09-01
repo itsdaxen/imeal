@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import { Card, Input, Label, Link, TextField, Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ActionButton } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
@@ -63,9 +64,7 @@ export function AssignmentBrowser({
 
       {shown.length === 0 ? (
         <ContentCard className="items-center py-10 text-center">
-          <Typography type="h2" weight="semibold">
-            No matching recipes
-          </Typography>
+          <SectionTitle>No matching recipes</SectionTitle>
           <Typography color="muted" type="body-sm">
             Try another name.
           </Typography>

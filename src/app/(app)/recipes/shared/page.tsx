@@ -5,6 +5,7 @@ import { Button, Card, Link, Typography } from "@heroui/react";
 
 import { UsersRound } from "lucide-react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -86,14 +87,14 @@ export default async function SharedRecipesPage() {
                       </Typography>
                     </div>
                   </div>
-                  <Typography type="h2" weight="semibold">
+                  <SectionTitle>
                     <Link
                       className="text-foreground no-underline"
                       href={`/recipes/${recipe.id}`}
                     >
                       {recipe.title}
                     </Link>
-                  </Typography>
+                  </SectionTitle>
                   <TagList label="Meals this suits" tags={recipe.mealTags} />
                   <Typography className="text-muted" type="body-sm">
                     {recipe.prepMinutes} min · serves {recipe.servings}

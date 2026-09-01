@@ -1,4 +1,6 @@
-import { Button, Typography } from "@heroui/react";
+import { Button } from "@heroui/react";
+
+import { SectionTitle } from "@/components/ui/section-title";
 
 import { copySharedWeek, dismissSharedWeek } from "../plan-sharing.actions";
 import type { SharedPlan } from "../plan-sharing.queries";
@@ -15,9 +17,7 @@ export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
 
   return (
     <section className="flex flex-col gap-3 rounded-3xl border border-accent/50 bg-accent-soft/30 p-4 sm:p-5">
-      <Typography type="h2" weight="semibold">
-        Shared with you
-      </Typography>
+      <SectionTitle>Shared with you</SectionTitle>
 
       <ul className="flex list-none flex-col gap-2 p-0">
         {plans.map((plan) => (

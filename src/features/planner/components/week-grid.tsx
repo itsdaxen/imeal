@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 
 import type { WeekPlan } from "../plan.queries";
@@ -29,11 +30,9 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
 
   function dayCard(day: (typeof days)[number]) {
     return (
-      <ContentCard className="h-full" density="compact" key={day.date}>
+      <ContentCard density="compact" key={day.date}>
         <Card.Header>
-          <Typography className="xl:text-lg" type="h2" weight="semibold">
-            {day.label}
-          </Typography>
+          <SectionTitle className="xl:text-lg">{day.label}</SectionTitle>
           <Typography className="text-muted" type="body-xs">
             {day.dateLabel}
           </Typography>
@@ -83,7 +82,7 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
                 type="button"
               >
                 <span className="font-semibold">{day.label.slice(0, 3)}</span>
-                <span className="flex items-center gap-1 text-[0.7rem]">
+                <span className="flex items-center gap-1 text-xs">
                   {day.dateLabel.split(" ").at(-1)}
                   {hasMeal ? (
                     <span

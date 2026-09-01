@@ -13,7 +13,7 @@ export function ResetPasswordForm() {
   >(updatePassword, {});
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} className="all-required flex flex-col gap-5">
       {state.error ? (
         <FormMessage tone="error">{state.error}</FormMessage>
       ) : null}

@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} className="all-required flex flex-col gap-5">
       {state.error ? (
         <FormMessage tone="error">{state.error}</FormMessage>
       ) : null}
@@ -85,7 +85,7 @@ function SentPanel({ email }: { email: string }) {
 
       <form
         action={formAction}
-        className="flex flex-col gap-3"
+        className="all-required flex flex-col gap-3"
         onSubmit={() => setSecondsLeft(RESEND_SECONDS)}
       >
         <input name="email" type="hidden" value={email} />

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Clock3, Lightbulb } from "lucide-react";
 import { Button, Card, ProgressBar, Typography } from "@heroui/react";
 
+import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 
 import { useWakeLock } from "../use-wake-lock";
@@ -99,9 +100,7 @@ export function CookingSession({
       >
         <Card.Header className="flex-row items-center gap-2">
           <Clock3 aria-hidden="true" className="size-4 text-accent" />
-          <Typography type="h2" weight="semibold">
-            Elapsed time
-          </Typography>
+          <SectionTitle>Elapsed time</SectionTitle>
         </Card.Header>
         <Card.Content className="gap-4">
           <time
@@ -132,9 +131,7 @@ export function CookingSession({
 
       <div className="flex flex-col gap-10 lg:col-start-1 lg:row-span-2 lg:row-start-1">
         <section className="flex flex-col gap-4">
-          <Typography type="h2" weight="semibold">
-            Ingredients
-          </Typography>
+          <SectionTitle>Ingredients</SectionTitle>
 
           <ul className="flex list-none flex-col gap-1 p-0">
             {ingredients.map((ingredient, index) => {
@@ -174,9 +171,7 @@ export function CookingSession({
 
         <section className="flex flex-col gap-5">
           <div className="flex items-baseline justify-between gap-4">
-            <Typography type="h2" weight="semibold">
-              Step {stepIndex + 1}
-            </Typography>
+            <SectionTitle>Step {stepIndex + 1}</SectionTitle>
             <Typography className="text-muted" type="body-sm">
               of {steps.length}
             </Typography>
@@ -211,9 +206,7 @@ export function CookingSession({
       <aside className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <ContentCard density="compact">
           <Card.Header>
-            <Typography type="h2" weight="semibold">
-              Steps
-            </Typography>
+            <SectionTitle>Steps</SectionTitle>
           </Card.Header>
           <Card.Content>
             <ProgressBar
@@ -256,9 +249,7 @@ export function CookingSession({
           <ContentCard density="compact">
             <Card.Header className="flex-row items-center gap-2">
               <Lightbulb aria-hidden="true" className="size-4 text-accent" />
-              <Typography type="h2" weight="semibold">
-                Tip
-              </Typography>
+              <SectionTitle>Tip</SectionTitle>
             </Card.Header>
             <Card.Content>
               <Typography className="text-muted" type="body-sm">

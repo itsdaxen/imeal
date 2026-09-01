@@ -1,4 +1,6 @@
-import { Button, Typography } from "@heroui/react";
+import { Button } from "@heroui/react";
+
+import { SectionTitle } from "@/components/ui/section-title";
 
 import type { Person } from "@/features/friends/friend.queries";
 
@@ -23,9 +25,7 @@ export function SharePanel({
 
   return (
     <section className="flex flex-col gap-3 border-t border-border/60 pt-6">
-      <Typography type="h2" weight="semibold">
-        Share with a friend
-      </Typography>
+      <SectionTitle>Share with a friend</SectionTitle>
 
       <ul className="flex list-none flex-col p-0">
         {friends.map((friend) => {

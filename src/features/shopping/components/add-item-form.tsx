@@ -12,7 +12,7 @@ export function AddItemForm({ listId }: { listId: string }) {
   const [showQuantity, setShowQuantity] = useState(false);
 
   return (
-    <form action={addManualItem} className="flex flex-col gap-3">
+    <form action={addManualItem} className="all-required flex flex-col gap-3">
       <input name="listId" type="hidden" value={listId} />
 
       <div className="flex items-end gap-2 sm:gap-3">

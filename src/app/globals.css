@@ -90,6 +90,15 @@ button:disabled,
 }
 
 /**
+ * Where every field in a form is required, the asterisk distinguishes nothing and is
+ * only noise stacked on a label. The field keeps `isRequired`, so validation and the
+ * accessible name are unchanged — this hides the marker, not the meaning.
+ */
+.all-required [data-required="true"] > .label::after {
+  content: none;
+}
+
+/**
  * HeroUI paints its focus ring from react-aria's data-focus-visible attribute, and
  * its CSS-only fallback is `:focus-visible:not(:focus)`, which cannot match a real
  * focus. Composed controls — a Link wearing button classes, for one — then show
