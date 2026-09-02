@@ -47,15 +47,6 @@ export default async function RecipesPage({
           aria-label="Recipe collection actions"
           className="flex flex-wrap items-center gap-x-2 gap-y-1"
         >
-          <ActionLink
-            href={showArchived ? "/recipes" : "/recipes?archived=1"}
-            tier="quiet"
-          >
-            {showArchived ? "Back to your recipes" : "Archived"}
-          </ActionLink>
-          <ActionLink href="/recipes/shared" tier="quiet">
-            Shared
-          </ActionLink>
           <ActionLink href="/recipes/import" tier="neutral">
             Import
           </ActionLink>
@@ -69,7 +60,11 @@ export default async function RecipesPage({
         </nav>
       </header>
 
-      <RecipeSearch mealTag={filters.mealTag} search={filters.search} />
+      <RecipeSearch
+        archived={showArchived}
+        mealTag={filters.mealTag}
+        search={filters.search}
+      />
 
       {recipes.length === 0 ? (
         <EmptyState
