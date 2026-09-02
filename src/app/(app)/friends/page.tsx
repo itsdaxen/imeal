@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { Card, Input, Label, TextField, Typography } from "@heroui/react";
+import { Card, cn, Input, Label, TextField, Typography } from "@heroui/react";
 
 import { UsersRound } from "lucide-react";
 
@@ -32,17 +32,19 @@ export const metadata: Metadata = { title: "Friends" };
 /** Each group of people is a panel, so a quiet week is not four floating headings. */
 function Panel({
   children,
+  compactOnMobile = false,
   eyebrow,
   title,
   width = span.full,
 }: {
   children: ReactNode;
+  compactOnMobile?: boolean;
   eyebrow: string;
   title: string;
   width?: string;
 }) {
   return (
-    <ContentCard className={width}>
+    <ContentCard className={cn(width, compactOnMobile && "p-4 sm:p-6")}>
       <Card.Header className="gap-1">
         <Eyebrow>{eyebrow}</Eyebrow>
         <PanelTitle>{title}</PanelTitle>
@@ -83,7 +85,12 @@ export default async function FriendsPage({
       </header>
 
       <PageGrid>
-        <Panel eyebrow="Search" title="Find someone">
+        <Panel
+          compactOnMobile
+          eyebrow="Search"
+          title="Find someone"
+          width={pending ? span.wide : span.full}
+        >
           <form
             action="/friends"
             className="flex flex-wrap items-end gap-3"
@@ -140,7 +147,7 @@ export default async function FriendsPage({
           <Panel
             eyebrow="Waiting on you"
             title="Requests for you"
-            width={outgoing.length > 0 ? span.narrow : span.full}
+            width={span.narrow}
           >
             <ul className="flex list-none flex-col p-0">
               {incoming.map((request) => (
@@ -172,11 +179,7 @@ export default async function FriendsPage({
         ) : null}
 
         {outgoing.length > 0 ? (
-          <Panel
-            eyebrow="Sent"
-            title="Waiting on a reply"
-            width={incoming.length > 0 ? span.narrow : span.full}
-          >
+          <Panel eyebrow="Sent" title="Waiting on a reply" width={span.narrow}>
             <ul className="flex list-none flex-col p-0">
               {outgoing.map((request) => (
                 <PersonRow
