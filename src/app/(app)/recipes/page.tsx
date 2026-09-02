@@ -39,11 +39,14 @@ export default async function RecipesPage({
 
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <Typography type="h1" weight="semibold">
           {showArchived ? "Archived recipes" : "Recipes"}
         </Typography>
-        <div className="flex flex-wrap items-center gap-4">
+        <nav
+          aria-label="Recipe collection actions"
+          className="flex flex-wrap items-center gap-x-2 gap-y-1"
+        >
           <ActionLink
             href={showArchived ? "/recipes" : "/recipes?archived=1"}
             tier="quiet"
@@ -51,15 +54,19 @@ export default async function RecipesPage({
             {showArchived ? "Back to your recipes" : "Archived"}
           </ActionLink>
           <ActionLink href="/recipes/shared" tier="quiet">
-            Shared with you
+            Shared
           </ActionLink>
           <ActionLink href="/recipes/import" tier="neutral">
             Import
           </ActionLink>
-          <ActionLink href="/recipes/new" tier="primary">
+          <ActionLink
+            className="order-first sm:order-none"
+            href="/recipes/new"
+            tier="primary"
+          >
             Add a recipe
           </ActionLink>
-        </div>
+        </nav>
       </header>
 
       <RecipeSearch mealTag={filters.mealTag} search={filters.search} />
