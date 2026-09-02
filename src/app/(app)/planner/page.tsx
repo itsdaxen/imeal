@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Button, Disclosure, Link, Typography } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
-import { ShareWeekPanel } from "@/features/planner/components/share-week-panel";
+import { PlannerOptions } from "@/features/planner/components/planner-options";
 import { SharedWeekInbox } from "@/features/planner/components/shared-week-inbox";
 import {
   listPlanRecipients,
@@ -11,9 +11,7 @@ import {
 } from "@/features/planner/plan-sharing.queries";
 import { listFriends } from "@/features/friends/friend.queries";
 import { WeekGrid } from "@/features/planner/components/week-grid";
-import { ConfirmActionForm } from "@/components/ui/confirm-action-form";
 import { ContentCard } from "@/components/ui/content-card";
-import { deleteWeekPlan } from "@/features/planner/plan.actions";
 import { getWeekPlan } from "@/features/planner/plan.queries";
 import { generateShoppingList } from "@/features/shopping/shopping.actions";
 import {
@@ -58,13 +56,12 @@ export default async function PlannerPage({
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-3">
-          {plan.planId ? (
-            <ShareWeekPanel
-              friends={friends}
-              recipientIds={recipientIds}
-              weekStart={weekStart}
-            />
-          ) : null}
+          <PlannerOptions
+            friends={friends}
+            hasMeals={plan.meals.length > 0}
+            recipientIds={recipientIds}
+            weekStart={weekStart}
+          />
         </div>
       </header>
 
@@ -91,17 +88,6 @@ export default async function PlannerPage({
             Add to shopping list
           </Button>
         </form>
-
-        {plan.meals.length > 0 ? (
-          <ConfirmActionForm
-            action={deleteWeekPlan}
-            confirmLabel="Empty the week"
-            description="Every meal in this week goes, and anyone you shared it with loses their copy of the invitation."
-            fields={{ weekStart }}
-            heading="Empty this week?"
-            label="Empty the week"
-          />
-        ) : null}
       </div>
 
       <ContentCard className="w-full" density="flush">
@@ -130,7 +116,7 @@ export default async function PlannerPage({
 
       <nav
         aria-label="Change week"
-        className="flex items-center justify-center gap-6 border-t border-separator pt-5"
+        className="flex items-center justify-center gap-6"
       >
         <Link
           className="inline-flex min-h-11 items-center"
