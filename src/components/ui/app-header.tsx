@@ -32,7 +32,7 @@ export function AppHeader({
         // Three columns rather than justify-between: the brand is wider than the
         // avatar, so a flex row leaves the nav visibly closer to one side at every
         // width. Equal 1fr flanks centre it against the bar, not against its siblings.
-        "grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 py-2 transition-[border-radius,background-color,box-shadow,padding,border-color] duration-200 ease-out motion-reduce:transition-none sm:px-5 sm:py-3",
+        "grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 transition-[border-radius,background-color,box-shadow,padding,border-color] duration-200 ease-out motion-reduce:transition-none sm:px-5 sm:py-3 lg:grid-cols-[1fr_auto_1fr]",
         // Stuck, the bar around it carries the edge, so the card drops its own.
         "group-data-[stuck=true]:rounded-none group-data-[stuck=true]:bg-transparent group-data-[stuck=true]:py-1 group-data-[stuck=true]:shadow-none sm:group-data-[stuck=true]:py-1.5",
       )}

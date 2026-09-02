@@ -206,9 +206,6 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
     <>
       {shown.length > 1 ? (
         <div className="flex flex-wrap items-center gap-3 border-t border-separator pt-5">
-          <Typography color="muted" type="body-sm" weight="medium">
-            Sort
-          </Typography>
           <ToggleButtonGroup
             aria-label="Sort the list"
             className="self-start"
