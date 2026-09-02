@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 
 import Image from "next/image";
-import {
-  Button,
-  Card,
-  Input,
-  Label,
-  Link,
-  TextField,
-  Typography,
-} from "@heroui/react";
+import { Button, Input, Label, TextField, Typography } from "@heroui/react";
 
 import { Library, SearchX } from "lucide-react";
 
@@ -19,11 +11,8 @@ import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
-import { TagList } from "@/components/ui/tag-list";
-import {
-  saveCatalogRecipe,
-  withdrawSuggestion,
-} from "@/features/catalog/catalog.actions";
+import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
+import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import {
   listCatalog,
   listMySuggestions,
@@ -104,53 +93,17 @@ export default async function CatalogPage({
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <li key={recipe.id}>
-              <ContentCard className="h-full" density="compact">
-                <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
-                  {recipe.imageUrl ? (
-                    <Image
-                      alt=""
-                      className="size-full object-cover"
-                      height={192}
-                      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
-                      src={recipe.imageUrl}
-                      width={320}
-                    />
-                  ) : (
-                    <MealArtwork
-                      artwork={artworkFor(recipe.id)}
-                      className="size-full"
-                    />
-                  )}
-                </Card.Content>
-                <Card.Header>
-                  <TagList label="Meals this suits" tags={recipe.mealTags} />
-                  <SectionTitle>
-                    <Link
-                      className="text-foreground no-underline"
-                      href={`/recipes/${recipe.id}`}
-                    >
-                      {recipe.title}
-                    </Link>
-                  </SectionTitle>
-                </Card.Header>
-
-                <Card.Footer className="justify-between">
-                  <Typography className="text-muted" type="body-sm">
-                    {recipe.prepMinutes} min · serves {recipe.servings}
-                  </Typography>
-
-                  <form action={saveCatalogRecipe}>
-                    <input name="recipeId" type="hidden" value={recipe.id} />
-                    <Button
-                      className="min-h-11"
-                      type="submit"
-                      variant="tertiary"
-                    >
-                      Save a copy
-                    </Button>
-                  </form>
-                </Card.Footer>
-              </ContentCard>
+              <RecipeCard
+                href={`/catalog/${recipe.id}`}
+                recipe={{
+                  id: recipe.id,
+                  image_url: recipe.imageUrl,
+                  meal_tags: recipe.mealTags,
+                  prep_minutes: recipe.prepMinutes,
+                  servings: recipe.servings,
+                  title: recipe.title,
+                }}
+              />
             </li>
           ))}
         </ul>

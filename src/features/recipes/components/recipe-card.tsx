@@ -7,7 +7,13 @@ import { TagList } from "@/components/ui/tag-list";
 
 import type { RecipeSummary } from "../recipe.queries";
 
-export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
+export function RecipeCard({
+  href,
+  recipe,
+}: {
+  href?: string;
+  recipe: RecipeSummary;
+}) {
   return (
     <LinkCard className="h-full hover:shadow-lg" density="compact">
       <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
@@ -31,7 +37,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
       <Card.Header className="gap-2">
         <TagList label="Meals this suits" tags={recipe.meal_tags} />
         <Card.Title className="text-base">
-          <LinkCard.Target href={`/recipes/${recipe.id}`}>
+          <LinkCard.Target href={href ?? `/recipes/${recipe.id}`}>
             {recipe.title}
           </LinkCard.Target>
         </Card.Title>
