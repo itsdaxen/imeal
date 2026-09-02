@@ -85,10 +85,7 @@ export default async function ShoppingPage({
         ) : null}
       </header>
 
-      <nav
-        aria-label="Shopping lists"
-        className="flex flex-col gap-2 border-y border-separator py-4"
-      >
+      <nav aria-label="Shopping lists" className="flex flex-col gap-2 py-4">
         <Typography color="muted" type="body-xs" weight="semibold">
           YOUR LISTS
         </Typography>

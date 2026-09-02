@@ -110,10 +110,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
 
   function row(item: ShoppingItem) {
     return (
-      <li
-        className="flex items-center justify-between gap-2 border-b border-separator last:border-b-0"
-        key={item.id}
-      >
+      <li className="flex items-center justify-between gap-2" key={item.id}>
         {/* The whole row is the target, so an item can be ticked off one-handed. */}
         <button
           aria-pressed={item.checked}
@@ -205,7 +202,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   return (
     <>
       {shown.length > 1 ? (
-        <div className="flex flex-wrap items-center gap-3 border-t border-separator pt-5">
+        <div className="flex flex-wrap items-center gap-3 pt-5">
           <ToggleButtonGroup
             aria-label="Sort the list"
             className="self-start"
@@ -248,7 +245,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
       )}
 
       {collected.length > 0 ? (
-        <section className="flex flex-col gap-1 border-t border-separator pt-4">
+        <section className="flex flex-col gap-1 pt-4">
           <Typography color="muted" type="body-sm" weight="semibold">
             Collected · {collected.length}
           </Typography>

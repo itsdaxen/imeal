@@ -45,13 +45,13 @@ export function AddItemForm({ listId }: { listId: string }) {
 
         {showQuantity ? (
           <NumberField
+            aria-label="Quantity"
             className="w-28"
             defaultValue={1}
             maxValue={999}
             minValue={1}
             name="quantity"
           >
-            <Label>Quantity</Label>
             <Input />
           </NumberField>
         ) : (
