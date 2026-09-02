@@ -10,6 +10,10 @@ import { resolveWeekList } from "./shopping.queries";
 import { listSchema } from "./shopping.schema";
 
 const weekSchema = z.object({ weekStart: z.iso.date() });
+const plannedMealSchema = weekSchema.extend({
+  itemId: z.uuid(),
+  listId: z.uuid(),
+});
 
 const manualItemSchema = listSchema.extend({
   name: z.string().trim().min(1, "Name the item.").max(200),
@@ -66,6 +70,85 @@ export async function generateShoppingList(formData: FormData) {
 
   revalidatePath("/shopping");
   redirect(`/shopping?week=${parsed.data.weekStart}&list=${listId}`);
+}
+
+export async function addPlannedMealToShoppingList(formData: FormData) {
+  const parsed = plannedMealSchema.safeParse({
+    itemId: formData.get("itemId"),
+    listId: formData.get("listId"),
+    weekStart: formData.get("weekStart"),
+  });
+
+  if (!parsed.success) {
+    throw new Error("That planned meal is not valid.");
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { itemId, listId, weekStart } = parsed.data;
+  const [{ data: meal }, { data: list }] = await Promise.all([
+    supabase
+      .from("meal_plan_items")
+      .select("meal_plan_id, recipe_id")
+      .eq("id", itemId)
+      .maybeSingle(),
+    supabase.from("shopping_lists").select("id").eq("id", listId).maybeSingle(),
+  ]);
+
+  if (!meal || !list) {
+    throw new Error("That meal or shopping list is no longer available.");
+  }
+
+  const [{ data: plan }, { data: recipe }, { data: existing }] =
+    await Promise.all([
+      supabase
+        .from("meal_plans")
+        .select("id")
+        .eq("id", meal.meal_plan_id)
+        .eq("user_id", userId)
+        .eq("week_start", weekStart)
+        .maybeSingle(),
+      supabase
+        .from("recipes")
+        .select("ingredients")
+        .eq("id", meal.recipe_id)
+        .maybeSingle(),
+      supabase.from("shopping_items").select("name").eq("list_id", listId),
+    ]);
+
+  if (!plan || !recipe) {
+    throw new Error("That meal is no longer part of this week.");
+  }
+
+  const present = new Set(
+    (existing ?? []).map((item) => item.name.trim().toLocaleLowerCase()),
+  );
+  const ingredients = recipe.ingredients.filter(
+    (name) => !present.has(name.trim().toLocaleLowerCase()),
+  );
+
+  if (ingredients.length > 0) {
+    const { error } = await supabase.from("shopping_items").insert(
+      ingredients.map((name) => ({
+        list_id: listId,
+        meal_plan_id: plan.id,
+        name,
+        source: "generated" as const,
+        user_id: userId,
+      })),
+    );
+
+    if (error) {
+      throw new Error(`Could not add that meal: ${error.message}`);
+    }
+  }
+
+  await supabase
+    .from("meal_plans")
+    .update({ target_list_id: listId })
+    .eq("id", plan.id);
+
+  revalidatePath("/shopping");
+  redirect(`/shopping?week=${weekStart}&list=${listId}`);
 }
 
 export async function addManualItem(formData: FormData) {

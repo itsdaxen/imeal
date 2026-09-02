@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { applyTidy, proposeTidy } from "@/features/ai/ai.actions";
 import {
   addManualItem,
+  addPlannedMealToShoppingList,
   addStaplesToList,
   clearShoppingList,
   generateShoppingList,
@@ -25,6 +26,7 @@ const defaultList = "00000000-0000-4000-8000-000000000001";
 const partyList = "00000000-0000-4000-8000-000000000002";
 const userId = "00000000-0000-4000-8000-000000000003";
 const weekStart = "2026-08-24";
+const mealId = "00000000-0000-4000-8000-000000000004";
 type Result = { data: unknown; error: { message: string } | null };
 
 function query(data: unknown, error: string | null = null) {
@@ -195,6 +197,35 @@ describe("independent shopping", () => {
       generateShoppingList(form({ listId: partyList, weekStart })),
     ).rejects.toThrow("destination changed");
     expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("adds only one planned meal's missing ingredients", async () => {
+    const inserted = query(null);
+    const plan = query({ id: "plan" });
+    from
+      .mockReturnValueOnce(query({ meal_plan_id: "plan", recipe_id: "recipe" }))
+      .mockReturnValueOnce(query({ id: partyList }))
+      .mockReturnValueOnce(plan)
+      .mockReturnValueOnce(query({ ingredients: ["Salt", "Limes"] }))
+      .mockReturnValueOnce(query([{ name: "salt" }]))
+      .mockReturnValueOnce(inserted)
+      .mockReturnValueOnce(plan);
+
+    await expect(
+      addPlannedMealToShoppingList(
+        form({ itemId: mealId, listId: partyList, weekStart }),
+      ),
+    ).rejects.toThrow(`redirect:/shopping?week=${weekStart}&list=${partyList}`);
+
+    expect(inserted.insert).toHaveBeenCalledWith([
+      {
+        list_id: partyList,
+        meal_plan_id: "plan",
+        name: "Limes",
+        source: "generated",
+        user_id: userId,
+      },
+    ]);
   });
 
   it("refuses an inaccessible generation destination before updating the plan", async () => {

@@ -104,16 +104,11 @@ export default async function PlannerPage({
         ) : null}
       </div>
 
-      <ContentCard className="mx-auto w-full max-w-2xl" density="flush">
+      <ContentCard className="w-full" density="flush">
         <Disclosure>
           <Disclosure.Heading>
-            <Disclosure.Trigger className="flex min-h-16 w-full items-center gap-4 px-5 text-left sm:px-6">
-              <span>
-                <span className="block font-semibold">More options</span>
-                <span className="block text-sm text-muted">
-                  Choose recipe sources, meals, and a shopping list.
-                </span>
-              </span>
+            <Disclosure.Trigger className="flex min-h-11 w-full items-center gap-4 px-5 py-2 text-left sm:px-6">
+              <span className="font-semibold">More options</span>
               <Disclosure.Indicator />
             </Disclosure.Trigger>
           </Disclosure.Heading>

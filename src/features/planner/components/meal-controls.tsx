@@ -1,21 +1,23 @@
 import { Check } from "lucide-react";
 
 import { IconButton } from "@/components/ui/icon-button";
-import { generateShoppingList } from "@/features/shopping/shopping.actions";
+import { addPlannedMealToShoppingList } from "@/features/shopping/shopping.actions";
 
 type MealControlsProps = {
+  itemId: string;
   listId: string;
   weekStart: string;
 };
 
-export function MealControls({ listId, weekStart }: MealControlsProps) {
+export function MealControls({ itemId, listId, weekStart }: MealControlsProps) {
   return (
-    <form action={generateShoppingList}>
+    <form action={addPlannedMealToShoppingList}>
+      <input name="itemId" type="hidden" value={itemId} />
       <input name="listId" type="hidden" value={listId} />
       <input name="weekStart" type="hidden" value={weekStart} />
       <IconButton
         className="text-accent"
-        label="Add this week to the shopping list"
+        label="Add this meal to the shopping list"
         size="sm"
         type="submit"
         variant="ghost"

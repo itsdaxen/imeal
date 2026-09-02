@@ -72,7 +72,11 @@ export function SlotCell({
           </Typography>
           <div className="flex items-center justify-end gap-1">
             {listId ? (
-              <MealControls listId={listId} weekStart={weekStart} />
+              <MealControls
+                itemId={meal.id}
+                listId={listId}
+                weekStart={weekStart}
+              />
             ) : null}
             <MealMenu
               dayIndex={dayIndex}
