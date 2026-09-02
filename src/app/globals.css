@@ -59,6 +59,31 @@ summary,
   min-height: 2.75rem;
 }
 
+/* HeroUI's select value keeps a taller internal line box than its text needs. Align
+   both children against the trigger itself so the label does not ride high. */
+[data-slot="select-trigger"] {
+  align-items: center;
+}
+
+[data-slot="select-value"] {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  line-height: 1.25rem;
+}
+
+/* Simfinia's desktop fields use a quiet inset tint instead of HeroUI's thick
+   accent ring. The field still changes visibly without turning green at its edge. */
+.input:focus,
+.input[data-focused="true"],
+.input-group:focus-within,
+.input-group[data-focus-within="true"],
+.textarea:focus,
+.textarea[data-focused="true"] {
+  outline: none;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--focus) 38%, transparent);
+}
+
 button:disabled,
 [aria-disabled="true"] {
   cursor: not-allowed;
