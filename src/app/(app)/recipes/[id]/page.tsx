@@ -11,8 +11,7 @@ import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { listFriends } from "@/features/friends/friend.queries";
-import { DeleteRecipeForm } from "@/features/recipes/components/delete-recipe-form";
-import { archiveRecipe } from "@/features/recipes/recipe.actions";
+import { RecipeOwnerMenu } from "@/features/recipes/components/recipe-owner-menu";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 import { saveCatalogRecipe } from "@/features/catalog/catalog.actions";
 import { Button } from "@heroui/react";
@@ -64,9 +63,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
       <ContentCard
         appearance="media"
-        className="grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
+        className="relative grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
         density="flush"
       >
+        {isOwner ? <RecipeOwnerMenu id={recipe.id} /> : null}
         <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
           {recipe.image_url ? (
             <Image
@@ -95,39 +95,22 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {recipe.prep_minutes} min · serves {recipe.servings}
           </Typography>
 
-          <div className="flex flex-col items-start gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              {isOwner ? (
-                <PlanRecipeDialog
-                  days={weekDays(currentWeekStart())}
-                  recipeId={recipe.id}
-                  slots={recipe.meal_tags}
-                  weekStart={currentWeekStart()}
-                />
-              ) : null}
-              <ActionLink
-                href={`/cook/${recipe.id}`}
-                tier={isOwner ? "neutral" : "primary"}
-              >
-                Cook this
-              </ActionLink>
-            </div>
+          <div className="flex flex-wrap items-center gap-3">
             {isOwner ? (
-              <div className="flex w-full flex-wrap items-center gap-3 border-t border-separator pt-4">
-                <ActionLink href={`/recipes/${recipe.id}/edit`} tier="neutral">
-                  Edit
-                </ActionLink>
-
-                <form action={archiveRecipe}>
-                  <input name="recipeId" type="hidden" value={recipe.id} />
-                  <Button className="min-h-11" type="submit" variant="tertiary">
-                    Archive
-                  </Button>
-                </form>
-
-                <DeleteRecipeForm id={recipe.id} />
-              </div>
-            ) : isCatalogRecipe && isAdmin ? (
+              <PlanRecipeDialog
+                days={weekDays(currentWeekStart())}
+                recipeId={recipe.id}
+                slots={recipe.meal_tags}
+                weekStart={currentWeekStart()}
+              />
+            ) : null}
+            <ActionLink
+              href={`/cook/${recipe.id}`}
+              tier={isOwner ? "neutral" : "primary"}
+            >
+              Cook this
+            </ActionLink>
+            {isOwner ? null : isCatalogRecipe && isAdmin ? (
               <ActionLink href={`/recipes/${recipe.id}/edit`} tier="neutral">
                 Edit as moderator
               </ActionLink>
