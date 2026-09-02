@@ -84,6 +84,7 @@ export async function createRecipe(
       prep_minutes: recipe.prepMinutes,
       servings: recipe.servings,
       meal_tags: recipe.mealTags,
+      collection_tags: recipe.collectionTags,
     })
     .select("id")
     .single();
@@ -142,6 +143,7 @@ export async function updateRecipe(
       prep_minutes: recipe.prepMinutes,
       servings: recipe.servings,
       meal_tags: recipe.mealTags,
+      collection_tags: recipe.collectionTags,
     })
     .eq("id", id);
 

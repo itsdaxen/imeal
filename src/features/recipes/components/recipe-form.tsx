@@ -31,6 +31,7 @@ export type RecipeFormValues = {
   prepMinutes: number;
   servings: number;
   mealTags: MealSlot[];
+  collectionTags: string[];
 };
 
 const EMPTY: RecipeFormValues = {
@@ -42,6 +43,7 @@ const EMPTY: RecipeFormValues = {
   prepMinutes: 30,
   servings: 4,
   mealTags: ["dinner"],
+  collectionTags: [],
 };
 
 type RecipeFormProps = {
@@ -185,6 +187,17 @@ export function RecipeForm({
             ))}
           </div>
         </fieldset>
+
+        <TextField
+          defaultValue={values.collectionTags.join(", ")}
+          name="collectionTags"
+        >
+          <Label>Collections</Label>
+          <Input placeholder="Asian, quick, family favorites" />
+          <Description>
+            Optional · separate collection names with commas.
+          </Description>
+        </TextField>
 
         <Button className="w-full" isPending={isPending} type="submit">
           {isPending ? "Saving…" : submitLabel}

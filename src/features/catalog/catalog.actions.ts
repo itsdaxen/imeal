@@ -72,7 +72,9 @@ export async function saveCatalogRecipe(formData: FormData) {
 
   const { data: source } = await supabase
     .from("recipes")
-    .select("title, ingredients, steps, tip, prep_minutes, servings, meal_tags")
+    .select(
+      "title, ingredients, steps, tip, prep_minutes, servings, meal_tags, collection_tags",
+    )
     .eq("id", parsed.data.recipeId)
     .eq("visibility", "public")
     .maybeSingle();
@@ -93,6 +95,7 @@ export async function saveCatalogRecipe(formData: FormData) {
       prep_minutes: source.prep_minutes,
       servings: source.servings,
       meal_tags: source.meal_tags,
+      collection_tags: source.collection_tags,
       source_recipe_id: parsed.data.recipeId,
     })
     .select("id")

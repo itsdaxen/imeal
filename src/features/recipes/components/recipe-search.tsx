@@ -15,13 +15,20 @@ import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
 
 type RecipeSearchProps = {
   archived?: boolean;
+  collection?: string;
   mealTag?: MealSlot;
   search?: string;
 };
 
-export function RecipeSearch({ archived, mealTag, search }: RecipeSearchProps) {
+export function RecipeSearch({
+  archived,
+  collection,
+  mealTag,
+  search,
+}: RecipeSearchProps) {
   const router = useRouter();
   const [term, setTerm] = useState(search ?? "");
+  const [collectionTerm, setCollectionTerm] = useState(collection ?? "");
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -29,12 +36,14 @@ export function RecipeSearch({ archived, mealTag, search }: RecipeSearchProps) {
       if (term.trim()) params.set("search", term.trim());
       if (mealTag) params.set("mealTag", mealTag);
       if (archived) params.set("archived", "1");
+      if (collectionTerm.trim())
+        params.set("collection", collectionTerm.trim().toLowerCase());
       router.replace(`/recipes${params.size ? `?${params}` : ""}`, {
         scroll: false,
       });
     }, 250);
     return () => window.clearTimeout(timeout);
-  }, [archived, mealTag, router, term]);
+  }, [archived, collectionTerm, mealTag, router, term]);
 
   function routeWithFilters(collection: string, meal: string) {
     if (collection === "shared") {
@@ -45,6 +54,8 @@ export function RecipeSearch({ archived, mealTag, search }: RecipeSearchProps) {
     if (term.trim()) params.set("search", term.trim());
     if (meal !== "any") params.set("mealTag", meal);
     if (collection === "archived") params.set("archived", "1");
+    if (collectionTerm.trim())
+      params.set("collection", collectionTerm.trim().toLowerCase());
     router.push(`/recipes${params.size ? `?${params}` : ""}`);
   }
 
@@ -64,9 +75,9 @@ export function RecipeSearch({ archived, mealTag, search }: RecipeSearchProps) {
         <Disclosure.Content>
           <Disclosure.Body className="flex flex-wrap gap-3 pt-3">
             <div className="flex min-w-44 flex-1 flex-col gap-1">
-              <Label id="collection">Collection</Label>
+              <Label id="library">Library</Label>
               <Select
-                aria-labelledby="collection"
+                aria-labelledby="library"
                 defaultSelectedKey={archived ? "archived" : "active"}
                 onSelectionChange={(key) =>
                   routeWithFilters(String(key), mealTag ?? "any")
@@ -85,6 +96,14 @@ export function RecipeSearch({ archived, mealTag, search }: RecipeSearchProps) {
                 </Select.Popover>
               </Select>
             </div>
+            <TextField
+              className="min-w-44 flex-1"
+              value={collectionTerm}
+              onChange={setCollectionTerm}
+            >
+              <Label>Collection</Label>
+              <Input placeholder="Asian, quick…" />
+            </TextField>
             <div className="flex min-w-44 flex-1 flex-col gap-1">
               <Label id="mealTag">Meal</Label>
               <Select

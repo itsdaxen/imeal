@@ -88,6 +88,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
         <Card.Header className="flex-col items-start justify-center gap-5 p-6 sm:p-8 lg:p-10">
           <TagList label="Meals this suits" tags={recipe.meal_tags} />
+          {recipe.collection_tags.length > 0 ? (
+            <TagList label="Collections" tags={recipe.collection_tags} />
+          ) : null}
           <Typography type="h1" weight="semibold">
             {recipe.title}
           </Typography>
@@ -96,7 +99,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </Typography>
 
           <div className="flex flex-wrap items-center gap-3">
-            {isOwner ? (
+            {isOwner || isCatalogRecipe ? (
               <PlanRecipeDialog
                 days={weekDays(currentWeekStart())}
                 recipeId={recipe.id}

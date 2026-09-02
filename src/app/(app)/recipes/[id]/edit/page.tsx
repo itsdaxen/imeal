@@ -63,6 +63,7 @@ export default async function EditRecipePage({
           prepMinutes: recipe.prep_minutes,
           servings: recipe.servings,
           mealTags: recipe.meal_tags,
+          collectionTags: recipe.collection_tags,
         }}
       />
     </main>

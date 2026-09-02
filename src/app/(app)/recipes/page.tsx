@@ -25,17 +25,19 @@ export default async function RecipesPage({
     search?: string;
     mealTag?: string;
     archived?: string;
+    collection?: string;
   }>;
 }) {
-  const { search, mealTag, archived } = await searchParams;
+  const { search, mealTag, archived, collection } = await searchParams;
   const showArchived = archived === "1";
   const filters = {
     search,
     mealTag: toMealTag(mealTag),
     archived: showArchived,
+    collection,
   };
   const recipes = await listOwnedRecipes(filters);
-  const isFiltered = Boolean(filters.search || filters.mealTag);
+  const isFiltered = Boolean(filters.search || filters.mealTag || collection);
 
   return (
     <main className="flex flex-col gap-8 pt-10 sm:pt-14">
@@ -62,6 +64,7 @@ export default async function RecipesPage({
 
       <RecipeSearch
         archived={showArchived}
+        collection={collection}
         mealTag={filters.mealTag}
         search={filters.search}
       />

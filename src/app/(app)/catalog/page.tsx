@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import Image from "next/image";
-import { Button, Input, Label, TextField, Typography } from "@heroui/react";
+import { Button, Typography } from "@heroui/react";
 
 import { Library, SearchX } from "lucide-react";
 
@@ -13,12 +13,18 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
+import { CatalogSearch } from "@/features/catalog/components/catalog-search";
+import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import {
   listCatalog,
   listMySuggestions,
 } from "@/features/catalog/catalog.queries";
 
 export const metadata: Metadata = { title: "Catalog" };
+
+function toMealTag(value: string | undefined): MealSlot | undefined {
+  return MEAL_SLOTS.find((slot) => slot === value);
+}
 
 const STATUS_LABEL = {
   pending: "Waiting for review",
@@ -29,11 +35,16 @@ const STATUS_LABEL = {
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string }>;
+  searchParams: Promise<{
+    search?: string;
+    mealTag?: string;
+    collection?: string;
+  }>;
 }) {
-  const { search } = await searchParams;
+  const { search, mealTag, collection } = await searchParams;
+  const selectedMeal = toMealTag(mealTag);
   const [recipes, suggestions] = await Promise.all([
-    listCatalog(search),
+    listCatalog({ search, mealTag: selectedMeal, collection }),
     listMySuggestions(),
   ]);
 
@@ -48,23 +59,11 @@ export default async function CatalogPage({
         </Typography>
       </header>
 
-      <form
-        action="/catalog"
-        className="flex flex-wrap items-end gap-3"
-        role="search"
-      >
-        <TextField
-          className="min-w-56 flex-1"
-          defaultValue={search}
-          name="search"
-        >
-          <Label>Search the catalog</Label>
-          <Input placeholder="Title contains…" type="search" />
-        </TextField>
-        <Button type="submit" variant="tertiary">
-          Search
-        </Button>
-      </form>
+      <CatalogSearch
+        collection={collection}
+        mealTag={selectedMeal}
+        search={search}
+      />
 
       {recipes.length === 0 ? (
         <EmptyState
@@ -99,6 +98,7 @@ export default async function CatalogPage({
                   id: recipe.id,
                   image_url: recipe.imageUrl,
                   meal_tags: recipe.mealTags,
+                  collection_tags: recipe.collectionTags,
                   prep_minutes: recipe.prepMinutes,
                   servings: recipe.servings,
                   title: recipe.title,

@@ -33,6 +33,7 @@ function toFormValues(draft: DraftRecipe): RecipeFormValues {
     prepMinutes: draft.prepMinutes,
     servings: draft.servings,
     mealTags: draft.mealTags,
+    collectionTags: [],
   };
 }
 

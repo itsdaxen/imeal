@@ -8,6 +8,7 @@ export type CatalogRecipe = {
   prepMinutes: number;
   servings: number;
   mealTags: MealSlot[];
+  collectionTags: string[];
   imageUrl: string | null;
 };
 
@@ -42,22 +43,35 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
   return !error && Boolean(data);
 }
 
-export async function listCatalog(search?: string): Promise<CatalogRecipe[]> {
+export async function listCatalog(
+  filters: {
+    search?: string;
+    mealTag?: MealSlot;
+    collection?: string;
+  } = {},
+): Promise<CatalogRecipe[]> {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("recipes")
-    .select("id, title, prep_minutes, servings, meal_tags, image_url")
+    .select(
+      "id, title, prep_minutes, servings, meal_tags, collection_tags, image_url",
+    )
     .eq("visibility", "public")
     .eq("status", "active")
     .order("title", { ascending: true });
 
-  const term = search?.trim();
+  const term = filters.search?.trim();
 
   if (term) {
     query = query.ilike(
       "title",
       `%${term.replace(/[%_\\]/g, (m) => `\\${m}`)}%`,
     );
+  }
+
+  if (filters.mealTag) query = query.contains("meal_tags", [filters.mealTag]);
+  if (filters.collection?.trim()) {
+    query = query.contains("collection_tags", [filters.collection.trim()]);
   }
 
   const { data, error } = await query;
@@ -72,6 +86,7 @@ export async function listCatalog(search?: string): Promise<CatalogRecipe[]> {
     prepMinutes: recipe.prep_minutes,
     servings: recipe.servings,
     mealTags: recipe.meal_tags,
+    collectionTags: recipe.collection_tags,
     imageUrl: recipe.image_url,
   }));
 }

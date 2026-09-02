@@ -361,6 +361,7 @@ export type Database = {
       };
       recipes: {
         Row: {
+          collection_tags: string[];
           created_at: string;
           id: string;
           image_url: string | null;
@@ -378,6 +379,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["recipe_visibility"];
         };
         Insert: {
+          collection_tags?: string[];
           created_at?: string;
           id?: string;
           image_url?: string | null;
@@ -395,6 +397,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["recipe_visibility"];
         };
         Update: {
+          collection_tags?: string[];
           created_at?: string;
           id?: string;
           image_url?: string | null;

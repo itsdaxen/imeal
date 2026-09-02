@@ -37,6 +37,20 @@ export const recipeInputSchema = z.object({
   mealTags: z
     .array(z.enum(MEAL_SLOTS))
     .min(1, "Choose at least one meal this suits."),
+  // A recipe without collections is the normal case, so the field is optional
+  // rather than something every caller has to remember to pass.
+  collectionTags: z
+    .string()
+    .default("")
+    .transform((value) => [
+      ...new Set(
+        value
+          .split(",")
+          .map((tag) => tag.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ])
+    .pipe(z.array(z.string().max(40)).max(12)),
 });
 
 export type RecipeInput = z.output<typeof recipeInputSchema>;
@@ -50,5 +64,6 @@ export function parseRecipeForm(formData: FormData) {
     prepMinutes: formData.get("prepMinutes") ?? "",
     servings: formData.get("servings") ?? "",
     mealTags: formData.getAll("mealTags"),
+    collectionTags: formData.get("collectionTags") ?? "",
   });
 }
