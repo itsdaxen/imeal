@@ -25,10 +25,21 @@ const DEFAULT_SLOTS: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
 
 export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
+    return { planId: null, enabledSlots: DEFAULT_SLOTS, meals: [] };
+  }
+
+  // Scoped to this user explicitly: a week someone shares with you is readable
+  // under RLS, so filtering on the date alone matches their plan as well as yours
+  // and the single-row read fails the moment anyone shares a week.
   const { data: plan, error: planError } = await supabase
     .from("meal_plans")
     .select("id, enabled_slots")
+    .eq("user_id", user.id)
     .eq("week_start", weekStart)
     .maybeSingle();
 
