@@ -8,6 +8,14 @@ import { Dropdown } from "@heroui/react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { IconButton } from "@/components/ui/icon-button";
 
+import type { Suggestion } from "@/features/catalog/catalog.queries";
+import {
+  suggestRecipe,
+  withdrawSuggestion,
+} from "@/features/catalog/catalog.actions";
+import type { Person } from "@/features/friends/friend.queries";
+import { ShareDialog } from "@/features/sharing/components/share-dialog";
+
 import { CollectionsDialog } from "./collections-dialog";
 
 import {
@@ -18,12 +26,18 @@ import {
 
 export function RecipeOwnerMenu({
   collections,
+  friends,
   id,
   knownCollections,
+  recipientIds,
+  suggestion,
 }: {
   collections: string[];
+  friends: Person[];
   id: string;
   knownCollections: string[];
+  recipientIds: string[];
+  suggestion?: Suggestion;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -33,6 +47,32 @@ export function RecipeOwnerMenu({
   );
   const [isDeletingOpen, setIsDeletingOpen] = useState(false);
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
+  const [isSharingOpen, setIsSharingOpen] = useState(false);
+
+  // The catalog item says what it will do next, which depends on where the last
+  // suggestion got to: published entries offer nothing, pending ones can be pulled.
+  const catalogItem =
+    suggestion?.status === "approved"
+      ? null
+      : suggestion?.status === "pending"
+        ? {
+            action: () =>
+              run(withdrawSuggestion, { suggestionId: suggestion.id }),
+            label: "Withdraw from the catalog",
+          }
+        : {
+            action: () => run(suggestRecipe, { recipeId: id }),
+            label: "Suggest for the catalog",
+          };
+
+  function run(
+    action: (data: FormData) => Promise<void>,
+    fields: Record<string, string>,
+  ) {
+    const data = new FormData();
+    Object.entries(fields).forEach(([name, value]) => data.set(name, value));
+    startTransition(() => action(data));
+  }
   const deleteForm = useRef<HTMLFormElement>(null);
 
   function archive() {
@@ -68,6 +108,22 @@ export function RecipeOwnerMenu({
               Add to collection
             </Dropdown.Item>
             <Dropdown.Item
+              id="share"
+              onAction={() => setIsSharingOpen(true)}
+              textValue="Share with friends"
+            >
+              Share with friends
+            </Dropdown.Item>
+            {catalogItem ? (
+              <Dropdown.Item
+                id="catalog"
+                onAction={catalogItem.action}
+                textValue={catalogItem.label}
+              >
+                {catalogItem.label}
+              </Dropdown.Item>
+            ) : null}
+            <Dropdown.Item
               id="archive"
               onAction={archive}
               textValue="Archive recipe"
@@ -86,6 +142,14 @@ export function RecipeOwnerMenu({
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
+
+      <ShareDialog
+        friends={friends}
+        isOpen={isSharingOpen}
+        onOpenChange={setIsSharingOpen}
+        recipeId={id}
+        recipientIds={recipientIds}
+      />
 
       <CollectionsDialog
         isOpen={isCollectionsOpen}

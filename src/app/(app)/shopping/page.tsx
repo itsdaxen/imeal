@@ -86,9 +86,6 @@ export default async function ShoppingPage({
       </header>
 
       <nav aria-label="Shopping lists" className="flex flex-col gap-2 py-4">
-        <Typography color="muted" type="body-xs" weight="semibold">
-          YOUR LISTS
-        </Typography>
         <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
           {lists.map((entry) => (
             <Link

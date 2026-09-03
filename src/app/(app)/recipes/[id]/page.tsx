@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Card, Typography } from "@heroui/react";
+import { Card, Chip, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
@@ -19,9 +19,7 @@ import {
   getRecipe,
   listOwnedCollections,
 } from "@/features/recipes/recipe.queries";
-import { SuggestForm } from "@/features/catalog/components/suggest-form";
 import { listMySuggestions } from "@/features/catalog/catalog.queries";
-import { SharePanel } from "@/features/sharing/components/share-panel";
 import { listShareRecipients } from "@/features/sharing/sharing.queries";
 import { copySharedRecipe } from "@/features/sharing/sharing.actions";
 import { PlanRecipeDialog } from "@/features/planner/components/plan-recipe-dialog";
@@ -73,8 +71,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
         {isOwner ? (
           <RecipeOwnerMenu
             collections={recipe.collection_tags}
+            friends={friends}
             id={recipe.id}
             knownCollections={knownCollections}
+            recipientIds={recipientIds}
+            suggestion={suggestion}
           />
         ) : null}
         <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
@@ -100,6 +101,21 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <TagList label="Meals this suits" tags={recipe.meal_tags} />
           {recipe.collection_tags.length > 0 ? (
             <TagList label="Collections" tags={recipe.collection_tags} />
+          ) : null}
+          {/* The catalog action sits in the menu, but its state has to stay visible
+              here — otherwise a pending or declined suggestion is invisible. */}
+          {isOwner && suggestion ? (
+            <Chip
+              color={suggestion.status === "approved" ? "accent" : "default"}
+              size="sm"
+              variant="soft"
+            >
+              {suggestion.status === "approved"
+                ? "In the catalog"
+                : suggestion.status === "pending"
+                  ? "Catalog review pending"
+                  : `Not published${suggestion.reviewerNote ? ` — ${suggestion.reviewerNote}` : ""}`}
+            </Chip>
           ) : null}
           <Typography type="h1" weight="semibold">
             {recipe.title}
@@ -182,20 +198,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <SectionTitle>Tip</SectionTitle>
           <Typography type="body">{recipe.tip}</Typography>
         </section>
-      ) : null}
-      {isOwner ? (
-        <section className="flex flex-col gap-3 border-t border-border/60 pt-6">
-          <SectionTitle>The catalog</SectionTitle>
-          <SuggestForm recipeId={recipe.id} suggestion={suggestion} />
-        </section>
-      ) : null}
-
-      {isOwner ? (
-        <SharePanel
-          friends={friends}
-          recipeId={recipe.id}
-          recipientIds={recipientIds}
-        />
       ) : null}
     </main>
   );
