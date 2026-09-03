@@ -43,6 +43,22 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
   return !error && Boolean(data);
 }
 
+/** The collections in use across the published catalog. */
+export async function listCatalogCollections(): Promise<string[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("collection_tags")
+    .eq("visibility", "public")
+    .eq("status", "active");
+
+  if (error) {
+    return [];
+  }
+
+  return [...new Set(data.flatMap((row) => row.collection_tags))].sort();
+}
+
 export async function listCatalog(
   filters: {
     search?: string;

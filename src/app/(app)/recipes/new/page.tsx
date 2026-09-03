@@ -3,12 +3,15 @@ import type { Metadata } from "next";
 import { Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
+import { listOwnedCollections } from "@/features/recipes/recipe.queries";
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { createRecipe } from "@/features/recipes/recipe.actions";
 
 export const metadata: Metadata = { title: "Add a recipe" };
 
-export default function NewRecipePage() {
+export default async function NewRecipePage() {
+  const knownCollections = await listOwnedCollections();
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -25,7 +28,11 @@ export default function NewRecipePage() {
         </ActionLink>
       </header>
 
-      <RecipeForm action={createRecipe} submitLabel="Save recipe" />
+      <RecipeForm
+        action={createRecipe}
+        knownCollections={knownCollections}
+        submitLabel="Save recipe"
+      />
     </main>
   );
 }

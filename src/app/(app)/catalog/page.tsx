@@ -17,6 +17,7 @@ import { CatalogSearch } from "@/features/catalog/components/catalog-search";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import {
   listCatalog,
+  listCatalogCollections,
   listMySuggestions,
 } from "@/features/catalog/catalog.queries";
 
@@ -43,9 +44,10 @@ export default async function CatalogPage({
 }) {
   const { search, mealTag, collection } = await searchParams;
   const selectedMeal = toMealTag(mealTag);
-  const [recipes, suggestions] = await Promise.all([
+  const [recipes, suggestions, collections] = await Promise.all([
     listCatalog({ search, mealTag: selectedMeal, collection }),
     listMySuggestions(),
+    listCatalogCollections(),
   ]);
 
   return (
@@ -61,6 +63,7 @@ export default async function CatalogPage({
 
       <CatalogSearch
         collection={collection}
+        collections={collections}
         mealTag={selectedMeal}
         search={search}
       />

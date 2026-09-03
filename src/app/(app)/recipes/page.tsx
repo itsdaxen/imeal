@@ -4,7 +4,10 @@ import { Button, Typography } from "@heroui/react";
 
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { RecipeSearch } from "@/features/recipes/components/recipe-search";
-import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
+import {
+  listOwnedCollections,
+  listOwnedRecipes,
+} from "@/features/recipes/recipe.queries";
 import { restoreRecipe } from "@/features/recipes/recipe.actions";
 import { BookOpen, SearchX } from "lucide-react";
 
@@ -36,7 +39,10 @@ export default async function RecipesPage({
     archived: showArchived,
     collection,
   };
-  const recipes = await listOwnedRecipes(filters);
+  const [recipes, collections] = await Promise.all([
+    listOwnedRecipes(filters),
+    listOwnedCollections(),
+  ]);
   const isFiltered = Boolean(filters.search || filters.mealTag || collection);
 
   return (
@@ -65,6 +71,7 @@ export default async function RecipesPage({
       <RecipeSearch
         archived={showArchived}
         collection={collection}
+        collections={collections}
         mealTag={filters.mealTag}
         search={filters.search}
       />

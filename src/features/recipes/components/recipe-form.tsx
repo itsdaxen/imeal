@@ -47,6 +47,7 @@ const EMPTY: RecipeFormValues = {
 };
 
 type RecipeFormProps = {
+  knownCollections?: string[];
   action: (
     state: RecipeFormState,
     formData: FormData,
@@ -57,6 +58,7 @@ type RecipeFormProps = {
 
 export function RecipeForm({
   action,
+  knownCollections = [],
   submitLabel,
   values = EMPTY,
 }: RecipeFormProps) {
@@ -193,10 +195,20 @@ export function RecipeForm({
           name="collectionTags"
         >
           <Label>Collections</Label>
-          <Input placeholder="Asian, quick, family favorites" />
+          <Input
+            list="known-collections"
+            placeholder="Asian, quick, family favorites"
+          />
           <Description>
-            Optional · separate collection names with commas.
+            {knownCollections.length > 0
+              ? `Optional · separate names with commas. Already in use: ${knownCollections.slice(0, 6).join(", ")}`
+              : "Optional · separate collection names with commas."}
           </Description>
+          <datalist id="known-collections">
+            {knownCollections.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
         </TextField>
 
         <Button className="w-full" isPending={isPending} type="submit">

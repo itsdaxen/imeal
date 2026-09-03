@@ -16,6 +16,7 @@ import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
 type RecipeSearchProps = {
   archived?: boolean;
   collection?: string;
+  collections: string[];
   mealTag?: MealSlot;
   search?: string;
 };
@@ -23,6 +24,7 @@ type RecipeSearchProps = {
 export function RecipeSearch({
   archived,
   collection,
+  collections,
   mealTag,
   search,
 }: RecipeSearchProps) {
@@ -96,14 +98,37 @@ export function RecipeSearch({
                 </Select.Popover>
               </Select>
             </div>
-            <TextField
-              className="min-w-44 flex-1"
-              value={collectionTerm}
-              onChange={setCollectionTerm}
-            >
-              <Label>Collection</Label>
-              <Input placeholder="Asian, quick…" />
-            </TextField>
+            {collections.length > 0 ? (
+              <div className="flex min-w-44 flex-1 flex-col gap-1">
+                <Label id="recipeCollection">Collection</Label>
+                <Select
+                  aria-labelledby="recipeCollection"
+                  defaultSelectedKey={collection ?? "any"}
+                  onSelectionChange={(key) =>
+                    setCollectionTerm(String(key) === "any" ? "" : String(key))
+                  }
+                >
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item id="any">Any collection</ListBox.Item>
+                      {collections.map((name) => (
+                        <ListBox.Item
+                          className="capitalize"
+                          id={name}
+                          key={name}
+                        >
+                          {name}
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              </div>
+            ) : null}
             <div className="flex min-w-44 flex-1 flex-col gap-1">
               <Label id="mealTag">Meal</Label>
               <Select

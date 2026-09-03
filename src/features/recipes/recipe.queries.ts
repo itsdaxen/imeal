@@ -28,6 +28,33 @@ function escapeLikePattern(value: string) {
   return value.replace(/[%_\\]/g, (match) => `\\${match}`);
 }
 
+/**
+ * The collections a person has actually used. Free text only works if you can see
+ * what already exists — otherwise "asian" and "Asian food" become two collections.
+ */
+export async function listOwnedCollections(): Promise<string[]> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("collection_tags")
+    .eq("owner_id", user.id)
+    .eq("status", "active");
+
+  if (error) {
+    return [];
+  }
+
+  return [...new Set(data.flatMap((row) => row.collection_tags))].sort();
+}
+
 export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
   const supabase = await createSupabaseServerClient();
   const {
