@@ -1,27 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
-import { Search } from "lucide-react";
-import { Card, Input, Label, Link, TextField, Typography } from "@heroui/react";
+import { Input, Label, ListBox, Select, TextField } from "@heroui/react";
+import { SearchX } from "lucide-react";
 
-import { SectionTitle } from "@/components/ui/section-title";
 import { ActionButton } from "@/components/ui/action";
-import { ContentCard } from "@/components/ui/content-card";
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
-import { TagList } from "@/components/ui/tag-list";
-import { assignRecipeToSlot } from "@/features/planner/plan.actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { RecipeCard } from "@/features/recipes/components/recipe-card";
+import type { RecipeSummary } from "@/features/recipes/recipe.queries";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
-type Recipe = {
-  id: string;
-  image_url: string | null;
-  meal_tags: MealSlot[];
-  prep_minutes: number;
-  servings: number;
-  title: string;
-};
+import { assignRecipeToSlot } from "../plan.actions";
 
+/**
+ * The same card and grid as the library, so choosing a meal looks like browsing
+ * recipes rather than a separate chooser. Filtering is local: the slot has already
+ * narrowed the list, so a round trip per keystroke would cost more than it returns.
+ */
 export function AssignmentBrowser({
   dayIndex,
   mealSlot,
@@ -30,100 +25,101 @@ export function AssignmentBrowser({
 }: {
   dayIndex: number;
   mealSlot: MealSlot;
-  recipes: Recipe[];
+  recipes: RecipeSummary[];
   weekStart: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [term, setTerm] = useState("");
+  const [collection, setCollection] = useState("any");
+
+  const collections = useMemo(
+    () =>
+      [...new Set(recipes.flatMap((recipe) => recipe.collection_tags))].sort(),
+    [recipes],
+  );
+
   const shown = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    return needle
-      ? recipes.filter((recipe) =>
-          recipe.title.toLocaleLowerCase().includes(needle),
-        )
-      : recipes;
-  }, [query, recipes]);
+    const needle = term.trim().toLocaleLowerCase();
+
+    return recipes.filter((recipe) => {
+      const matchesTerm =
+        !needle || recipe.title.toLocaleLowerCase().includes(needle);
+      const matchesCollection =
+        collection === "any" || recipe.collection_tags.includes(collection);
+
+      return matchesTerm && matchesCollection;
+    });
+  }, [collection, recipes, term]);
 
   return (
-    <section className="flex flex-col gap-5" aria-label="Choose a recipe">
-      {recipes.length > 4 ? (
-        <TextField className="max-w-md" name="recipeSearch" onChange={setQuery}>
-          <Label>Find a recipe</Label>
-          <div className="relative">
-            <Search
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted"
-            />
-            <Input className="pl-10" placeholder="Search by name" />
-          </div>
+    <section aria-label="Choose a recipe" className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-end gap-3" role="search">
+        <TextField className="min-w-56 flex-1" onChange={setTerm} value={term}>
+          <Label>Search your recipes</Label>
+          <Input placeholder="Title contains…" type="search" />
         </TextField>
-      ) : null}
 
-      <Typography color="muted" type="body-sm">
-        {shown.length} {shown.length === 1 ? "recipe" : "recipes"}
-      </Typography>
+        {collections.length > 0 ? (
+          <div className="flex min-w-44 flex-col gap-1">
+            <Label id="assignCollection">Collection</Label>
+            <Select
+              aria-labelledby="assignCollection"
+              onSelectionChange={(key) => setCollection(String(key))}
+              selectedKey={collection}
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="any">Any collection</ListBox.Item>
+                  {collections.map((name) => (
+                    <ListBox.Item className="capitalize" id={name} key={name}>
+                      {name}
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+          </div>
+        ) : null}
+      </div>
 
       {shown.length === 0 ? (
-        <ContentCard className="items-center py-10 text-center">
-          <SectionTitle>No matching recipes</SectionTitle>
-          <Typography color="muted" type="body-sm">
-            Try another name.
-          </Typography>
-        </ContentCard>
+        <EmptyState
+          actions={
+            <ActionButton
+              onPress={() => {
+                setTerm("");
+                setCollection("any");
+              }}
+              tier="neutral"
+            >
+              Clear the filters
+            </ActionButton>
+          }
+          description={`None of your ${mealSlot} recipes match that search.`}
+          icon={<SearchX aria-hidden="true" className="size-6" />}
+          title="No recipes match"
+        />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((recipe) => (
-            <li key={recipe.id}>
-              <ContentCard className="h-full" density="compact">
-                <Link
-                  className="block h-40 w-full flex-none overflow-hidden rounded-xl"
-                  href={`/recipes/${recipe.id}`}
-                  aria-label={`View ${recipe.title}`}
-                >
-                  {recipe.image_url ? (
-                    <Image
-                      alt=""
-                      className="size-full object-cover"
-                      height={192}
-                      sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
-                      src={recipe.image_url}
-                      width={320}
-                    />
-                  ) : (
-                    <MealArtwork
-                      artwork={artworkFor(recipe.id)}
-                      className="size-full"
-                    />
-                  )}
-                </Link>
-                <Card.Header className="gap-2">
-                  <TagList label="Meals this suits" tags={recipe.meal_tags} />
-                  <Card.Title className="text-base">{recipe.title}</Card.Title>
-                  <Card.Description>
-                    {recipe.prep_minutes} min · serves {recipe.servings}
-                  </Card.Description>
-                </Card.Header>
-                <Card.Footer className="mt-auto gap-3">
-                  <form action={assignRecipeToSlot} className="flex-1">
-                    <input name="weekStart" type="hidden" value={weekStart} />
-                    <input name="dayIndex" type="hidden" value={dayIndex} />
-                    <input name="slot" type="hidden" value={mealSlot} />
-                    <input name="recipeId" type="hidden" value={recipe.id} />
-                    <ActionButton
-                      className="w-full"
-                      tier="primary"
-                      type="submit"
-                    >
-                      Choose
-                    </ActionButton>
-                  </form>
-                  <Link
-                    className="inline-flex min-h-11 items-center px-2 text-sm"
-                    href={`/recipes/${recipe.id}`}
-                  >
-                    Details
-                  </Link>
-                </Card.Footer>
-              </ContentCard>
+            <li className="flex flex-col gap-2" key={recipe.id}>
+              <RecipeCard recipe={recipe} />
+
+              <form action={assignRecipeToSlot}>
+                <input name="weekStart" type="hidden" value={weekStart} />
+                <input name="dayIndex" type="hidden" value={dayIndex} />
+                <input name="slot" type="hidden" value={mealSlot} />
+                <input name="recipeId" type="hidden" value={recipe.id} />
+                {/* One per card, so these stay neutral: a grid of identical
+                    primaries is a wall of green and leaves the page with no
+                    single primary action at all. */}
+                <ActionButton className="w-full" tier="neutral" type="submit">
+                  Add to plan
+                </ActionButton>
+              </form>
             </li>
           ))}
         </ul>
