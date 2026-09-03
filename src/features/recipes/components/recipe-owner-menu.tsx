@@ -8,13 +8,23 @@ import { Dropdown } from "@heroui/react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { IconButton } from "@/components/ui/icon-button";
 
+import { CollectionsDialog } from "./collections-dialog";
+
 import {
   archiveRecipe,
   deleteRecipe,
   type RecipeFormState,
 } from "../recipe.actions";
 
-export function RecipeOwnerMenu({ id }: { id: string }) {
+export function RecipeOwnerMenu({
+  collections,
+  id,
+  knownCollections,
+}: {
+  collections: string[];
+  id: string;
+  knownCollections: string[];
+}) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [, deleteAction, isDeleting] = useActionState<RecipeFormState>(
@@ -22,6 +32,7 @@ export function RecipeOwnerMenu({ id }: { id: string }) {
     {},
   );
   const [isDeletingOpen, setIsDeletingOpen] = useState(false);
+  const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
   const deleteForm = useRef<HTMLFormElement>(null);
 
   function archive() {
@@ -50,6 +61,13 @@ export function RecipeOwnerMenu({ id }: { id: string }) {
               Edit recipe
             </Dropdown.Item>
             <Dropdown.Item
+              id="collections"
+              onAction={() => setIsCollectionsOpen(true)}
+              textValue="Add to collection"
+            >
+              Add to collection
+            </Dropdown.Item>
+            <Dropdown.Item
               id="archive"
               onAction={archive}
               textValue="Archive recipe"
@@ -68,6 +86,14 @@ export function RecipeOwnerMenu({ id }: { id: string }) {
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
+
+      <CollectionsDialog
+        isOpen={isCollectionsOpen}
+        known={knownCollections}
+        onOpenChange={setIsCollectionsOpen}
+        recipeId={id}
+        selected={collections}
+      />
 
       <form action={deleteAction} className="hidden" ref={deleteForm}>
         <button tabIndex={-1} type="submit" />

@@ -12,10 +12,12 @@ import {
 } from "@/features/images/upload";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-import { parseRecipeForm } from "./recipe.schema";
+import { collectionTagsSchema, parseRecipeForm } from "./recipe.schema";
 
 export type RecipeFormState = {
   error?: string;
+  /** Changes on every save, so a form can tell one save from the next. */
+  savedAt?: number;
 };
 
 async function requireUserId() {
@@ -202,6 +204,46 @@ export async function deleteRecipe(
 
   revalidatePath("/recipes");
   redirect("/recipes");
+}
+
+/**
+ * Replaces a recipe's collections. Sent from the recipe's own menu, so the whole set
+ * arrives at once rather than one add at a time — which also makes removing the last
+ * collection expressible.
+ */
+export async function setRecipeCollections(
+  _previous: RecipeFormState,
+  formData: FormData,
+): Promise<RecipeFormState> {
+  const parsed = z
+    .object({
+      recipeId: z.uuid(),
+      collectionTags: collectionTagsSchema,
+    })
+    .safeParse({
+      recipeId: formData.get("recipeId"),
+      collectionTags: formData.get("collectionTags") ?? "",
+    });
+
+  if (!parsed.success) {
+    return { error: "Those collection names are not valid." };
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { error } = await supabase
+    .from("recipes")
+    .update({ collection_tags: parsed.data.collectionTags })
+    .eq("id", parsed.data.recipeId)
+    .eq("owner_id", userId);
+
+  if (error) {
+    return { error: "Could not save the collections. Try again." };
+  }
+
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${parsed.data.recipeId}`);
+
+  return { savedAt: Date.now() };
 }
 
 export async function setRecipeArchived(

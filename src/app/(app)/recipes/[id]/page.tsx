@@ -15,7 +15,10 @@ import { RecipeOwnerMenu } from "@/features/recipes/components/recipe-owner-menu
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 import { saveCatalogRecipe } from "@/features/catalog/catalog.actions";
 import { Button } from "@heroui/react";
-import { getRecipe } from "@/features/recipes/recipe.queries";
+import {
+  getRecipe,
+  listOwnedCollections,
+} from "@/features/recipes/recipe.queries";
 import { SuggestForm } from "@/features/catalog/components/suggest-form";
 import { listMySuggestions } from "@/features/catalog/catalog.queries";
 import { SharePanel } from "@/features/sharing/components/share-panel";
@@ -50,13 +53,14 @@ export default async function RecipePage({ params }: RecipePageProps) {
   // A shared recipe is readable but not the recipient's to change.
   const isOwner = Boolean(user && recipe.owner_id === user.id);
   const isCatalogRecipe = recipe.owner_id === null;
-  const [friends, recipientIds, suggestions] = isOwner
+  const [friends, recipientIds, suggestions, knownCollections] = isOwner
     ? await Promise.all([
         listFriends(),
         listShareRecipients(recipe.id),
         listMySuggestions(),
+        listOwnedCollections(),
       ])
-    : [[], [], []];
+    : [[], [], [], []];
   const suggestion = suggestions.find((item) => item.recipe.id === recipe.id);
 
   return (
@@ -66,7 +70,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
         className="relative grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
         density="flush"
       >
-        {isOwner ? <RecipeOwnerMenu id={recipe.id} /> : null}
+        {isOwner ? (
+          <RecipeOwnerMenu
+            collections={recipe.collection_tags}
+            id={recipe.id}
+            knownCollections={knownCollections}
+          />
+        ) : null}
         <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
           {recipe.image_url ? (
             <Image

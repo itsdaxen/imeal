@@ -11,6 +11,24 @@ const toLines = z.string().transform((value) =>
     .filter(Boolean),
 );
 
+/**
+ * Collections arrive as one comma-separated field from every surface that edits them,
+ * so the parsing lives here rather than being repeated per form. A recipe without
+ * collections is the normal case, hence the default.
+ */
+export const collectionTagsSchema = z
+  .string()
+  .default("")
+  .transform((value) => [
+    ...new Set(
+      value
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ])
+  .pipe(z.array(z.string().max(40)).max(12));
+
 export const recipeInputSchema = z.object({
   title: z.string().trim().min(1, "Give the recipe a title.").max(200),
   ingredients: toLines.pipe(
@@ -37,23 +55,8 @@ export const recipeInputSchema = z.object({
   mealTags: z
     .array(z.enum(MEAL_SLOTS))
     .min(1, "Choose at least one meal this suits."),
-  // A recipe without collections is the normal case, so the field is optional
-  // rather than something every caller has to remember to pass.
-  collectionTags: z
-    .string()
-    .default("")
-    .transform((value) => [
-      ...new Set(
-        value
-          .split(",")
-          .map((tag) => tag.trim().toLowerCase())
-          .filter(Boolean),
-      ),
-    ])
-    .pipe(z.array(z.string().max(40)).max(12)),
+  collectionTags: collectionTagsSchema,
 });
-
-export type RecipeInput = z.output<typeof recipeInputSchema>;
 
 export function parseRecipeForm(formData: FormData) {
   return recipeInputSchema.safeParse({
