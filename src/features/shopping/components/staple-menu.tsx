@@ -5,23 +5,17 @@ import { Dropdown } from "@heroui/react";
 
 import { IconButton } from "@/components/ui/icon-button";
 
-import { removeStaple, toggleStaple } from "../shopping.actions";
-
 export function StapleMenu({
   active,
-  id,
   name,
+  onRemove,
+  onToggle,
 }: {
   active: boolean;
-  id: string;
   name: string;
+  onRemove: () => void;
+  onToggle: () => void;
 }) {
-  function run(action: (data: FormData) => Promise<void>) {
-    const data = new FormData();
-    data.set("stapleId", id);
-    void action(data);
-  }
-
   return (
     <Dropdown>
       <IconButton label={`Options for ${name}`} variant="ghost">
@@ -31,7 +25,7 @@ export function StapleMenu({
         <Dropdown.Menu>
           <Dropdown.Item
             id="toggle"
-            onAction={() => run(toggleStaple)}
+            onAction={onToggle}
             textValue={active ? "Pause" : "Resume"}
           >
             {active ? "Pause" : "Resume"}
@@ -39,7 +33,7 @@ export function StapleMenu({
           <Dropdown.Item
             className="text-danger"
             id="remove"
-            onAction={() => run(removeStaple)}
+            onAction={onRemove}
             textValue="Remove"
             variant="danger"
           >

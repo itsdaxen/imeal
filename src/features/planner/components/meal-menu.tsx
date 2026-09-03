@@ -9,10 +9,12 @@ import { IconButton } from "@/components/ui/icon-button";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { clearSlot, shuffleMeal } from "../plan.actions";
+import type { RunMealChange } from "./week-grid";
 
 type MealMenuProps = {
   dayIndex: number;
   itemId: string;
+  onMealChange: RunMealChange;
   recipeId: string;
   slot: MealSlot;
   weekStart: string;
@@ -21,6 +23,7 @@ type MealMenuProps = {
 export function MealMenu({
   dayIndex,
   itemId,
+  onMealChange,
   recipeId,
   slot,
   weekStart,
@@ -75,7 +78,7 @@ export function MealMenu({
             className="text-danger"
             id="remove"
             onAction={() =>
-              run(clearSlot, {
+              onMealChange({ dayIndex, kind: "remove", slot }, clearSlot, {
                 dayIndex: String(dayIndex),
                 slot,
                 weekStart,

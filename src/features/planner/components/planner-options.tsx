@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useOptimistic, useRef, useState, useTransition } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { Button, Dropdown, Link, Modal, Typography } from "@heroui/react";
 
@@ -27,7 +27,31 @@ export function PlannerOptions({
 }: PlannerOptionsProps) {
   const [dialog, setDialog] = useState<"clear" | "share" | null>(null);
   const clearForm = useRef<HTMLFormElement>(null);
-  const shared = new Set(recipientIds);
+  const [, startTransition] = useTransition();
+  // Same reasoning as sharing a recipe: the label flips, so it flips on press.
+  const [shared, toggleShared] = useOptimistic(
+    new Set(recipientIds),
+    (current, friendId: string) => {
+      const next = new Set(current);
+      if (next.has(friendId)) next.delete(friendId);
+      else next.add(friendId);
+      return next;
+    },
+  );
+
+  function runShare(
+    friendId: string,
+    action: (data: FormData) => Promise<void>,
+  ) {
+    const data = new FormData();
+    data.set("weekStart", weekStart);
+    data.set("friendId", friendId);
+
+    startTransition(async () => {
+      toggleShared(friendId);
+      await action(data);
+    });
+  }
 
   return (
     <>
@@ -85,25 +109,19 @@ export function PlannerOptions({
                         key={friend.id}
                       >
                         <span>{friend.displayName}</span>
-                        <form action={isShared ? unshareWeek : shareWeek}>
-                          <input
-                            name="weekStart"
-                            type="hidden"
-                            value={weekStart}
-                          />
-                          <input
-                            name="friendId"
-                            type="hidden"
-                            value={friend.id}
-                          />
-                          <Button
-                            className="min-h-11"
-                            type="submit"
-                            variant={isShared ? "ghost" : "tertiary"}
-                          >
-                            {isShared ? "Stop sharing" : "Share"}
-                          </Button>
-                        </form>
+                        <Button
+                          className="min-h-11"
+                          onPress={() =>
+                            runShare(
+                              friend.id,
+                              isShared ? unshareWeek : shareWeek,
+                            )
+                          }
+                          type="button"
+                          variant={isShared ? "ghost" : "tertiary"}
+                        >
+                          {isShared ? "Stop sharing" : "Share"}
+                        </Button>
                       </li>
                     );
                   })}

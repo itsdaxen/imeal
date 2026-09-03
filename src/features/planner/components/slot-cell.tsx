@@ -7,11 +7,13 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 import type { PlannedMeal } from "../plan.queries";
 import { MealControls } from "./meal-controls";
 import { MealMenu } from "./meal-menu";
+import type { RunMealChange } from "./week-grid";
 
 type SlotCellProps = {
   dayIndex: number;
   listId: string | null;
   meal?: PlannedMeal;
+  onMealChange: RunMealChange;
   slot: MealSlot;
   weekStart: string;
 };
@@ -20,6 +22,7 @@ export function SlotCell({
   dayIndex,
   listId,
   meal,
+  onMealChange,
   slot,
   weekStart,
 }: SlotCellProps) {
@@ -81,6 +84,7 @@ export function SlotCell({
             <MealMenu
               dayIndex={dayIndex}
               itemId={meal.id}
+              onMealChange={onMealChange}
               recipeId={meal.recipe.id}
               slot={slot}
               weekStart={weekStart}

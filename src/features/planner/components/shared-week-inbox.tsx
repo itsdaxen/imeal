@@ -1,3 +1,6 @@
+"use client";
+
+import { useOptimistic, useTransition } from "react";
 import { Button } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
@@ -11,7 +14,24 @@ type SharedWeekInboxProps = {
 };
 
 export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
-  if (plans.length === 0) {
+  const [, startTransition] = useTransition();
+  // Both actions end with the invitation leaving the inbox, so it goes at once.
+  const [shown, dismissPlan] = useOptimistic(plans, (current, planId: string) =>
+    current.filter((plan) => plan.planId !== planId),
+  );
+
+  function run(planId: string, action: (data: FormData) => Promise<void>) {
+    const data = new FormData();
+    data.set("planId", planId);
+    data.set("weekStart", weekStart);
+
+    startTransition(async () => {
+      dismissPlan(planId);
+      await action(data);
+    });
+  }
+
+  if (shown.length === 0) {
     return null;
   }
 
@@ -20,7 +40,7 @@ export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
       <SectionTitle>Shared with you</SectionTitle>
 
       <ul className="flex list-none flex-col gap-2 p-0">
-        {plans.map((plan) => (
+        {shown.map((plan) => (
           <li
             className="flex flex-wrap items-center justify-between gap-3"
             key={plan.planId}
@@ -35,20 +55,23 @@ export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
             </span>
 
             <div className="flex items-center gap-2">
-              <form action={copySharedWeek}>
-                <input name="planId" type="hidden" value={plan.planId} />
-                <input name="weekStart" type="hidden" value={weekStart} />
-                <Button className="min-h-11" type="submit" variant="tertiary">
-                  Copy into this week
-                </Button>
-              </form>
+              <Button
+                className="min-h-11"
+                onPress={() => run(plan.planId, copySharedWeek)}
+                type="button"
+                variant="tertiary"
+              >
+                Copy into this week
+              </Button>
 
-              <form action={dismissSharedWeek}>
-                <input name="planId" type="hidden" value={plan.planId} />
-                <Button className="min-h-11" type="submit" variant="ghost">
-                  Dismiss
-                </Button>
-              </form>
+              <Button
+                className="min-h-11"
+                onPress={() => run(plan.planId, dismissSharedWeek)}
+                type="button"
+                variant="ghost"
+              >
+                Dismiss
+              </Button>
             </div>
           </li>
         ))}

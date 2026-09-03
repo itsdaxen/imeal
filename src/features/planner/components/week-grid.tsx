@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { Card, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 
-import type { WeekPlan } from "../plan.queries";
+import type { MealSlot } from "@/features/recipes/recipe.schema";
+
+import type { PlannedMeal, WeekPlan } from "../plan.queries";
 import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
 
@@ -16,10 +18,27 @@ type WeekGridProps = {
   weekStart: string;
 };
 
-function mealAt(plan: WeekPlan, dayIndex: number, slot: string) {
-  return plan.meals.find(
-    (meal) => meal.dayIndex === dayIndex && meal.slot === slot,
+/**
+ * What a meal change looks like before the server has agreed to it. Removing is
+ * predictable, so the card can go immediately; shuffling picks a recipe only the
+ * server knows, so it stays a pending state instead.
+ */
+export type MealChange = { dayIndex: number; kind: "remove"; slot: MealSlot };
+
+export type RunMealChange = (
+  change: MealChange,
+  action: (data: FormData) => Promise<void>,
+  fields: Record<string, string>,
+) => void;
+
+function applyChange(meals: PlannedMeal[], change: MealChange) {
+  return meals.filter(
+    (meal) => !(meal.dayIndex === change.dayIndex && meal.slot === change.slot),
   );
+}
+
+function mealAt(meals: PlannedMeal[], dayIndex: number, slot: string) {
+  return meals.find((meal) => meal.dayIndex === dayIndex && meal.slot === slot);
 }
 
 export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
@@ -28,6 +47,20 @@ export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
     plan.meals.some((meal) => meal.dayIndex === day.index),
   );
   const [selectedDay, setSelectedDay] = useState(firstPlannedDay?.index ?? 0);
+  const [, startTransition] = useTransition();
+  const [meals, applyMeal] = useOptimistic(plan.meals, applyChange);
+
+  // The optimistic update has to happen inside the same transition as the write, so
+  // the change and the request that confirms it are one unit React can roll back.
+  const runMealChange: RunMealChange = (change, action, fields) => {
+    const data = new FormData();
+    Object.entries(fields).forEach(([name, value]) => data.set(name, value));
+
+    startTransition(async () => {
+      applyMeal(change);
+      await action(data);
+    });
+  };
 
   function dayCard(day: (typeof days)[number]) {
     return (
@@ -46,7 +79,8 @@ export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
                 dayIndex={day.index}
                 key={slot}
                 listId={listId}
-                meal={mealAt(plan, day.index, slot)}
+                meal={mealAt(meals, day.index, slot)}
+                onMealChange={runMealChange}
                 slot={slot}
                 weekStart={weekStart}
               />
@@ -69,9 +103,7 @@ export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
           aria-label="Choose a day"
         >
           {days.map((day) => {
-            const hasMeal = plan.meals.some(
-              (meal) => meal.dayIndex === day.index,
-            );
+            const hasMeal = meals.some((meal) => meal.dayIndex === day.index);
             const selected = day.index === selectedDay;
             return (
               <button

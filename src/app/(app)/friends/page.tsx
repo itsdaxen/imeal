@@ -12,6 +12,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { PersonAction } from "@/features/friends/components/person-action";
+import { PeopleList } from "@/features/friends/components/people-list";
 import { PersonRow } from "@/features/friends/components/person-row";
 import {
   acceptFriendRequest,
@@ -149,55 +150,49 @@ export default async function FriendsPage({
             title="Requests for you"
             width={span.narrow}
           >
-            <ul className="flex list-none flex-col p-0">
-              {incoming.map((request) => (
-                <PersonRow
-                  actions={
-                    <>
-                      <PersonAction
-                        action={acceptFriendRequest}
-                        label="Accept"
-                        name="requestId"
-                        value={request.id}
-                      />
-                      <PersonAction
-                        action={declineFriendRequest}
-                        label="Decline"
-                        name="requestId"
-                        value={request.id}
-                        variant="ghost"
-                      />
-                    </>
-                  }
-                  context="Sent you a request"
-                  key={request.id}
-                  name={request.person.displayName}
-                />
-              ))}
-            </ul>
+            <PeopleList
+              people={incoming.map((request) => ({
+                actions: [
+                  {
+                    action: acceptFriendRequest,
+                    label: "Accept",
+                    name: "requestId",
+                    value: request.id,
+                  },
+                  {
+                    action: declineFriendRequest,
+                    label: "Decline",
+                    name: "requestId",
+                    value: request.id,
+                    variant: "ghost" as const,
+                  },
+                ],
+                context: "Sent you a request",
+                id: request.id,
+                name: request.person.displayName,
+              }))}
+            />
           </Panel>
         ) : null}
 
         {outgoing.length > 0 ? (
           <Panel eyebrow="Sent" title="Waiting on a reply" width={span.narrow}>
-            <ul className="flex list-none flex-col p-0">
-              {outgoing.map((request) => (
-                <PersonRow
-                  actions={
-                    <PersonAction
-                      action={withdrawFriendRequest}
-                      label="Withdraw"
-                      name="requestId"
-                      value={request.id}
-                      variant="ghost"
-                    />
-                  }
-                  context="Request sent"
-                  key={request.id}
-                  name={request.person.displayName}
-                />
-              ))}
-            </ul>
+            <PeopleList
+              people={outgoing.map((request) => ({
+                actions: [
+                  {
+                    action: withdrawFriendRequest,
+                    label: "Withdraw",
+                    name: "requestId",
+                    value: request.id,
+                    variant: "ghost" as const,
+                  },
+                ],
+                context: "Request sent",
+                id: request.id,
+                name: request.person.displayName,
+              }))}
+            />
           </Panel>
         ) : null}
 
@@ -214,24 +209,22 @@ export default async function FriendsPage({
               title="No friends yet"
             />
           ) : (
-            <ul className="flex list-none flex-col p-0">
-              {friends.map((person) => (
-                <PersonRow
-                  actions={
-                    <PersonAction
-                      action={removeFriend}
-                      label="Remove"
-                      name="personId"
-                      value={person.id}
-                      variant="ghost"
-                    />
-                  }
-                  context="Can receive shared weeks and recipes"
-                  key={person.id}
-                  name={person.displayName}
-                />
-              ))}
-            </ul>
+            <PeopleList
+              people={friends.map((person) => ({
+                actions: [
+                  {
+                    action: removeFriend,
+                    label: "Remove",
+                    name: "personId",
+                    value: person.id,
+                    variant: "ghost" as const,
+                  },
+                ],
+                context: "Can receive shared weeks and recipes",
+                id: person.id,
+                name: person.displayName,
+              }))}
+            />
           )}
         </Panel>
       </PageGrid>

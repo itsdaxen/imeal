@@ -1,5 +1,6 @@
 "use client";
 
+import { useOptimistic, useTransition } from "react";
 import { Button, Modal, Typography } from "@heroui/react";
 
 import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
@@ -26,7 +27,29 @@ export function ShareDialog({
   recipeId: string;
   recipientIds: string[];
 }) {
-  const shared = new Set(recipientIds);
+  const [, startTransition] = useTransition();
+  // The button flips between Share and Stop sharing, so it has to flip on press
+  // rather than after the round trip — otherwise it reads as an unresponsive control.
+  const [shared, toggle] = useOptimistic(
+    new Set(recipientIds),
+    (current, friendId: string) => {
+      const next = new Set(current);
+      if (next.has(friendId)) next.delete(friendId);
+      else next.add(friendId);
+      return next;
+    },
+  );
+
+  function run(friendId: string, action: (data: FormData) => Promise<void>) {
+    const data = new FormData();
+    data.set("recipeId", recipeId);
+    data.set("friendId", friendId);
+
+    startTransition(async () => {
+      toggle(friendId);
+      await action(data);
+    });
+  }
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -48,14 +71,10 @@ export function ShareDialog({
                   const isShared = shared.has(friend.id);
 
                   return (
-                    <form
-                      action={isShared ? unshareRecipe : shareRecipe}
+                    <div
                       className="flex items-center justify-between gap-3"
                       key={friend.id}
                     >
-                      <input name="recipeId" type="hidden" value={recipeId} />
-                      <input name="friendId" type="hidden" value={friend.id} />
-
                       <span className="flex min-w-0 items-center gap-3">
                         <PersonAvatar name={friend.displayName} />
                         <span className="truncate text-sm">
@@ -64,13 +83,16 @@ export function ShareDialog({
                       </span>
 
                       <Button
+                        onPress={() =>
+                          run(friend.id, isShared ? unshareRecipe : shareRecipe)
+                        }
                         size="sm"
-                        type="submit"
+                        type="button"
                         variant={isShared ? "ghost" : "tertiary"}
                       >
                         {isShared ? "Stop sharing" : "Share"}
                       </Button>
-                    </form>
+                    </div>
                   );
                 })
               )}
