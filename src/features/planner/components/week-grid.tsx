@@ -13,17 +13,18 @@ import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
 
 type WeekGridProps = {
-  listId: string | null;
   plan: WeekPlan;
   weekStart: string;
 };
 
 /**
- * What a meal change looks like before the server has agreed to it. Removing is
- * predictable, so the card can go immediately; shuffling picks a recipe only the
- * server knows, so it stays a pending state instead.
+ * What a meal change looks like before the server has agreed to it. Removing and
+ * approving are both predictable, so the card can change immediately; shuffling
+ * picks a recipe only the server knows, so it stays a pending state instead.
  */
-export type MealChange = { dayIndex: number; kind: "remove"; slot: MealSlot };
+export type MealChange =
+  | { itemId: string; kind: "approval" }
+  | { dayIndex: number; kind: "remove"; slot: MealSlot };
 
 export type RunMealChange = (
   change: MealChange,
@@ -32,8 +33,15 @@ export type RunMealChange = (
 ) => void;
 
 function applyChange(meals: PlannedMeal[], change: MealChange) {
-  return meals.filter(
-    (meal) => !(meal.dayIndex === change.dayIndex && meal.slot === change.slot),
+  if (change.kind === "remove") {
+    return meals.filter(
+      (meal) =>
+        !(meal.dayIndex === change.dayIndex && meal.slot === change.slot),
+    );
+  }
+
+  return meals.map((meal) =>
+    meal.id === change.itemId ? { ...meal, approved: !meal.approved } : meal,
   );
 }
 
@@ -41,7 +49,7 @@ function mealAt(meals: PlannedMeal[], dayIndex: number, slot: string) {
   return meals.find((meal) => meal.dayIndex === dayIndex && meal.slot === slot);
 }
 
-export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
+export function WeekGrid({ plan, weekStart }: WeekGridProps) {
   const days = weekDays(weekStart);
   const firstPlannedDay = days.find((day) =>
     plan.meals.some((meal) => meal.dayIndex === day.index),
@@ -78,7 +86,6 @@ export function WeekGrid({ listId, plan, weekStart }: WeekGridProps) {
               <SlotCell
                 dayIndex={day.index}
                 key={slot}
-                listId={listId}
                 meal={mealAt(meals, day.index, slot)}
                 onMealChange={runMealChange}
                 slot={slot}

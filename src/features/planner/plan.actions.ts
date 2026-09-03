@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { pickReplacement, planWeek } from "./generate";
+import { ingredientsToAdd } from "./meal-ingredients";
 import { listPlannableRecipes } from "./plan.queries";
 import {
   generationSchema,
@@ -247,6 +248,118 @@ export async function shuffleMeal(formData: FormData) {
   revalidatePath("/planner");
 }
 
+/**
+ * Approving a meal is the moment its ingredients are wanted, so it is also what puts
+ * them on the week's list. Un-approving takes back the rows this meal added and that
+ * nobody has ticked yet — anything already collected, or edited by hand, stays.
+ */
+type SupabaseServerClient = Awaited<
+  ReturnType<typeof createSupabaseServerClient>
+>;
+
+/**
+ * Puts one meal's ingredients on the week's list, skipping anything already there by
+ * name so approving a second meal that shares an ingredient does not duplicate it.
+ * Each row remembers the meal it came from so un-approving can undo exactly this.
+ */
+async function addMealIngredients({
+  mealItemId,
+  planId,
+  recipeId,
+  supabase,
+  userId,
+  weekStart,
+}: {
+  mealItemId: string;
+  planId: string;
+  recipeId: string;
+  supabase: SupabaseServerClient;
+  userId: string;
+  weekStart: string;
+}) {
+  const listId = await resolveTargetList({ planId, supabase, userId });
+
+  if (!listId) {
+    return;
+  }
+
+  const [{ data: recipe }, { data: existing }] = await Promise.all([
+    supabase
+      .from("recipes")
+      .select("ingredients")
+      .eq("id", recipeId)
+      .maybeSingle(),
+    supabase.from("shopping_items").select("name").eq("list_id", listId),
+  ]);
+
+  if (!recipe) {
+    return;
+  }
+
+  const ingredients = ingredientsToAdd(
+    recipe.ingredients,
+    (existing ?? []).map((item) => item.name),
+  );
+
+  if (ingredients.length === 0) {
+    return;
+  }
+
+  await supabase.from("shopping_items").insert(
+    ingredients.map((name) => ({
+      list_id: listId,
+      meal_plan_id: planId,
+      meal_plan_item_id: mealItemId,
+      name,
+      source: "generated" as const,
+      user_id: userId,
+    })),
+  );
+
+  void weekStart;
+}
+
+/** The week's chosen list, falling back to the default one and remembering it. */
+async function resolveTargetList({
+  planId,
+  supabase,
+  userId,
+}: {
+  planId: string;
+  supabase: SupabaseServerClient;
+  userId: string;
+}) {
+  const { data: plan } = await supabase
+    .from("meal_plans")
+    .select("target_list_id")
+    .eq("id", planId)
+    .maybeSingle();
+
+  if (plan?.target_list_id) {
+    return plan.target_list_id;
+  }
+
+  const { data: fallback } = await supabase
+    .from("shopping_lists")
+    .select("id")
+    .eq("owner_id", userId)
+    .order("is_default", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (!fallback) {
+    return null;
+  }
+
+  await supabase
+    .from("meal_plans")
+    .update({ target_list_id: fallback.id })
+    .eq("id", planId);
+
+  return fallback.id;
+}
+
 export async function setMealApproval(formData: FormData) {
   const parsed = mealSchema.safeParse({
     weekStart: formData.get("weekStart"),
@@ -257,10 +370,10 @@ export async function setMealApproval(formData: FormData) {
     return;
   }
 
-  const { supabase } = await requireUserId();
+  const { supabase, userId } = await requireUserId();
   const { data: meal } = await supabase
     .from("meal_plan_items")
-    .select("id, approved")
+    .select("id, approved, recipe_id, meal_plan_id")
     .eq("id", parsed.data.itemId)
     .maybeSingle();
 
@@ -268,12 +381,46 @@ export async function setMealApproval(formData: FormData) {
     return;
   }
 
+  // The plan has to be this user's own week, not one shared with them.
+  const { data: plan } = await supabase
+    .from("meal_plans")
+    .select("id")
+    .eq("id", meal.meal_plan_id)
+    .eq("user_id", userId)
+    .eq("week_start", parsed.data.weekStart)
+    .maybeSingle();
+
+  if (!plan) {
+    return;
+  }
+
+  const approving = !meal.approved;
+
   await supabase
     .from("meal_plan_items")
-    .update({ approved: !meal.approved })
+    .update({ approved: approving })
     .eq("id", meal.id);
 
+  if (approving) {
+    await addMealIngredients({
+      mealItemId: meal.id,
+      planId: plan.id,
+      recipeId: meal.recipe_id,
+      supabase,
+      userId,
+      weekStart: parsed.data.weekStart,
+    });
+  } else {
+    await supabase
+      .from("shopping_items")
+      .delete()
+      .eq("meal_plan_item_id", meal.id)
+      .eq("user_id", userId)
+      .eq("checked", false);
+  }
+
   revalidatePath("/planner");
+  revalidatePath("/shopping");
 }
 
 export async function approveWholeWeek(formData: FormData) {

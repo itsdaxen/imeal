@@ -112,7 +112,7 @@ export default async function PlannerPage({
         </Disclosure>
       </ContentCard>
 
-      <WeekGrid listId={destination.listId} plan={plan} weekStart={weekStart} />
+      <WeekGrid plan={plan} weekStart={weekStart} />
 
       <nav
         aria-label="Change week"

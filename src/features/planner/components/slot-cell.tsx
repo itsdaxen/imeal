@@ -11,7 +11,6 @@ import type { RunMealChange } from "./week-grid";
 
 type SlotCellProps = {
   dayIndex: number;
-  listId: string | null;
   meal?: PlannedMeal;
   onMealChange: RunMealChange;
   slot: MealSlot;
@@ -20,7 +19,6 @@ type SlotCellProps = {
 
 export function SlotCell({
   dayIndex,
-  listId,
   meal,
   onMealChange,
   slot,
@@ -74,13 +72,12 @@ export function SlotCell({
             {meal.recipe.prepMinutes} min
           </Typography>
           <div className="flex items-center justify-end gap-1">
-            {listId ? (
-              <MealControls
-                itemId={meal.id}
-                listId={listId}
-                weekStart={weekStart}
-              />
-            ) : null}
+            <MealControls
+              approved={meal.approved}
+              itemId={meal.id}
+              onMealChange={onMealChange}
+              weekStart={weekStart}
+            />
             <MealMenu
               dayIndex={dayIndex}
               itemId={meal.id}

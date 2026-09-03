@@ -439,6 +439,7 @@ export type Database = {
           id: string;
           list_id: string;
           meal_plan_id: string | null;
+          meal_plan_item_id: string | null;
           name: string;
           quantity: number;
           source: Database["public"]["Enums"]["shopping_item_source"];
@@ -453,6 +454,7 @@ export type Database = {
           id?: string;
           list_id: string;
           meal_plan_id?: string | null;
+          meal_plan_item_id?: string | null;
           name: string;
           quantity?: number;
           source?: Database["public"]["Enums"]["shopping_item_source"];
@@ -467,6 +469,7 @@ export type Database = {
           id?: string;
           list_id?: string;
           meal_plan_id?: string | null;
+          meal_plan_item_id?: string | null;
           name?: string;
           quantity?: number;
           source?: Database["public"]["Enums"]["shopping_item_source"];
@@ -487,6 +490,13 @@ export type Database = {
             columns: ["meal_plan_id"];
             isOneToOne: false;
             referencedRelation: "meal_plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shopping_items_meal_plan_item_id_fkey";
+            columns: ["meal_plan_item_id"];
+            isOneToOne: false;
+            referencedRelation: "meal_plan_items";
             referencedColumns: ["id"];
           },
           {
