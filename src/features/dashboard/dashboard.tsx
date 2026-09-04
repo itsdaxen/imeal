@@ -15,12 +15,12 @@ import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { MealArtwork } from "@/components/ui/meal-artwork";
-import { LinkCard } from "@/components/ui/link-card";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
+import { RecipeCard } from "@/features/recipes/components/recipe-card";
 
 import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
@@ -302,46 +302,6 @@ function ShoppingBand({
   );
 }
 
-function RecipeCard({
-  recipe,
-}: {
-  recipe: DashboardData["recentRecipes"][number];
-}) {
-  return (
-    <LinkCard className={cn(span.third, "hover:shadow-lg")} density="compact">
-      <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
-        {recipe.imageUrl ? (
-          <Image
-            alt=""
-            className="size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
-            height={192}
-            sizes="(min-width: 1024px) 20rem, (min-width: 640px) 45vw, 100vw"
-            src={recipe.imageUrl}
-            width={256}
-          />
-        ) : (
-          <MealArtwork
-            artwork={recipe.artwork}
-            className="size-full transition-transform duration-300 motion-safe:group-hover:scale-105"
-          />
-        )}
-      </Card.Content>
-
-      <Card.Header className="gap-1.5">
-        <TagList label="Meals this suits" tags={recipe.mealTags} />
-        <Card.Title className="text-base">
-          <LinkCard.Target href={`/recipes/${recipe.id}`}>
-            {recipe.title}
-          </LinkCard.Target>
-        </Card.Title>
-        <Card.Description>
-          {recipe.prepMinutes} min · serves {recipe.servings}
-        </Card.Description>
-      </Card.Header>
-    </LinkCard>
-  );
-}
-
 function greeting(hour: number) {
   if (hour < 12) {
     return "Good morning";
@@ -407,7 +367,11 @@ export async function Dashboard() {
             ) : (
               <PageGrid>
                 {data.recentRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                  <RecipeCard
+                    className={span.third}
+                    key={recipe.id}
+                    recipe={recipe}
+                  />
                 ))}
               </PageGrid>
             )}

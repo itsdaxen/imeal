@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Card } from "@heroui/react";
+import { Card, cn } from "@heroui/react";
 
 import { LinkCard } from "@/components/ui/link-card";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
@@ -7,15 +7,28 @@ import { TagList } from "@/components/ui/tag-list";
 
 import type { RecipeSummary } from "../recipe.queries";
 
+/**
+ * One recipe, wherever recipes are listed.
+ *
+ * The dashboard drew its own copy of this card because its query returned a different
+ * shape of the same rows. Two cards that looked identical would have drifted apart the
+ * first time one of them gained a badge, so the query now hands back `RecipeSummary`
+ * and everyone draws the card from here.
+ */
 export function RecipeCard({
+  className,
   href,
   recipe,
 }: {
+  className?: string;
   href?: string;
   recipe: RecipeSummary;
 }) {
   return (
-    <LinkCard className="h-full hover:shadow-lg" density="compact">
+    <LinkCard
+      className={cn("h-full hover:shadow-lg", className)}
+      density="compact"
+    >
       <Card.Content className="h-36 flex-none overflow-hidden rounded-xl">
         {recipe.image_url ? (
           <Image

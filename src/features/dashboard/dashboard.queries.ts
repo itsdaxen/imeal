@@ -4,7 +4,10 @@ import {
   formatWeekLabel,
   weekDays,
 } from "@/features/planner/week";
-import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
+import {
+  listOwnedRecipes,
+  type RecipeSummary,
+} from "@/features/recipes/recipe.queries";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { getShoppingList } from "@/features/shopping/shopping.queries";
 import { artworkFor, type Artwork } from "@/components/ui/meal-artwork";
@@ -50,15 +53,7 @@ export type DashboardData = {
     }>;
   };
   shopping: { completedItems: number; totalItems: number; nextItems: string[] };
-  recentRecipes: Array<{
-    id: string;
-    imageUrl: string | null;
-    mealTags: MealSlot[];
-    title: string;
-    prepMinutes: number;
-    servings: number;
-    artwork: Artwork;
-  }>;
+  recentRecipes: RecipeSummary[];
 };
 
 function slotRank(slot: MealSlot) {
@@ -158,14 +153,6 @@ export async function getDashboardData(
         .slice(0, NEXT_SHOPPING_ITEM_COUNT)
         .map((item) => item.name),
     },
-    recentRecipes: recipes.slice(0, RECENT_RECIPE_COUNT).map((recipe) => ({
-      id: recipe.id,
-      imageUrl: recipe.image_url,
-      mealTags: recipe.meal_tags,
-      title: recipe.title,
-      prepMinutes: recipe.prep_minutes,
-      servings: recipe.servings,
-      artwork: artworkFor(recipe.id),
-    })),
+    recentRecipes: recipes.slice(0, RECENT_RECIPE_COUNT),
   };
 }
