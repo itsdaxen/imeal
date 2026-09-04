@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { initialsOf } from "@/lib/text";
 
 export type CurrentUser = {
   avatarUrl: string | null;
@@ -6,12 +7,6 @@ export type CurrentUser = {
   displayName: string;
   initials: string;
 };
-
-function toInitials(displayName: string) {
-  const parts = displayName.split(/\s+/).filter(Boolean).slice(0, 2);
-
-  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "?";
-}
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const supabase = await createSupabaseServerClient();
@@ -37,6 +32,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     avatarUrl: profile?.avatar_url ?? null,
     id: user.id,
     displayName,
-    initials: toInitials(displayName),
+    initials: initialsOf(displayName),
   };
 }

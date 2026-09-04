@@ -1,4 +1,5 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
+import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "./recipe.schema";
@@ -23,11 +24,6 @@ export type RecipeSummary = {
   collection_tags: string[];
   image_url: string | null;
 };
-
-// PostgREST treats these as pattern metacharacters inside ilike.
-function escapeLikePattern(value: string) {
-  return value.replace(/[%_\\]/g, (match) => `\\${match}`);
-}
 
 /**
  * The collections a person has actually used. Free text only works if you can see

@@ -1,4 +1,5 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
+import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
@@ -80,10 +81,7 @@ export async function listCatalog(
   const term = filters.search?.trim();
 
   if (term) {
-    query = query.ilike(
-      "title",
-      `%${term.replace(/[%_\\]/g, (m) => `\\${m}`)}%`,
-    );
+    query = query.ilike("title", `%${escapeLikePattern(term)}%`);
   }
 
   if (filters.mealTag) query = query.contains("meal_tags", [filters.mealTag]);

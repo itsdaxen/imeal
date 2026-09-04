@@ -1,4 +1,5 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
+import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type Person = { id: string; displayName: string };
@@ -95,7 +96,7 @@ export async function searchPeople(term: string): Promise<Person[]> {
     .from("profiles")
     .select("id, display_name")
     .eq("friend_discoverable", true)
-    .ilike("display_name", `%${search.replace(/[%_\\]/g, (m) => `\\${m}`)}%`)
+    .ilike("display_name", `%${escapeLikePattern(search)}%`)
     .limit(10);
 
   if (error) {
