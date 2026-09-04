@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 import { resolveWeekList } from "./shopping.queries";
 import { listSchema } from "./shopping.schema";
@@ -27,19 +27,6 @@ const listNameSchema = z.object({
 });
 
 const memberSchema = listSchema.extend({ userId: z.uuid() });
-
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
 
 export async function generateShoppingList(formData: FormData) {
   const parsed = weekSchema.extend(listSchema.shape).safeParse({

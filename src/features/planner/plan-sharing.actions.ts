@@ -4,23 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 const shareSchema = z.object({ weekStart: z.iso.date(), friendId: z.uuid() });
 const receivedSchema = z.object({ planId: z.uuid(), weekStart: z.iso.date() });
-
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
 
 export async function shareWeek(formData: FormData) {
   const parsed = shareSchema.safeParse({

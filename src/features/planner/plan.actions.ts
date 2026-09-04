@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { SupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 import { pickReplacement, planWeek } from "./generate";
 import { ingredientsToAdd } from "./meal-ingredients";
@@ -25,19 +26,6 @@ const SLOT_LABEL = {
   snack: "snack",
   dinner: "dinner",
 } as const;
-
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
 
 export async function assignRecipeToSlot(formData: FormData) {
   const parsed = slotAssignmentSchema.safeParse({
@@ -253,10 +241,6 @@ export async function shuffleMeal(formData: FormData) {
  * them on the week's list. Un-approving takes back the rows this meal added and that
  * nobody has ticked yet — anything already collected, or edited by hand, stays.
  */
-type SupabaseServerClient = Awaited<
-  ReturnType<typeof createSupabaseServerClient>
->;
-
 /**
  * Puts one meal's ingredients on the week's list, skipping anything already there by
  * name so approving a second meal that shares an ingredient does not duplicate it.

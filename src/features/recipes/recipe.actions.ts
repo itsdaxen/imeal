@@ -10,7 +10,8 @@ import {
   removeStoredImage,
   storeImage,
 } from "@/features/images/upload";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { SupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 import { collectionTagsSchema, parseRecipeForm } from "./recipe.schema";
 
@@ -20,22 +21,9 @@ export type RecipeFormState = {
   savedAt?: number;
 };
 
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
-
 async function uploadedImage(
   formData: FormData,
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: SupabaseServerClient,
   userId: string,
 ): Promise<{ url?: string } | { error: string }> {
   const file = chosenFile(formData.get("image"));

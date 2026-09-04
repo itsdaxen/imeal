@@ -30,3 +30,8 @@ export async function createSupabaseServerClient() {
     },
   );
 }
+
+/** The server client's type, so callers that pass it around need not re-derive it. */
+export type SupabaseServerClient = Awaited<
+  ReturnType<typeof createSupabaseServerClient>
+>;

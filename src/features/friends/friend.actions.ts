@@ -1,26 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 const personSchema = z.object({ personId: z.uuid() });
 const requestSchema = z.object({ requestId: z.uuid() });
-
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
 
 export async function sendFriendRequest(formData: FormData) {
   const parsed = personSchema.safeParse({ personId: formData.get("personId") });

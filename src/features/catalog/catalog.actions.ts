@@ -4,26 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireUserId } from "@/lib/supabase/session-user";
 
 const recipeSchema = z.object({ recipeId: z.uuid() });
 const suggestionSchema = z.object({ suggestionId: z.uuid() });
 const rejectionSchema = suggestionSchema.extend({
   note: z.string().trim().max(500).optional(),
 });
-
-async function requireUserId() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, userId: user.id };
-}
 
 export async function suggestRecipe(formData: FormData) {
   const parsed = recipeSchema.safeParse({ recipeId: formData.get("recipeId") });
