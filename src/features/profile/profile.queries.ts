@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { optionalUserId } from "@/lib/supabase/session-user";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
@@ -11,12 +11,9 @@ export type Profile = {
 };
 
 export async function getProfile(): Promise<Profile | null> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return null;
   }
 
@@ -25,7 +22,7 @@ export async function getProfile(): Promise<Profile | null> {
     .select(
       "display_name, avatar_url, friend_discoverable, default_meals_per_week, default_enabled_slots",
     )
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
 
   if (error) {

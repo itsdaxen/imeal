@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { optionalUserId } from "@/lib/supabase/session-user";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
@@ -24,12 +24,9 @@ export type WeekPlan = {
 const DEFAULT_SLOTS: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
 
 export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return { planId: null, enabledSlots: DEFAULT_SLOTS, meals: [] };
   }
 
@@ -39,7 +36,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   const { data: plan, error: planError } = await supabase
     .from("meal_plans")
     .select("id, enabled_slots")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("week_start", weekStart)
     .maybeSingle();
 
@@ -98,12 +95,9 @@ export type PlannableRecipeRow = {
 export async function listPlannableRecipes(
   source: "mine" | "catalog" | "both",
 ): Promise<PlannableRecipeRow[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -113,11 +107,11 @@ export async function listPlannableRecipes(
     .eq("status", "active");
 
   if (source === "mine") {
-    query = query.eq("owner_id", user.id);
+    query = query.eq("owner_id", userId);
   } else if (source === "catalog") {
     query = query.eq("visibility", "public");
   } else {
-    query = query.or(`owner_id.eq.${user.id},visibility.eq.public`);
+    query = query.or(`owner_id.eq.${userId},visibility.eq.public`);
   }
 
   const { data, error } = await query;

@@ -1,3 +1,4 @@
+import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
@@ -13,12 +14,9 @@ export type SharedRecipe = {
 };
 
 export async function listRecipesSharedWithMe(): Promise<SharedRecipe[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -28,7 +26,7 @@ export async function listRecipesSharedWithMe(): Promise<SharedRecipe[]> {
       `recipes (id, title, prep_minutes, servings, meal_tags, image_url),
        owner:profiles!recipe_shares_shared_by_fkey (display_name)`,
     )
-    .eq("shared_with", user.id);
+    .eq("shared_with", userId);
 
   if (error) {
     throw new Error(`Could not load shared recipes: ${error.message}`);

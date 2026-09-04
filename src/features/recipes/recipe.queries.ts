@@ -1,3 +1,4 @@
+import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "./recipe.schema";
@@ -33,19 +34,16 @@ function escapeLikePattern(value: string) {
  * what already exists — otherwise "asian" and "Asian food" become two collections.
  */
 export async function listOwnedCollections(): Promise<string[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
   const { data, error } = await supabase
     .from("recipes")
     .select("collection_tags")
-    .eq("owner_id", user.id)
+    .eq("owner_id", userId)
     .eq("status", "active");
 
   if (error) {
@@ -56,12 +54,9 @@ export async function listOwnedCollections(): Promise<string[]> {
 }
 
 export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -70,7 +65,7 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
   let query = supabase
     .from("recipes")
     .select(LIST_COLUMNS)
-    .eq("owner_id", user.id)
+    .eq("owner_id", userId)
     .eq("status", filters.archived ? "archived" : "active")
     .order("created_at", { ascending: false });
 

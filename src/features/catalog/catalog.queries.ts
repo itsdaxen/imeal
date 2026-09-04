@@ -1,3 +1,4 @@
+import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
@@ -130,12 +131,9 @@ function toSuggestion(row: {
 }
 
 export async function listMySuggestions(): Promise<Suggestion[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -144,7 +142,7 @@ export async function listMySuggestions(): Promise<Suggestion[]> {
     .select(
       "id, created_at, status, reviewer_note, recipes (id, title, image_url)",
     )
-    .eq("suggested_by", user.id)
+    .eq("suggested_by", userId)
     .order("created_at", { ascending: false });
 
   if (error) {

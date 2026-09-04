@@ -1,3 +1,4 @@
+import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listSchema } from "./shopping.schema";
 
@@ -28,12 +29,9 @@ export type ShoppingList = {
 };
 
 export async function listShoppingLists(): Promise<ShoppingListSummary[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -51,25 +49,22 @@ export async function listShoppingLists(): Promise<ShoppingListSummary[]> {
     id: list.id,
     name: list.name,
     isDefault: list.is_default,
-    isOwn: list.owner_id === user.id,
+    isOwn: list.owner_id === userId,
   }));
 }
 
 /** The list a week fills: whatever it points at, or the default. */
 export async function resolveWeekList(weekStart: string) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return { planId: null, listId: null };
   }
 
   const { data: plan, error: planError } = await supabase
     .from("meal_plans")
     .select("id, target_list_id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("week_start", weekStart)
     .maybeSingle();
 
@@ -86,7 +81,7 @@ export async function resolveWeekList(weekStart: string) {
   const { data: fallback, error: fallbackError } = await supabase
     .from("shopping_lists")
     .select("id")
-    .eq("owner_id", user.id)
+    .eq("owner_id", userId)
     .eq("is_default", true)
     .maybeSingle();
 

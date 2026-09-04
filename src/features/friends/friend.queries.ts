@@ -1,3 +1,4 @@
+import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type Person = { id: string; displayName: string };
@@ -18,19 +19,16 @@ function toPerson(profile: {
 }
 
 export async function listFriends(): Promise<Person[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
   const { data, error } = await supabase
     .from("friendships")
     .select("friend:profiles!friendships_friend_id_fkey (id, display_name)")
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
   if (error) {
     throw new Error(`Could not load friends: ${error.message}`);
@@ -63,12 +61,9 @@ export async function listIncomingRequests(): Promise<FriendRequest[]> {
 }
 
 export async function listOutgoingRequests(): Promise<FriendRequest[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -78,7 +73,7 @@ export async function listOutgoingRequests(): Promise<FriendRequest[]> {
       "id, addressee:profiles!friend_requests_addressee_id_fkey (id, display_name)",
     )
     .eq("status", "pending")
-    .eq("requester_id", user.id);
+    .eq("requester_id", userId);
 
   if (error) {
     throw new Error(`Could not load sent requests: ${error.message}`);
@@ -94,10 +89,7 @@ export async function searchPeople(term: string): Promise<Person[]> {
     return [];
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
   const { data, error } = await supabase
     .from("profiles")
@@ -110,5 +102,5 @@ export async function searchPeople(term: string): Promise<Person[]> {
     throw new Error(`Could not search: ${error.message}`);
   }
 
-  return data.filter((profile) => profile.id !== user?.id).map(toPerson);
+  return data.filter((profile) => profile.id !== userId).map(toPerson);
 }

@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { optionalUserId } from "@/lib/supabase/session-user";
 
 export type SharedPlan = {
   planId: string;
@@ -8,12 +8,9 @@ export type SharedPlan = {
 };
 
 export async function listPlansSharedWithMe(): Promise<SharedPlan[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
@@ -24,7 +21,7 @@ export async function listPlansSharedWithMe(): Promise<SharedPlan[]> {
        meal_plans (week_start, meal_plan_items (id)),
        owner:profiles!meal_plan_shares_owner_id_fkey (display_name)`,
     )
-    .eq("recipient_id", user.id);
+    .eq("recipient_id", userId);
 
   if (error) {
     throw new Error(`Could not load shared weeks: ${error.message}`);
@@ -41,19 +38,16 @@ export async function listPlansSharedWithMe(): Promise<SharedPlan[]> {
 }
 
 export async function listPlanRecipients(weekStart: string): Promise<string[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await optionalUserId();
 
-  if (!user) {
+  if (!userId) {
     return [];
   }
 
   const { data: plan } = await supabase
     .from("meal_plans")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("week_start", weekStart)
     .maybeSingle();
 
