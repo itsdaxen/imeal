@@ -2,14 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Disclosure,
-  Input,
-  Label,
-  ListBox,
-  Select,
-  TextField,
-} from "@heroui/react";
+
+import { FilterBar } from "@/components/ui/filter-bar";
 
 import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
 
@@ -62,104 +56,49 @@ export function RecipeSearch({
   }
 
   return (
-    <div className="flex flex-col gap-3" role="search">
-      <TextField className="w-full" value={term} onChange={setTerm}>
-        <Label>Search recipes</Label>
-        <Input placeholder="Title contains…" type="search" />
-      </TextField>
-      <Disclosure>
-        <Disclosure.Heading>
-          <Disclosure.Trigger className="flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-left hover:bg-default/60">
-            Filters
-            <Disclosure.Indicator />
-          </Disclosure.Trigger>
-        </Disclosure.Heading>
-        <Disclosure.Content>
-          <Disclosure.Body className="flex flex-wrap gap-3 pt-3">
-            <div className="flex min-w-44 flex-1 flex-col gap-1">
-              <Label id="library">Library</Label>
-              <Select
-                aria-labelledby="library"
-                defaultSelectedKey={archived ? "archived" : "active"}
-                onSelectionChange={(key) =>
-                  routeWithFilters(String(key), mealTag ?? "any")
-                }
-              >
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="active">My recipes</ListBox.Item>
-                    <ListBox.Item id="archived">Archived</ListBox.Item>
-                    <ListBox.Item id="shared">Shared with me</ListBox.Item>
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
-            {collections.length > 0 ? (
-              <div className="flex min-w-44 flex-1 flex-col gap-1">
-                <Label id="recipeCollection">Collection</Label>
-                <Select
-                  aria-labelledby="recipeCollection"
-                  defaultSelectedKey={collection ?? "any"}
-                  onSelectionChange={(key) =>
-                    setCollectionTerm(String(key) === "any" ? "" : String(key))
-                  }
-                >
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item id="any">Any collection</ListBox.Item>
-                      {collections.map((name) => (
-                        <ListBox.Item
-                          className="capitalize"
-                          id={name}
-                          key={name}
-                        >
-                          {name}
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              </div>
-            ) : null}
-            <div className="flex min-w-44 flex-1 flex-col gap-1">
-              <Label id="mealTag">Meal</Label>
-              <Select
-                aria-labelledby="mealTag"
-                defaultSelectedKey={mealTag ?? "any"}
-                onSelectionChange={(key) =>
-                  routeWithFilters(
-                    archived ? "archived" : "active",
-                    String(key),
-                  )
-                }
-              >
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="any">Any meal</ListBox.Item>
-                    {MEAL_SLOTS.map((slot) => (
-                      <ListBox.Item className="capitalize" id={slot} key={slot}>
-                        {slot}
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
-          </Disclosure.Body>
-        </Disclosure.Content>
-      </Disclosure>
-    </div>
+    <FilterBar
+      filters={[
+        {
+          id: "library",
+          label: "Library",
+          onChange: (value) => routeWithFilters(value, mealTag ?? "any"),
+          options: [
+            { id: "active", label: "My recipes" },
+            { id: "archived", label: "Archived" },
+            { id: "shared", label: "Shared with me" },
+          ],
+          value: archived ? "archived" : "active",
+        },
+        ...(collections.length > 0
+          ? [
+              {
+                id: "recipeCollection",
+                label: "Collection",
+                onChange: (value: string) =>
+                  setCollectionTerm(value === "any" ? "" : value),
+                options: [
+                  { id: "any", label: "Any collection" },
+                  ...collections.map((name) => ({ id: name, label: name })),
+                ],
+                value: collectionTerm || "any",
+              },
+            ]
+          : []),
+        {
+          id: "mealTag",
+          label: "Meal",
+          onChange: (value) =>
+            routeWithFilters(archived ? "archived" : "active", value),
+          options: [
+            { id: "any", label: "Any meal" },
+            ...MEAL_SLOTS.map((slot) => ({ id: slot, label: slot })),
+          ],
+          value: mealTag ?? "any",
+        },
+      ]}
+      onSearchChange={setTerm}
+      searchLabel="Search recipes"
+      searchValue={term}
+    />
   );
 }

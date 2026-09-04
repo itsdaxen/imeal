@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Input, Label, ListBox, Select, TextField } from "@heroui/react";
 import { SearchX } from "lucide-react";
 
 import { ActionButton } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import type { RecipeSummary } from "@/features/recipes/recipe.queries";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
@@ -52,38 +52,27 @@ export function AssignmentBrowser({
 
   return (
     <section aria-label="Choose a recipe" className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end gap-3" role="search">
-        <TextField className="min-w-56 flex-1" onChange={setTerm} value={term}>
-          <Label>Search your recipes</Label>
-          <Input placeholder="Title contains…" type="search" />
-        </TextField>
-
-        {collections.length > 0 ? (
-          <div className="flex min-w-44 flex-col gap-1">
-            <Label id="assignCollection">Collection</Label>
-            <Select
-              aria-labelledby="assignCollection"
-              onSelectionChange={(key) => setCollection(String(key))}
-              selectedKey={collection}
-            >
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="any">Any collection</ListBox.Item>
-                  {collections.map((name) => (
-                    <ListBox.Item className="capitalize" id={name} key={name}>
-                      {name}
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
-          </div>
-        ) : null}
-      </div>
+      <FilterBar
+        filters={
+          collections.length > 0
+            ? [
+                {
+                  id: "assignCollection",
+                  label: "Collection",
+                  onChange: setCollection,
+                  options: [
+                    { id: "any", label: "Any collection" },
+                    ...collections.map((name) => ({ id: name, label: name })),
+                  ],
+                  value: collection,
+                },
+              ]
+            : []
+        }
+        onSearchChange={setTerm}
+        searchLabel="Search your recipes"
+        searchValue={term}
+      />
 
       {shown.length === 0 ? (
         <EmptyState
