@@ -20,6 +20,7 @@ import {
 } from "@/features/sharing/sharing.actions";
 import { listRecipesSharedWithMe } from "@/features/sharing/sharing.queries";
 import { PageShell } from "@/components/ui/page-shell";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Shared with you" };
 
@@ -28,16 +29,16 @@ export default async function SharedRecipesPage() {
 
   return (
     <PageShell>
-      <header className="flex max-w-2xl flex-col gap-2">
-        <BackLink href="/recipes">Your recipes</BackLink>
-        <Typography type="h1" weight="semibold">
-          Shared with you
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          Cook from a friend&apos;s recipe as-is, or save your own copy to
-          change later.
-        </Typography>
-      </header>
+      <PageHeader
+        back={<BackLink href="/recipes">Your recipes</BackLink>}
+        description={
+          <>
+            Cook from a friend&apos;s recipe as-is, or save your own copy to
+            change later.
+          </>
+        }
+        title={<>Shared with you</>}
+      />
 
       {recipes.length === 0 ? (
         <EmptyState

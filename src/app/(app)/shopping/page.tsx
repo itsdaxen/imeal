@@ -22,6 +22,7 @@ import {
 } from "@/features/shopping/shopping.queries";
 import { listSchema } from "@/features/shopping/shopping.schema";
 import { PageShell } from "@/components/ui/page-shell";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Shopping" };
 
@@ -59,32 +60,31 @@ export default async function ShoppingPage({
 
   return (
     <PageShell gap="snug" width="narrow">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Typography type="h1" weight="semibold">
-            {list.listName}
-          </Typography>
-          <Typography color="muted" type="body">
+      <PageHeader
+        actions={
+          list.listId ? (
+            <ListToolbar
+              currentUserId={user?.id ?? ""}
+              friends={friends}
+              isOwn={open?.isOwn ?? false}
+              listId={list.listId}
+              listName={list.listName}
+              members={members}
+            >
+              {list.items.length > 0 ? (
+                <TidyPanel items={list.items} listId={list.listId} />
+              ) : null}
+            </ListToolbar>
+          ) : null
+        }
+        description={
+          <>
             {list.remaining} {list.remaining === 1 ? "item" : "items"} left
             {members.length > 1 ? ` · ${members.length} collaborators` : ""}
-          </Typography>
-        </div>
-
-        {list.listId ? (
-          <ListToolbar
-            currentUserId={user?.id ?? ""}
-            friends={friends}
-            isOwn={open?.isOwn ?? false}
-            listId={list.listId}
-            listName={list.listName}
-            members={members}
-          >
-            {list.items.length > 0 ? (
-              <TidyPanel items={list.items} listId={list.listId} />
-            ) : null}
-          </ListToolbar>
-        ) : null}
-      </header>
+          </>
+        }
+        title={list.listName}
+      />
 
       <nav aria-label="Shopping lists" className="flex flex-col gap-2 py-4">
         <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">

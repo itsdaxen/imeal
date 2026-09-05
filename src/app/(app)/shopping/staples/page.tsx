@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { ShoppingBasket } from "lucide-react";
-import { Input, Label, TextField, Typography } from "@heroui/react";
+import { Input, Label, TextField } from "@heroui/react";
 
 import { BackLink } from "@/components/ui/back-link";
 import { ActionButton } from "@/components/ui/action";
@@ -12,6 +12,7 @@ import { StaplesList } from "@/features/shopping/components/staples-list";
 import { addStaple } from "@/features/shopping/shopping.actions";
 import { listStaples } from "@/features/shopping/shopping.queries";
 import { PageShell } from "@/components/ui/page-shell";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Staples" };
 
@@ -20,16 +21,16 @@ export default async function StaplesPage() {
 
   return (
     <PageShell gap="snug">
-      <header className="flex max-w-2xl flex-col gap-2">
-        <BackLink href="/shopping">Shopping</BackLink>
-        <Typography type="h1" weight="semibold">
-          Staples
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          Things you buy most weeks. Add them to a list in one step, and pause
-          the ones you do not need right now.
-        </Typography>
-      </header>
+      <PageHeader
+        back={<BackLink href="/shopping">Shopping</BackLink>}
+        description={
+          <>
+            Things you buy most weeks. Add them to a list in one step, and pause
+            the ones you do not need right now.
+          </>
+        }
+        title={<>Staples</>}
+      />
 
       <PageGrid>
         <ContentCard

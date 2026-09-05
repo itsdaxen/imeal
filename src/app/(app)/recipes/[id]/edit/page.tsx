@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
-import { Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
@@ -13,6 +12,7 @@ import {
 } from "@/features/recipes/recipe.queries";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 import { PageShell } from "@/components/ui/page-shell";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Edit recipe" };
 
@@ -42,19 +42,15 @@ export default async function EditRecipePage({
 
   return (
     <PageShell width="wide">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex max-w-2xl flex-col gap-2">
-          <Typography type="h1" weight="semibold">
-            Edit recipe
-          </Typography>
-          <Typography className="text-muted" type="body">
-            Keep the version you plan and cook accurate.
-          </Typography>
-        </div>
-        <ActionLink href={`/recipes/${recipe.id}`} tier="quiet">
-          Back to recipe
-        </ActionLink>
-      </header>
+      <PageHeader
+        actions={
+          <ActionLink href={`/recipes/${recipe.id}`} tier="quiet">
+            Back to recipe
+          </ActionLink>
+        }
+        description={<>Keep the version you plan and cook accurate.</>}
+        title={<>Edit recipe</>}
+      />
 
       <RecipeForm
         action={updateThisRecipe}

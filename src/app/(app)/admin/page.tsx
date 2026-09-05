@@ -28,6 +28,7 @@ import {
   isCurrentUserAdmin,
   listPendingSuggestions,
 } from "@/features/catalog/catalog.queries";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Moderation" };
 
@@ -42,15 +43,15 @@ export default async function AdminPage() {
 
   return (
     <PageShell width="wide">
-      <header className="flex flex-col gap-2">
-        <Typography type="h1" weight="semibold">
-          Moderation
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          Approving copies the recipe into the catalog. The author keeps their
-          own.
-        </Typography>
-      </header>
+      <PageHeader
+        description={
+          <>
+            Approving copies the recipe into the catalog. The author keeps their
+            own.
+          </>
+        }
+        title={<>Moderation</>}
+      />
 
       {pending.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-border p-8 text-center sm:p-12">

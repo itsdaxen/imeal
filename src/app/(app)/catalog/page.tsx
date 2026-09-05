@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import Image from "next/image";
-import { Button, Typography } from "@heroui/react";
+import { Button } from "@heroui/react";
 
 import { Library, SearchX } from "lucide-react";
 
@@ -21,6 +21,7 @@ import {
   listCatalogCollections,
   listMySuggestions,
 } from "@/features/catalog/catalog.queries";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Catalog" };
 
@@ -53,14 +54,15 @@ export default async function CatalogPage({
 
   return (
     <PageShell gap="loose">
-      <header className="flex flex-col gap-2">
-        <Typography type="h1" weight="semibold">
-          Catalog
-        </Typography>
-        <Typography className="text-muted" type="body-sm">
-          Recipes published for everyone. Save one and it becomes yours to edit.
-        </Typography>
-      </header>
+      <PageHeader
+        description={
+          <>
+            Recipes published for everyone. Save one and it becomes yours to
+            edit.
+          </>
+        }
+        title={<>Catalog</>}
+      />
 
       <CatalogSearch
         collection={collection}

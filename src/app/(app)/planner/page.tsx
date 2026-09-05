@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Button, Disclosure, Link, Typography } from "@heroui/react";
+import { Button, Disclosure, Link } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
 import { PlannerOptions } from "@/features/planner/components/planner-options";
@@ -24,6 +24,7 @@ import {
   formatWeekLabel,
   resolveWeekStart,
 } from "@/features/planner/week";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata: Metadata = { title: "Planner" };
 
@@ -46,25 +47,20 @@ export default async function PlannerPage({
 
   return (
     <PageShell>
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <Typography type="h1" weight="semibold">
-            Planner
-          </Typography>
-          <Typography className="text-muted" type="body-sm">
-            {formatWeekLabel(weekStart)}
-          </Typography>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <PlannerOptions
-            friends={friends}
-            hasMeals={plan.meals.length > 0}
-            recipientIds={recipientIds}
-            weekStart={weekStart}
-          />
-        </div>
-      </header>
+      <PageHeader
+        actions={
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <PlannerOptions
+              friends={friends}
+              hasMeals={plan.meals.length > 0}
+              recipientIds={recipientIds}
+              weekStart={weekStart}
+            />
+          </div>
+        }
+        description={formatWeekLabel(weekStart)}
+        title={<>Planner</>}
+      />
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
 
