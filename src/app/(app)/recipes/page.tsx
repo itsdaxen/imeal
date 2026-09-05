@@ -14,6 +14,7 @@ import { BookOpen, SearchX } from "lucide-react";
 import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Recipes" };
 
@@ -46,7 +47,7 @@ export default async function RecipesPage({
   const isFiltered = Boolean(filters.search || filters.mealTag || collection);
 
   return (
-    <main className="flex flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <Typography type="h1" weight="semibold">
           {showArchived ? "Archived recipes" : "Recipes"}
@@ -138,6 +139,6 @@ export default async function RecipesPage({
           ))}
         </ul>
       )}
-    </main>
+    </PageShell>
   );
 }

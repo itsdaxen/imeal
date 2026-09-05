@@ -4,12 +4,13 @@ import { Typography } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
 import { RecipeImport } from "@/features/ai/components/recipe-import";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Import a recipe" };
 
 export default function ImportRecipePage() {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-2xl flex-col gap-2">
           <Typography type="h1" weight="semibold">
@@ -26,6 +27,6 @@ export default function ImportRecipePage() {
       </header>
 
       <RecipeImport />
-    </main>
+    </PageShell>
   );
 }

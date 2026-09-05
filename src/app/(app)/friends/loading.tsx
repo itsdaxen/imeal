@@ -2,10 +2,11 @@ import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { PageHeadingSkeleton } from "@/components/ui/page-skeleton";
+import { PageShell } from "@/components/ui/page-shell";
 
 export default function FriendsLoading() {
   return (
-    <div className="flex flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div">
       <PageHeadingSkeleton action={false} />
       <ContentCard className="gap-5" density="spacious">
         <Skeleton className="h-7 w-40" />
@@ -20,6 +21,6 @@ export default function FriendsLoading() {
           </div>
         ))}
       </ContentCard>
-    </div>
+    </PageShell>
   );
 }

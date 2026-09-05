@@ -1,6 +1,7 @@
 import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { PageShell } from "@/components/ui/page-shell";
 import {
   FieldSkeleton,
   PageHeadingSkeleton,
@@ -9,7 +10,7 @@ import {
 /** Matches the authoring layout, which edit and create both render. */
 export function RecipeFormSkeleton() {
   return (
-    <div className="flex w-full flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div">
       <PageHeadingSkeleton />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
@@ -41,6 +42,6 @@ export function RecipeFormSkeleton() {
           <Skeleton className="h-11 w-full rounded-full" />
         </ContentCard>
       </div>
-    </div>
+    </PageShell>
   );
 }

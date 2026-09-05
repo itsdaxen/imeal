@@ -1,10 +1,11 @@
 import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { PageShell } from "@/components/ui/page-shell";
 
 export default function ShoppingLoading() {
   return (
-    <div className="flex flex-col gap-6 pt-10 sm:pt-14">
+    <PageShell as="div" gap="snug">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-4 w-40" />
@@ -31,6 +32,6 @@ export default function ShoppingLoading() {
           ))}
         </div>
       </ContentCard>
-    </div>
+    </PageShell>
   );
 }

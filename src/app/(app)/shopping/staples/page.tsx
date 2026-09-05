@@ -11,6 +11,7 @@ import { PageGrid, span } from "@/components/ui/page-grid";
 import { StaplesList } from "@/features/shopping/components/staples-list";
 import { addStaple } from "@/features/shopping/shopping.actions";
 import { listStaples } from "@/features/shopping/shopping.queries";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Staples" };
 
@@ -18,7 +19,7 @@ export default async function StaplesPage() {
   const staples = await listStaples();
 
   return (
-    <main className="flex w-full flex-col gap-6 pt-10 sm:pt-14">
+    <PageShell gap="snug">
       <header className="flex max-w-2xl flex-col gap-2">
         <BackLink href="/shopping">Shopping</BackLink>
         <Typography type="h1" weight="semibold">
@@ -61,6 +62,6 @@ export default async function StaplesPage() {
           <StaplesList staples={staples} />
         )}
       </PageGrid>
-    </main>
+    </PageShell>
   );
 }

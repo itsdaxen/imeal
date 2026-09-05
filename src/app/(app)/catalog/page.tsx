@@ -15,6 +15,7 @@ import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { CatalogSearch } from "@/features/catalog/components/catalog-search";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
+import { PageShell } from "@/components/ui/page-shell";
 import {
   listCatalog,
   listCatalogCollections,
@@ -51,7 +52,7 @@ export default async function CatalogPage({
   ]);
 
   return (
-    <main className="flex flex-col gap-10 pt-10 sm:pt-14">
+    <PageShell gap="loose">
       <header className="flex flex-col gap-2">
         <Typography type="h1" weight="semibold">
           Catalog
@@ -183,6 +184,6 @@ export default async function CatalogPage({
           </ContentCard>
         </section>
       ) : null}
-    </main>
+    </PageShell>
   );
 }

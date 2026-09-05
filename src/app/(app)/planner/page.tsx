@@ -14,6 +14,7 @@ import { WeekGrid } from "@/features/planner/components/week-grid";
 import { ContentCard } from "@/components/ui/content-card";
 import { getWeekPlan } from "@/features/planner/plan.queries";
 import { generateShoppingList } from "@/features/shopping/shopping.actions";
+import { PageShell } from "@/components/ui/page-shell";
 import {
   listShoppingLists,
   resolveWeekList,
@@ -44,7 +45,7 @@ export default async function PlannerPage({
     ]);
 
   return (
-    <main className="flex flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Typography type="h1" weight="semibold">
@@ -134,6 +135,6 @@ export default async function PlannerPage({
           Next
         </Link>
       </nav>
-    </main>
+    </PageShell>
   );
 }

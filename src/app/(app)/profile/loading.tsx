@@ -2,10 +2,11 @@ import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { FieldSkeleton } from "@/components/ui/page-skeleton";
+import { PageShell } from "@/components/ui/page-shell";
 
 export default function ProfileLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div" width="narrow">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-9 w-40" />
         <Skeleton className="h-4 w-80 max-w-full" />
@@ -33,6 +34,6 @@ export default function ProfileLoading() {
         <Skeleton className="h-7 w-44" />
         <Skeleton className="h-11 w-full rounded-xl" />
       </ContentCard>
-    </div>
+    </PageShell>
   );
 }

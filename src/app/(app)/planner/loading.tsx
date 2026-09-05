@@ -2,10 +2,11 @@ import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { PageHeadingSkeleton } from "@/components/ui/page-skeleton";
+import { PageShell } from "@/components/ui/page-shell";
 
 export default function PlannerLoading() {
   return (
-    <div className="flex flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div">
       <PageHeadingSkeleton />
       <Skeleton className="h-16 w-full rounded-3xl" />
 
@@ -22,6 +23,6 @@ export default function PlannerLoading() {
           </ContentCard>
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }

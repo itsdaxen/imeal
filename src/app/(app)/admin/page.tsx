@@ -18,6 +18,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { TagList } from "@/components/ui/tag-list";
+import { PageShell } from "@/components/ui/page-shell";
 
 import {
   approveSuggestion,
@@ -40,7 +41,7 @@ export default async function AdminPage() {
   const pending = await listPendingSuggestions();
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <header className="flex flex-col gap-2">
         <Typography type="h1" weight="semibold">
           Moderation
@@ -174,6 +175,6 @@ export default async function AdminPage() {
           ))}
         </ul>
       )}
-    </main>
+    </PageShell>
   );
 }

@@ -13,6 +13,7 @@ import { getWeekPlan } from "@/features/planner/plan.queries";
 import { slotTargetSchema } from "@/features/planner/plan.schema";
 import { resolveWeekStart, weekDays } from "@/features/planner/week";
 import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Plan a meal" };
 
@@ -43,7 +44,7 @@ export default async function AssignPage({
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <header className="flex flex-col gap-3">
         <BackLink href={`/planner?week=${weekStart}`}>
           Back to the week
@@ -96,6 +97,6 @@ export default async function AssignPage({
           weekStart={weekStart}
         />
       )}
-    </main>
+    </PageShell>
   );
 }

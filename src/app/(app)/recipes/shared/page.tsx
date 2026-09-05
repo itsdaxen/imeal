@@ -19,6 +19,7 @@ import {
   dropSharedRecipe,
 } from "@/features/sharing/sharing.actions";
 import { listRecipesSharedWithMe } from "@/features/sharing/sharing.queries";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Shared with you" };
 
@@ -26,7 +27,7 @@ export default async function SharedRecipesPage() {
   const recipes = await listRecipesSharedWithMe();
 
   return (
-    <main className="flex flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell>
       <header className="flex max-w-2xl flex-col gap-2">
         <BackLink href="/recipes">Your recipes</BackLink>
         <Typography type="h1" weight="semibold">
@@ -132,6 +133,6 @@ export default async function SharedRecipesPage() {
           ))}
         </ul>
       )}
-    </main>
+    </PageShell>
   );
 }

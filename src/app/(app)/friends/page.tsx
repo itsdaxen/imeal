@@ -14,6 +14,7 @@ import { PanelTitle } from "@/components/ui/panel-title";
 import { PersonAction } from "@/features/friends/components/person-action";
 import { PeopleList } from "@/features/friends/components/people-list";
 import { PersonRow } from "@/features/friends/components/person-row";
+import { PageShell } from "@/components/ui/page-shell";
 import {
   acceptFriendRequest,
   declineFriendRequest,
@@ -75,7 +76,7 @@ export default async function FriendsPage({
   const pending = incoming.length > 0 || outgoing.length > 0;
 
   return (
-    <main className="flex flex-col gap-6 pt-10 sm:pt-14">
+    <PageShell gap="snug">
       <header className="flex flex-col gap-1">
         <Typography type="h1" weight="semibold">
           Friends
@@ -228,6 +229,6 @@ export default async function FriendsPage({
           )}
         </Panel>
       </PageGrid>
-    </main>
+    </PageShell>
   );
 }

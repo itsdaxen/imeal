@@ -24,6 +24,7 @@ import { listShareRecipients } from "@/features/sharing/sharing.queries";
 import { copySharedRecipe } from "@/features/sharing/sharing.actions";
 import { PlanRecipeDialog } from "@/features/planner/components/plan-recipe-dialog";
 import { currentWeekStart, weekDays } from "@/features/planner/week";
+import { PageShell } from "@/components/ui/page-shell";
 
 type RecipePageProps = { params: Promise<{ id: string }> };
 
@@ -62,7 +63,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
   const suggestion = suggestions.find((item) => item.recipe.id === recipe.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <ContentCard
         appearance="media"
         className="relative grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
@@ -199,6 +200,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <Typography type="body">{recipe.tip}</Typography>
         </section>
       ) : null}
-    </main>
+    </PageShell>
   );
 }

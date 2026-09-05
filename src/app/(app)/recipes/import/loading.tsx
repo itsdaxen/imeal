@@ -1,6 +1,7 @@
 import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { PageShell } from "@/components/ui/page-shell";
 import {
   FieldSkeleton,
   PageHeadingSkeleton,
@@ -8,7 +9,7 @@ import {
 
 export default function ImportRecipeLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div" width="wide">
       <PageHeadingSkeleton />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
@@ -36,6 +37,6 @@ export default function ImportRecipeLoading() {
           ))}
         </ContentCard>
       </div>
-    </div>
+    </PageShell>
   );
 }

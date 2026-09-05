@@ -1,10 +1,11 @@
 import { Skeleton } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { PageShell } from "@/components/ui/page-shell";
 
 export default function RecipeDetailLoading() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell as="div" width="wide">
       <ContentCard
         appearance="media"
         className="grid md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]"
@@ -36,6 +37,6 @@ export default function RecipeDetailLoading() {
           ))}
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

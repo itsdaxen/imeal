@@ -21,6 +21,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
+import { PageShell } from "@/components/ui/page-shell";
 
 import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
@@ -328,8 +329,8 @@ export async function Dashboard() {
 
   return (
     <div id="dashboard">
-      <main className="pt-10 sm:pt-14">
-        <header className="mb-6 flex flex-col gap-1 sm:mb-8">
+      <PageShell>
+        <header className="flex flex-col gap-1">
           <Eyebrow tone="info">{today}</Eyebrow>
           <Typography type="h1" weight="semibold">
             {greeting(now.getHours())}
@@ -377,7 +378,7 @@ export async function Dashboard() {
             )}
           </section>
         </PageGrid>
-      </main>
+      </PageShell>
     </div>
   );
 }

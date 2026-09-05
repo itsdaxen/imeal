@@ -6,6 +6,7 @@ import { ActionLink } from "@/components/ui/action";
 import { listOwnedCollections } from "@/features/recipes/recipe.queries";
 import { RecipeForm } from "@/features/recipes/components/recipe-form";
 import { createRecipe } from "@/features/recipes/recipe.actions";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Add a recipe" };
 
@@ -13,7 +14,7 @@ export default async function NewRecipePage() {
   const knownCollections = await listOwnedCollections();
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-2xl flex-col gap-2">
           <Typography type="h1" weight="semibold">
@@ -33,6 +34,6 @@ export default async function NewRecipePage() {
         knownCollections={knownCollections}
         submitLabel="Save recipe"
       />
-    </main>
+    </PageShell>
   );
 }

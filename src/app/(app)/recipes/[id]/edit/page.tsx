@@ -12,6 +12,7 @@ import {
   listOwnedCollections,
 } from "@/features/recipes/recipe.queries";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = { title: "Edit recipe" };
 
@@ -40,7 +41,7 @@ export default async function EditRecipePage({
   const updateThisRecipe = updateRecipe.bind(null, recipe.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 pt-10 sm:pt-14">
+    <PageShell width="wide">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-2xl flex-col gap-2">
           <Typography type="h1" weight="semibold">
@@ -71,6 +72,6 @@ export default async function EditRecipePage({
           collectionTags: recipe.collection_tags,
         }}
       />
-    </main>
+    </PageShell>
   );
 }
