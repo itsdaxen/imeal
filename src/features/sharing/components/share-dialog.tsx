@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic } from "react";
 import { Button, Typography } from "@heroui/react";
 
 import { PersonAvatar } from "@/components/ui/person-avatar";
@@ -8,6 +8,7 @@ import type { Person } from "@/features/friends/friend.queries";
 
 import { shareRecipe, unshareRecipe } from "../sharing.actions";
 import { AppDialog } from "@/components/ui/app-dialog";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 /**
  * Sharing is occasional, so it lives in the recipe's menu rather than as a panel
@@ -27,7 +28,7 @@ export function ShareDialog({
   recipeId: string;
   recipientIds: string[];
 }) {
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   // The button flips between Share and Stop sharing, so it has to flip on press
   // rather than after the round trip — otherwise it reads as an unresponsive control.
   const [shared, toggle] = useOptimistic(
@@ -40,15 +41,8 @@ export function ShareDialog({
     },
   );
 
-  function run(friendId: string, action: (data: FormData) => Promise<void>) {
-    const data = new FormData();
-    data.set("recipeId", recipeId);
-    data.set("friendId", friendId);
-
-    startTransition(async () => {
-      toggle(friendId);
-      await action(data);
-    });
+  function run(friendId: string, action: ServerAction) {
+    send(action, { friendId, recipeId }, () => toggle(friendId));
   }
 
   return (

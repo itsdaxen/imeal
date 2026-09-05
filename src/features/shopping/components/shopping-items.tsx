@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import {
   Button,
@@ -20,6 +20,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
 import { AppDialog } from "@/components/ui/app-dialog";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 type Change = { id: string; kind: "toggle" } | { id: string; kind: "remove" };
 type Editing = { item: ShoppingItem; mode: "quantity" | "rename" } | null;
@@ -68,7 +69,7 @@ function sortItems(items: ShoppingItem[], mode: SortMode) {
  * from it and the optimistic change disappears.
  */
 export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   const [editing, setEditing] = useState<Editing>(null);
   const [sort, setSort] = useState<SortMode>("added");
   const [shown, apply] = useOptimistic(items, (current, change: Change) =>
@@ -97,14 +98,8 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
     return [...found.entries()];
   }, [needed, sort]);
 
-  function run(change: Change, action: (data: FormData) => Promise<void>) {
-    const data = new FormData();
-    data.set("itemId", change.id);
-
-    startTransition(async () => {
-      apply(change);
-      await action(data);
-    });
+  function run(change: Change, action: ServerAction) {
+    send(action, { itemId: change.id }, () => apply(change));
   }
 
   function row(item: ShoppingItem) {

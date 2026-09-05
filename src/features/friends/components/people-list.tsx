@@ -1,9 +1,10 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic } from "react";
 import { Button } from "@heroui/react";
 
 import { PersonRow } from "./person-row";
+import { useServerAction } from "@/lib/use-server-action";
 
 export type PersonAction = {
   action: (formData: FormData) => Promise<void>;
@@ -26,7 +27,7 @@ export type PersonEntry = {
  * remove itself — and the server re-renders behind it either way.
  */
 export function PeopleList({ people }: { people: PersonEntry[] }) {
-  const [, startTransition] = useTransition();
+  const { run } = useServerAction();
   const [shown, dismiss] = useOptimistic(people, (current, id: string) =>
     current.filter((person) => person.id !== id),
   );
@@ -39,15 +40,11 @@ export function PeopleList({ people }: { people: PersonEntry[] }) {
             <Button
               className="min-h-11"
               key={entry.label}
-              onPress={() => {
-                const data = new FormData();
-                data.set(entry.name, entry.value);
-
-                startTransition(async () => {
-                  dismiss(person.id);
-                  await entry.action(data);
-                });
-              }}
+              onPress={() =>
+                run(entry.action, { [entry.name]: entry.value }, () =>
+                  dismiss(person.id),
+                )
+              }
               type="button"
               variant={entry.variant ?? "tertiary"}
             >

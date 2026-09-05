@@ -25,6 +25,7 @@ import {
   renameShoppingList,
 } from "../shopping.actions";
 import { AppDialog } from "@/components/ui/app-dialog";
+import { useServerAction } from "@/lib/use-server-action";
 
 type Member = { displayName: string; id: string };
 
@@ -48,6 +49,7 @@ export function ListToolbar({
   listName,
   members,
 }: ListToolbarProps) {
+  const { run } = useServerAction();
   const [open, setOpen] = useState<"none" | "rename" | "share">("none");
   const memberIds = new Set(members.map((member) => member.id));
 
@@ -80,9 +82,7 @@ export function ListToolbar({
             <Dropdown.Item
               id="staples"
               onAction={() => {
-                const data = new FormData();
-                data.set("listId", listId);
-                void addStaplesToList(data);
+                run(addStaplesToList, { listId });
               }}
               textValue="Add staples"
             >
@@ -91,9 +91,7 @@ export function ListToolbar({
             <Dropdown.Item
               id="clear"
               onAction={() => {
-                const data = new FormData();
-                data.set("listId", listId);
-                void clearShoppingList(data);
+                run(clearShoppingList, { listId });
               }}
               className="text-danger"
               textValue="Clear list"
@@ -105,9 +103,7 @@ export function ListToolbar({
               <Dropdown.Item
                 id="delete"
                 onAction={() => {
-                  const data = new FormData();
-                  data.set("listId", listId);
-                  void deleteShoppingList(data);
+                  run(deleteShoppingList, { listId });
                 }}
                 className="text-danger"
                 textValue="Delete list"

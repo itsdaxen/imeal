@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import { Dropdown } from "@heroui/react";
@@ -23,6 +23,7 @@ import {
   deleteRecipe,
   type RecipeFormState,
 } from "../recipe.actions";
+import { useServerAction } from "@/lib/use-server-action";
 
 export function RecipeOwnerMenu({
   collections,
@@ -40,7 +41,7 @@ export function RecipeOwnerMenu({
   suggestion?: Suggestion;
 }) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const { run } = useServerAction();
   const [, deleteAction, isDeleting] = useActionState<RecipeFormState>(
     deleteRecipe.bind(null, id),
     {},
@@ -65,20 +66,10 @@ export function RecipeOwnerMenu({
             label: "Suggest for the catalog",
           };
 
-  function run(
-    action: (data: FormData) => Promise<void>,
-    fields: Record<string, string>,
-  ) {
-    const data = new FormData();
-    Object.entries(fields).forEach(([name, value]) => data.set(name, value));
-    startTransition(() => action(data));
-  }
   const deleteForm = useRef<HTMLFormElement>(null);
 
   function archive() {
-    const data = new FormData();
-    data.set("recipeId", id);
-    startTransition(() => archiveRecipe(data));
+    run(archiveRecipe, { recipeId: id });
   }
 
   return (

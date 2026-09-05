@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
+import { useOptimistic, useState } from "react";
 import { Card, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
@@ -11,6 +11,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 import type { PlannedMeal, WeekPlan } from "../plan.queries";
 import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
+import { useServerAction } from "@/lib/use-server-action";
 
 type WeekGridProps = {
   plan: WeekPlan;
@@ -55,19 +56,13 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
     plan.meals.some((meal) => meal.dayIndex === day.index),
   );
   const [selectedDay, setSelectedDay] = useState(firstPlannedDay?.index ?? 0);
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   const [meals, applyMeal] = useOptimistic(plan.meals, applyChange);
 
   // The optimistic update has to happen inside the same transition as the write, so
   // the change and the request that confirms it are one unit React can roll back.
   const runMealChange: RunMealChange = (change, action, fields) => {
-    const data = new FormData();
-    Object.entries(fields).forEach(([name, value]) => data.set(name, value));
-
-    startTransition(async () => {
-      applyMeal(change);
-      await action(data);
-    });
+    send(action, fields, () => applyMeal(change));
   };
 
   function dayCard(day: (typeof days)[number]) {

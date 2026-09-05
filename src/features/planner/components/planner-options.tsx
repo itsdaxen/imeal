@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useRef, useState, useTransition } from "react";
+import { useOptimistic, useRef, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { Button, Dropdown, Link, Typography } from "@heroui/react";
 
@@ -11,6 +11,7 @@ import type { Person } from "@/features/friends/friend.queries";
 import { deleteWeekPlan } from "../plan.actions";
 import { shareWeek, unshareWeek } from "../plan-sharing.actions";
 import { AppDialog } from "@/components/ui/app-dialog";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 type PlannerOptionsProps = {
   friends: Person[];
@@ -27,7 +28,7 @@ export function PlannerOptions({
 }: PlannerOptionsProps) {
   const [dialog, setDialog] = useState<"clear" | "share" | null>(null);
   const clearForm = useRef<HTMLFormElement>(null);
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   // Same reasoning as sharing a recipe: the label flips, so it flips on press.
   const [shared, toggleShared] = useOptimistic(
     new Set(recipientIds),
@@ -39,18 +40,8 @@ export function PlannerOptions({
     },
   );
 
-  function runShare(
-    friendId: string,
-    action: (data: FormData) => Promise<void>,
-  ) {
-    const data = new FormData();
-    data.set("weekStart", weekStart);
-    data.set("friendId", friendId);
-
-    startTransition(async () => {
-      toggleShared(friendId);
-      await action(data);
-    });
+  function runShare(friendId: string, action: ServerAction) {
+    send(action, { friendId, weekStart }, () => toggleShared(friendId));
   }
 
   return (

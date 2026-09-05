@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic } from "react";
 import { Typography } from "@heroui/react";
 
 import { ContentCard } from "@/components/ui/content-card";
@@ -9,6 +9,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 
 import { removeStaple, toggleStaple } from "../shopping.actions";
 import { StapleMenu } from "./staple-menu";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 export type Staple = { active: boolean; id: string; name: string };
 
@@ -29,17 +30,11 @@ function applyChange(staples: Staple[], change: Change) {
  * here rather than in each row — a row cannot move itself out of its own list.
  */
 export function StaplesList({ staples }: { staples: Staple[] }) {
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   const [shown, apply] = useOptimistic(staples, applyChange);
 
-  function run(change: Change, action: (data: FormData) => Promise<void>) {
-    const data = new FormData();
-    data.set("stapleId", change.id);
-
-    startTransition(async () => {
-      apply(change);
-      await action(data);
-    });
+  function run(change: Change, action: ServerAction) {
+    send(action, { stapleId: change.id }, () => apply(change));
   }
 
   const active = shown.filter((staple) => staple.active);

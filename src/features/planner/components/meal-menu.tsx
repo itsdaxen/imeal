@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import { Dropdown } from "@heroui/react";
@@ -10,6 +9,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { clearSlot, shuffleMeal } from "../plan.actions";
 import type { RunMealChange } from "./week-grid";
+import { useServerAction } from "@/lib/use-server-action";
 
 type MealMenuProps = {
   dayIndex: number;
@@ -29,17 +29,8 @@ export function MealMenu({
   weekStart,
 }: MealMenuProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { isPending, run } = useServerAction();
   const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}`;
-
-  function run(
-    action: (data: FormData) => Promise<void>,
-    fields: Record<string, string>,
-  ) {
-    const data = new FormData();
-    Object.entries(fields).forEach(([name, value]) => data.set(name, value));
-    startTransition(() => action(data));
-  }
 
   return (
     <Dropdown>

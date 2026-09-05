@@ -1,12 +1,13 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic } from "react";
 import { Button } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 
 import { copySharedWeek, dismissSharedWeek } from "../plan-sharing.actions";
 import type { SharedPlan } from "../plan-sharing.queries";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 type SharedWeekInboxProps = {
   plans: SharedPlan[];
@@ -14,21 +15,14 @@ type SharedWeekInboxProps = {
 };
 
 export function SharedWeekInbox({ plans, weekStart }: SharedWeekInboxProps) {
-  const [, startTransition] = useTransition();
+  const { run: send } = useServerAction();
   // Both actions end with the invitation leaving the inbox, so it goes at once.
   const [shown, dismissPlan] = useOptimistic(plans, (current, planId: string) =>
     current.filter((plan) => plan.planId !== planId),
   );
 
-  function run(planId: string, action: (data: FormData) => Promise<void>) {
-    const data = new FormData();
-    data.set("planId", planId);
-    data.set("weekStart", weekStart);
-
-    startTransition(async () => {
-      dismissPlan(planId);
-      await action(data);
-    });
+  function run(planId: string, action: ServerAction) {
+    send(action, { planId, weekStart }, () => dismissPlan(planId));
   }
 
   if (shown.length === 0) {
