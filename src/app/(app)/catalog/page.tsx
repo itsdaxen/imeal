@@ -21,6 +21,7 @@ import {
 } from "@/features/catalog/catalog.queries";
 import { PageHeader } from "@/components/ui/page-header";
 import { RecipeImage } from "@/components/ui/recipe-image";
+import { CardGrid } from "@/components/ui/card-grid";
 
 export const metadata: Metadata = { title: "Catalog" };
 
@@ -94,13 +95,13 @@ export default async function CatalogPage({
           title={search ? "Nothing matches" : "The catalog is still empty"}
         />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <CardGrid>
           {recipes.map((recipe) => (
             <li key={recipe.id}>
               <RecipeCard href={`/catalog/${recipe.id}`} recipe={recipe} />
             </li>
           ))}
-        </ul>
+        </CardGrid>
       )}
 
       {suggestions.length > 0 ? (

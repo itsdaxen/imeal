@@ -15,6 +15,7 @@ import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { PageShell } from "@/components/ui/page-shell";
+import { CardGrid } from "@/components/ui/card-grid";
 
 export const metadata: Metadata = { title: "Recipes" };
 
@@ -122,7 +123,7 @@ export default async function RecipesPage({
           }
         />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <CardGrid>
           {recipes.map((recipe) => (
             <li className="flex flex-col gap-2" key={recipe.id}>
               <RecipeCard recipe={recipe} />
@@ -137,7 +138,7 @@ export default async function RecipesPage({
               ) : null}
             </li>
           ))}
-        </ul>
+        </CardGrid>
       )}
     </PageShell>
   );

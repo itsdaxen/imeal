@@ -11,6 +11,7 @@ import type { RecipeSummary } from "@/features/recipes/recipe.queries";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { assignRecipeToSlot } from "../plan.actions";
+import { CardGrid } from "@/components/ui/card-grid";
 
 /**
  * The same card and grid as the library, so choosing a meal looks like browsing
@@ -92,7 +93,7 @@ export function AssignmentBrowser({
           title="No recipes match"
         />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <CardGrid>
           {shown.map((recipe) => (
             <li className="flex flex-col gap-2" key={recipe.id}>
               <RecipeCard recipe={recipe} />
@@ -111,7 +112,7 @@ export function AssignmentBrowser({
               </form>
             </li>
           ))}
-        </ul>
+        </CardGrid>
       )}
     </section>
   );

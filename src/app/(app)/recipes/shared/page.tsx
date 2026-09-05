@@ -20,6 +20,7 @@ import { listRecipesSharedWithMe } from "@/features/sharing/sharing.queries";
 import { PageShell } from "@/components/ui/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { RecipeImage } from "@/components/ui/recipe-image";
+import { CardGrid } from "@/components/ui/card-grid";
 
 export const metadata: Metadata = { title: "Shared with you" };
 
@@ -51,7 +52,7 @@ export default async function SharedRecipesPage() {
           title="Your shared cookbook starts with a friend"
         />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <CardGrid>
           {recipes.map((recipe) => (
             <li key={recipe.id}>
               <ContentCard className="h-full overflow-hidden" density="flush">
@@ -124,7 +125,7 @@ export default async function SharedRecipesPage() {
               </ContentCard>
             </li>
           ))}
-        </ul>
+        </CardGrid>
       )}
     </PageShell>
   );
