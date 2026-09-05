@@ -10,7 +10,6 @@ import {
 } from "@/features/recipes/recipe.queries";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { getShoppingList } from "@/features/shopping/shopping.queries";
-import { artworkFor, type Artwork } from "@/components/ui/meal-artwork";
 
 const RECENT_RECIPE_COUNT = 3;
 const NEXT_SHOPPING_ITEM_COUNT = 6;
@@ -38,7 +37,6 @@ export type DashboardData = {
     prepMinutes: number;
     approved: boolean;
     imageUrl: string | null;
-    artwork: Artwork;
   } | null;
   today: {
     label: string;
@@ -138,7 +136,6 @@ export async function getDashboardData(
           prepMinutes: upcoming.recipe.prepMinutes,
           approved: upcoming.approved,
           imageUrl: upcoming.recipe.imageUrl,
-          artwork: artworkFor(upcoming.recipe.id),
         }
       : null,
     today: {

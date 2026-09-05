@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import Image from "next/image";
 import { Button } from "@heroui/react";
 
 import { Library, SearchX } from "lucide-react";
@@ -10,7 +9,6 @@ import { ActionLink } from "@/components/ui/action";
 
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { CatalogSearch } from "@/features/catalog/components/catalog-search";
@@ -22,6 +20,7 @@ import {
   listMySuggestions,
 } from "@/features/catalog/catalog.queries";
 import { PageHeader } from "@/components/ui/page-header";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 export const metadata: Metadata = { title: "Catalog" };
 
@@ -117,20 +116,13 @@ export default async function CatalogPage({
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="size-14 shrink-0 overflow-hidden rounded-xl">
-                      {suggestion.recipe.imageUrl ? (
-                        <Image
-                          alt=""
-                          className="size-full object-cover"
-                          height={56}
-                          src={suggestion.recipe.imageUrl}
-                          width={56}
-                        />
-                      ) : (
-                        <MealArtwork
-                          artwork={artworkFor(suggestion.recipe.id)}
-                          className="size-full"
-                        />
-                      )}
+                      <RecipeImage
+                        className="size-full"
+                        height={56}
+                        id={suggestion.recipe.id}
+                        imageUrl={suggestion.recipe.imageUrl}
+                        width={56}
+                      />
                     </div>
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate font-medium">

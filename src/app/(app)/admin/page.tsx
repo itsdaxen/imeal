@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   Button,
@@ -15,7 +14,6 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 import { ActionLink } from "@/components/ui/action";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { TagList } from "@/components/ui/tag-list";
 import { PageShell } from "@/components/ui/page-shell";
@@ -29,6 +27,7 @@ import {
   listPendingSuggestions,
 } from "@/features/catalog/catalog.queries";
 import { PageHeader } from "@/components/ui/page-header";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 export const metadata: Metadata = { title: "Moderation" };
 
@@ -68,21 +67,14 @@ export default async function AdminPage() {
               <ContentCard className="overflow-hidden" density="flush">
                 <div className="grid md:grid-cols-[15rem_minmax(0,1fr)]">
                   <div className="h-48 overflow-hidden md:h-full md:min-h-64">
-                    {suggestion.recipe.imageUrl ? (
-                      <Image
-                        alt=""
-                        className="size-full object-cover"
-                        height={320}
-                        sizes="(min-width: 768px) 15rem, 100vw"
-                        src={suggestion.recipe.imageUrl}
-                        width={400}
-                      />
-                    ) : (
-                      <MealArtwork
-                        artwork={artworkFor(suggestion.recipe.id)}
-                        className="size-full"
-                      />
-                    )}
+                    <RecipeImage
+                      className="size-full"
+                      height={320}
+                      id={suggestion.recipe.id}
+                      imageUrl={suggestion.recipe.imageUrl}
+                      sizes="(min-width: 768px) 15rem, 100vw"
+                      width={400}
+                    />
                   </div>
 
                   <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-7">

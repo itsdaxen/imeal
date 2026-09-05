@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   Card,
   Chip,
@@ -14,7 +13,6 @@ import { CalendarPlus } from "lucide-react";
 import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
-import { MealArtwork } from "@/components/ui/meal-artwork";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -25,6 +23,7 @@ import { PageShell } from "@/components/ui/page-shell";
 
 import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (
@@ -105,22 +104,15 @@ function NextMealCard({
       density="flush"
       id="next-meal"
     >
-      {nextMeal.imageUrl ? (
-        <Image
-          alt=""
-          className="object-cover"
-          fill
-          // The hero above the fold, and so the page's LCP element.
-          preload
-          sizes="(min-width: 1024px) 66vw, 100vw"
-          src={nextMeal.imageUrl}
-        />
-      ) : (
-        <MealArtwork
-          artwork={nextMeal.artwork}
-          className="absolute inset-0 size-full"
-        />
-      )}
+      <RecipeImage
+        className="absolute inset-0 size-full"
+        fill
+        id={nextMeal.id}
+        imageUrl={nextMeal.imageUrl}
+        // The hero above the fold, and so the page's LCP element.
+        preload
+        sizes="(min-width: 1024px) 66vw, 100vw"
+      />
 
       {/* A soft floor under the panel, so a pale photograph cannot swallow its edge. */}
       <div className="absolute inset-x-0 bottom-0 z-10 h-2/3 bg-linear-to-t from-black/45 to-transparent" />

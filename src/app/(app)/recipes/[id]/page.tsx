@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Card, Chip, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { listFriends } from "@/features/friends/friend.queries";
@@ -25,6 +23,7 @@ import { copySharedRecipe } from "@/features/sharing/sharing.actions";
 import { PlanRecipeDialog } from "@/features/planner/components/plan-recipe-dialog";
 import { currentWeekStart, weekDays } from "@/features/planner/week";
 import { PageShell } from "@/components/ui/page-shell";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 type RecipePageProps = { params: Promise<{ id: string }> };
 
@@ -80,22 +79,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
           />
         ) : null}
         <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
-          {recipe.image_url ? (
-            <Image
-              alt=""
-              className="size-full object-cover"
-              height={640}
-              preload
-              sizes="(min-width: 768px) 34rem, 100vw"
-              src={recipe.image_url}
-              width={720}
-            />
-          ) : (
-            <MealArtwork
-              artwork={artworkFor(recipe.id)}
-              className="size-full"
-            />
-          )}
+          <RecipeImage
+            className="size-full"
+            height={640}
+            id={recipe.id}
+            imageUrl={recipe.image_url}
+            preload
+            sizes="(min-width: 768px) 34rem, 100vw"
+            width={720}
+          />
         </Card.Content>
 
         <Card.Header className="flex-col items-start justify-center gap-5 p-6 sm:p-8 lg:p-10">

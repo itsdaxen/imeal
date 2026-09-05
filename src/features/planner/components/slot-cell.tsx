@@ -1,13 +1,12 @@
-import Image from "next/image";
 import { Link, Typography } from "@heroui/react";
 
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import type { PlannedMeal } from "../plan.queries";
 import { MealControls } from "./meal-controls";
 import { MealMenu } from "./meal-menu";
 import type { RunMealChange } from "./week-grid";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 type SlotCellProps = {
   dayIndex: number;
@@ -37,21 +36,14 @@ export function SlotCell({
       {meal ? (
         <div className="flex flex-col gap-2 p-3">
           <span className="aspect-[4/3] w-full overflow-hidden rounded-xl">
-            {meal.recipe.imageUrl ? (
-              <Image
-                alt=""
-                className="size-full object-cover"
-                height={192}
-                sizes="(min-width: 1280px) 10rem, (min-width: 640px) 45vw, 100vw"
-                src={meal.recipe.imageUrl}
-                width={256}
-              />
-            ) : (
-              <MealArtwork
-                artwork={artworkFor(meal.recipe.id)}
-                className="size-full"
-              />
-            )}
+            <RecipeImage
+              className="size-full"
+              height={192}
+              id={meal.recipe.id}
+              imageUrl={meal.recipe.imageUrl}
+              sizes="(min-width: 1280px) 10rem, (min-width: 640px) 45vw, 100vw"
+              width={256}
+            />
           </span>
 
           <Typography

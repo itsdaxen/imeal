@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import Image from "next/image";
 import { Button, Card, Link, Typography } from "@heroui/react";
 
 import { UsersRound } from "lucide-react";
@@ -10,7 +9,6 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { artworkFor, MealArtwork } from "@/components/ui/meal-artwork";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { TagList } from "@/components/ui/tag-list";
 import { ActionLink } from "@/components/ui/action";
@@ -21,6 +19,7 @@ import {
 import { listRecipesSharedWithMe } from "@/features/sharing/sharing.queries";
 import { PageShell } from "@/components/ui/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
+import { RecipeImage } from "@/components/ui/recipe-image";
 
 export const metadata: Metadata = { title: "Shared with you" };
 
@@ -61,21 +60,14 @@ export default async function SharedRecipesPage() {
                   className="block h-40 w-full flex-none overflow-hidden"
                   href={`/recipes/${recipe.id}`}
                 >
-                  {recipe.imageUrl ? (
-                    <Image
-                      alt=""
-                      className="size-full object-cover transition-transform duration-300 hover:scale-105 motion-reduce:transition-none"
-                      height={192}
-                      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
-                      src={recipe.imageUrl}
-                      width={352}
-                    />
-                  ) : (
-                    <MealArtwork
-                      artwork={artworkFor(recipe.id)}
-                      className="size-full transition-transform duration-300 hover:scale-105 motion-reduce:transition-none"
-                    />
-                  )}
+                  <RecipeImage
+                    className="size-full transition-transform duration-300 hover:scale-105 motion-reduce:transition-none"
+                    height={192}
+                    id={recipe.id}
+                    imageUrl={recipe.imageUrl}
+                    sizes="(min-width: 1024px) 22rem, (min-width: 640px) 45vw, 100vw"
+                    width={352}
+                  />
                 </Link>
 
                 <Card.Header className="gap-2 px-5 pt-5">
