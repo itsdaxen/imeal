@@ -2,15 +2,15 @@
 
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { MoreHorizontal } from "lucide-react";
-import { Button, Dropdown, Link, Modal, Typography } from "@heroui/react";
+import { Button, Dropdown, Link, Typography } from "@heroui/react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
 import { deleteWeekPlan } from "../plan.actions";
 import { shareWeek, unshareWeek } from "../plan-sharing.actions";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 type PlannerOptionsProps = {
   friends: Person[];
@@ -83,57 +83,43 @@ export function PlannerOptions({
         </Dropdown.Popover>
       </Dropdown>
 
-      <Modal
+      <AppDialog
+        bodyClassName="flex flex-col gap-4"
+        heading="Share this week"
         isOpen={dialog === "share"}
         onOpenChange={(open) => setDialog(open ? "share" : null)}
       >
-        <ControlledDialogTrigger />
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Share this week</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4">
-                <Typography color="muted" type="body-sm">
-                  Friends can read the plan and copy it with its recipes.
-                </Typography>
-                <ul className="flex list-none flex-col p-0">
-                  {friends.map((friend) => {
-                    const isShared = shared.has(friend.id);
+        <Typography color="muted" type="body-sm">
+          Friends can read the plan and copy it with its recipes.
+        </Typography>
+        <ul className="flex list-none flex-col p-0">
+          {friends.map((friend) => {
+            const isShared = shared.has(friend.id);
 
-                    return (
-                      <li
-                        className="flex min-h-14 items-center justify-between gap-4 border-b border-separator last:border-b-0"
-                        key={friend.id}
-                      >
-                        <span>{friend.displayName}</span>
-                        <Button
-                          className="min-h-11"
-                          onPress={() =>
-                            runShare(
-                              friend.id,
-                              isShared ? unshareWeek : shareWeek,
-                            )
-                          }
-                          type="button"
-                          variant={isShared ? "ghost" : "tertiary"}
-                        >
-                          {isShared ? "Stop sharing" : "Share"}
-                        </Button>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <Link className="self-start" href="/friends">
-                  Manage friends
-                </Link>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+            return (
+              <li
+                className="flex min-h-14 items-center justify-between gap-4 border-b border-separator last:border-b-0"
+                key={friend.id}
+              >
+                <span>{friend.displayName}</span>
+                <Button
+                  className="min-h-11"
+                  onPress={() =>
+                    runShare(friend.id, isShared ? unshareWeek : shareWeek)
+                  }
+                  type="button"
+                  variant={isShared ? "ghost" : "tertiary"}
+                >
+                  {isShared ? "Stop sharing" : "Share"}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+        <Link className="self-start" href="/friends">
+          Manage friends
+        </Link>
+      </AppDialog>
 
       <form action={deleteWeekPlan} ref={clearForm}>
         <input name="weekStart" type="hidden" value={weekStart} />

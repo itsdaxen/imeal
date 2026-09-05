@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button, Input, Label, Modal, TextField } from "@heroui/react";
-
-import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
+import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { createShoppingList } from "../shopping.actions";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 /** Sits at the end of the list tabs, where "one more list" belongs. */
 export function NewListButton() {
@@ -23,33 +22,17 @@ export function NewListButton() {
         New list
       </Button>
 
-      <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
-        <ControlledDialogTrigger />
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>New list</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <form action={createShoppingList} className="flex gap-2">
-                  <TextField className="flex-1" isRequired name="name">
-                    <Label>Name</Label>
-                    <Input
-                      autoFocus
-                      placeholder="Market, party, the other house"
-                    />
-                  </TextField>
-                  <Button className="self-end" type="submit">
-                    Create
-                  </Button>
-                </form>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <AppDialog heading="New list" isOpen={isOpen} onOpenChange={setIsOpen}>
+        <form action={createShoppingList} className="flex gap-2">
+          <TextField className="flex-1" isRequired name="name">
+            <Label>Name</Label>
+            <Input autoFocus placeholder="Market, party, the other house" />
+          </TextField>
+          <Button className="self-end" type="submit">
+            Create
+          </Button>
+        </form>
+      </AppDialog>
     </>
   );
 }

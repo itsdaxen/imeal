@@ -8,7 +8,6 @@ import {
   Dropdown,
   Input,
   Label,
-  Modal,
   NumberField,
   TextField,
   ToggleButton,
@@ -16,11 +15,11 @@ import {
   Typography,
 } from "@heroui/react";
 
-import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 type Change = { id: string; kind: "toggle" } | { id: string; kind: "remove" };
 type Editing = { item: ShoppingItem; mode: "quantity" | "rename" } | null;
@@ -255,56 +254,42 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
         </section>
       ) : null}
 
-      <Modal isOpen={editing !== null} onOpenChange={() => setEditing(null)}>
-        <ControlledDialogTrigger />
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-sm">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>
-                  {editing?.mode === "quantity" ? "Change quantity" : "Rename"}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                {editing ? (
-                  <form action={updateItem} className="flex items-end gap-2">
-                    <input
-                      name="itemId"
-                      type="hidden"
-                      value={editing.item.id}
-                    />
+      <AppDialog
+        heading={editing?.mode === "quantity" ? "Change quantity" : "Rename"}
+        isOpen={editing !== null}
+        onOpenChange={() => setEditing(null)}
+        width="sm"
+      >
+        {editing ? (
+          <form action={updateItem} className="flex items-end gap-2">
+            <input name="itemId" type="hidden" value={editing.item.id} />
 
-                    {editing.mode === "quantity" ? (
-                      <NumberField
-                        className="flex-1"
-                        defaultValue={editing.item.quantity}
-                        minValue={1}
-                        name="quantity"
-                      >
-                        <Label>Quantity</Label>
-                        <Input autoFocus />
-                      </NumberField>
-                    ) : (
-                      <TextField
-                        className="flex-1"
-                        defaultValue={editing.item.name}
-                        isRequired
-                        name="name"
-                      >
-                        <Label>Name</Label>
-                        <Input autoFocus />
-                      </TextField>
-                    )}
+            {editing.mode === "quantity" ? (
+              <NumberField
+                className="flex-1"
+                defaultValue={editing.item.quantity}
+                minValue={1}
+                name="quantity"
+              >
+                <Label>Quantity</Label>
+                <Input autoFocus />
+              </NumberField>
+            ) : (
+              <TextField
+                className="flex-1"
+                defaultValue={editing.item.name}
+                isRequired
+                name="name"
+              >
+                <Label>Name</Label>
+                <Input autoFocus />
+              </TextField>
+            )}
 
-                    <Button type="submit">Save</Button>
-                  </form>
-                ) : null}
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+            <Button type="submit">Save</Button>
+          </form>
+        ) : null}
+      </AppDialog>
     </>
   );
 }

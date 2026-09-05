@@ -1,13 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Button, Input, Label, Modal, TextField } from "@heroui/react";
+import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { CheckChip } from "@/components/ui/check-chip";
-import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { FormMessage } from "@/features/auth/components/form-message";
 
 import { setRecipeCollections, type RecipeFormState } from "../recipe.actions";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 /**
  * Collections a recipe belongs to, edited from the recipe itself.
@@ -39,74 +39,57 @@ export function CollectionsDialog({
   const options = [...new Set([...known, ...selected])].sort();
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-      <ControlledDialogTrigger />
-      <Modal.Backdrop variant="blur">
-        <Modal.Container>
-          <Modal.Dialog className="sm:max-w-md">
-            <Modal.CloseTrigger />
-            <Modal.Header>
-              <Modal.Heading>Collections</Modal.Heading>
-            </Modal.Header>
-            <Modal.Body>
-              <form
-                action={(data) => {
-                  const picked = data.getAll("collection").map(String);
-                  const fresh = added
-                    .split(",")
-                    .map((name) => name.trim())
-                    .filter(Boolean);
-                  data.set("collectionTags", [...picked, ...fresh].join(", "));
-                  formAction(data);
-                  setAdded("");
-                  onOpenChange(false);
-                }}
-                className="flex flex-col gap-5"
-              >
-                <input name="recipeId" type="hidden" value={recipeId} />
+    <AppDialog
+      heading="Collections"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
+      <form
+        action={(data) => {
+          const picked = data.getAll("collection").map(String);
+          const fresh = added
+            .split(",")
+            .map((name) => name.trim())
+            .filter(Boolean);
+          data.set("collectionTags", [...picked, ...fresh].join(", "));
+          formAction(data);
+          setAdded("");
+          onOpenChange(false);
+        }}
+        className="flex flex-col gap-5"
+      >
+        <input name="recipeId" type="hidden" value={recipeId} />
 
-                {state.error ? (
-                  <FormMessage tone="error">{state.error}</FormMessage>
-                ) : null}
+        {state.error ? (
+          <FormMessage tone="error">{state.error}</FormMessage>
+        ) : null}
 
-                {options.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium">
-                      Your collections
-                    </span>
-                    <div className="grid grid-cols-2 gap-2">
-                      {options.map((name) => (
-                        <CheckChip
-                          defaultChecked={selected.includes(name)}
-                          key={name}
-                          label={name}
-                          name="collection"
-                          value={name}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
+        {options.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Your collections</span>
+            <div className="grid grid-cols-2 gap-2">
+              {options.map((name) => (
+                <CheckChip
+                  defaultChecked={selected.includes(name)}
+                  key={name}
+                  label={name}
+                  name="collection"
+                  value={name}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
 
-                <TextField onChange={setAdded} value={added}>
-                  <Label>
-                    {options.length > 0 ? "Add another" : "New collection"}
-                  </Label>
-                  <Input placeholder="Asian favorites" />
-                </TextField>
+        <TextField onChange={setAdded} value={added}>
+          <Label>{options.length > 0 ? "Add another" : "New collection"}</Label>
+          <Input placeholder="Asian favorites" />
+        </TextField>
 
-                <Button
-                  className="self-end"
-                  isPending={isPending}
-                  type="submit"
-                >
-                  {isPending ? "Saving…" : "Save collections"}
-                </Button>
-              </form>
-            </Modal.Body>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+        <Button className="self-end" isPending={isPending} type="submit">
+          {isPending ? "Saving…" : "Save collections"}
+        </Button>
+      </form>
+    </AppDialog>
   );
 }

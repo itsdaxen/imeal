@@ -2,12 +2,13 @@
 
 import { useActionState, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { Button, Modal, Typography } from "@heroui/react";
+import { Button, Typography } from "@heroui/react";
 
 import { FormMessage } from "@/features/auth/components/form-message";
 
 import { applyTidy, proposeTidy, type TidyState } from "../ai.actions";
 import type { TidyChange } from "../tidy-list";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 type TidyPanelProps = {
   items: ReadonlyArray<{ id: string; name: string; category: string | null }>;
@@ -65,60 +66,51 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
       </form>
 
       {/* The proposal is a decision, so it interrupts rather than appending below. */}
-      <Modal
+      <AppDialog
+        bodyClassName="flex flex-col gap-4"
+        heading="Tidy up"
         isOpen={answered && !dismissed}
         onOpenChange={() => setDismissed(true)}
+        width="lg"
       >
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-lg">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Tidy up</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4">
-                {state.error ? (
-                  <FormMessage tone="error">{state.error}</FormMessage>
-                ) : null}
+        {state.error ? (
+          <FormMessage tone="error">{state.error}</FormMessage>
+        ) : null}
 
-                {state.changes && proposed.length === 0 ? (
-                  <Typography color="muted" type="body-sm">
-                    The list is already tidy. Nothing to change.
+        {state.changes && proposed.length === 0 ? (
+          <Typography color="muted" type="body-sm">
+            The list is already tidy. Nothing to change.
+          </Typography>
+        ) : null}
+
+        {proposed.length > 0 ? (
+          <>
+            <Typography type="body-sm" weight="medium">
+              {proposed.length} {proposed.length === 1 ? "change" : "changes"}{" "}
+              proposed
+            </Typography>
+
+            <ul className="flex list-none flex-col gap-2 p-0">
+              {proposed.map(({ change, notes }) => (
+                <li className="flex flex-col" key={change.id}>
+                  <Typography type="body-sm">
+                    {change.name}
+                    {change.quantity > 1 ? ` × ${change.quantity}` : ""}
                   </Typography>
-                ) : null}
+                  <Typography color="muted" type="body-xs">
+                    {notes.join(" · ")}
+                  </Typography>
+                </li>
+              ))}
+            </ul>
 
-                {proposed.length > 0 ? (
-                  <>
-                    <Typography type="body-sm" weight="medium">
-                      {proposed.length}{" "}
-                      {proposed.length === 1 ? "change" : "changes"} proposed
-                    </Typography>
-
-                    <ul className="flex list-none flex-col gap-2 p-0">
-                      {proposed.map(({ change, notes }) => (
-                        <li className="flex flex-col" key={change.id}>
-                          <Typography type="body-sm">
-                            {change.name}
-                            {change.quantity > 1 ? ` × ${change.quantity}` : ""}
-                          </Typography>
-                          <Typography color="muted" type="body-xs">
-                            {notes.join(" · ")}
-                          </Typography>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <form action={applyTidy}>
-                      <input name="listId" type="hidden" value={listId} />
-                      <Button type="submit">Apply these changes</Button>
-                    </form>
-                  </>
-                ) : null}
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+            <form action={applyTidy}>
+              <input name="listId" type="hidden" value={listId} />
+              <Button type="submit">Apply these changes</Button>
+            </form>
+          </>
+        ) : null}
+      </AppDialog>
     </>
   );
 }

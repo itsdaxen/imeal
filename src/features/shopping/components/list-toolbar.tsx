@@ -9,12 +9,10 @@ import {
   Dropdown,
   Input,
   Label,
-  Modal,
   TextField,
   Typography,
 } from "@heroui/react";
 
-import { ControlledDialogTrigger } from "@/components/ui/controlled-dialog-trigger";
 import { IconButton } from "@/components/ui/icon-button";
 import type { Person } from "@/features/friends/friend.queries";
 
@@ -26,6 +24,7 @@ import {
   removeListMember,
   renameShoppingList,
 } from "../shopping.actions";
+import { AppDialog } from "@/components/ui/app-dialog";
 
 type Member = { displayName: string; id: string };
 
@@ -121,91 +120,69 @@ export function ListToolbar({
         </Dropdown.Popover>
       </Dropdown>
 
-      <Modal isOpen={open === "share"} onOpenChange={() => setOpen("none")}>
-        <ControlledDialogTrigger />
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Who shares {listName}</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="flex flex-col gap-2">
-                {friends.length === 0 ? (
-                  <Typography color="muted" type="body-sm">
-                    Add a friend first, then you can shop from the same list
-                    together.
-                  </Typography>
-                ) : (
-                  friends.map((friend) => {
-                    const isMember = memberIds.has(friend.id);
+      <AppDialog
+        bodyClassName="flex flex-col gap-2"
+        heading={<>Who shares {listName}</>}
+        isOpen={open === "share"}
+        onOpenChange={() => setOpen("none")}
+      >
+        {friends.length === 0 ? (
+          <Typography color="muted" type="body-sm">
+            Add a friend first, then you can shop from the same list together.
+          </Typography>
+        ) : (
+          friends.map((friend) => {
+            const isMember = memberIds.has(friend.id);
 
-                    return (
-                      <form
-                        action={isMember ? removeListMember : addListMember}
-                        className="flex items-center justify-between gap-3"
-                        key={friend.id}
-                      >
-                        <input name="listId" type="hidden" value={listId} />
-                        <input name="userId" type="hidden" value={friend.id} />
-                        <span className="text-sm">{friend.displayName}</span>
-                        <Button
-                          className="min-h-11"
-                          type="submit"
-                          variant="tertiary"
-                        >
-                          {isMember ? "Remove" : "Share"}
-                        </Button>
-                      </form>
-                    );
-                  })
-                )}
+            return (
+              <form
+                action={isMember ? removeListMember : addListMember}
+                className="flex items-center justify-between gap-3"
+                key={friend.id}
+              >
+                <input name="listId" type="hidden" value={listId} />
+                <input name="userId" type="hidden" value={friend.id} />
+                <span className="text-sm">{friend.displayName}</span>
+                <Button className="min-h-11" type="submit" variant="tertiary">
+                  {isMember ? "Remove" : "Share"}
+                </Button>
+              </form>
+            );
+          })
+        )}
 
-                {!isOwn ? (
-                  <form action={removeListMember} className="self-start">
-                    <input name="listId" type="hidden" value={listId} />
-                    <input name="userId" type="hidden" value={currentUserId} />
-                    <Button className="min-h-11" type="submit" variant="ghost">
-                      Leave this list
-                    </Button>
-                  </form>
-                ) : null}
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+        {!isOwn ? (
+          <form action={removeListMember} className="self-start">
+            <input name="listId" type="hidden" value={listId} />
+            <input name="userId" type="hidden" value={currentUserId} />
+            <Button className="min-h-11" type="submit" variant="ghost">
+              Leave this list
+            </Button>
+          </form>
+        ) : null}
+      </AppDialog>
 
-      <Modal isOpen={open === "rename"} onOpenChange={() => setOpen("none")}>
-        <ControlledDialogTrigger />
-        <Modal.Backdrop variant="blur">
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>Rename list</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <form action={renameShoppingList} className="flex gap-2">
-                  <input name="listId" type="hidden" value={listId} />
-                  <TextField
-                    className="flex-1"
-                    defaultValue={listName}
-                    isRequired
-                    name="name"
-                  >
-                    <Label>Name</Label>
-                    <Input autoFocus />
-                  </TextField>
-                  <Button className="self-end" type="submit">
-                    Save
-                  </Button>
-                </form>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <AppDialog
+        heading="Rename list"
+        isOpen={open === "rename"}
+        onOpenChange={() => setOpen("none")}
+      >
+        <form action={renameShoppingList} className="flex gap-2">
+          <input name="listId" type="hidden" value={listId} />
+          <TextField
+            className="flex-1"
+            defaultValue={listName}
+            isRequired
+            name="name"
+          >
+            <Label>Name</Label>
+            <Input autoFocus />
+          </TextField>
+          <Button className="self-end" type="submit">
+            Save
+          </Button>
+        </form>
+      </AppDialog>
     </div>
   );
 }
