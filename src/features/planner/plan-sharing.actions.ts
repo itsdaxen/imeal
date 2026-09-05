@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireUserId } from "@/lib/supabase/session-user";
+import { findWeekPlan } from "./week-plan";
 
 const shareSchema = z.object({ weekStart: z.iso.date(), friendId: z.uuid() });
 const receivedSchema = z.object({ planId: z.uuid(), weekStart: z.iso.date() });
@@ -20,12 +21,7 @@ export async function shareWeek(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", parsed.data.weekStart)
-    .maybeSingle();
+  const plan = await findWeekPlan(supabase, userId, parsed.data.weekStart);
 
   if (!plan) {
     return;
@@ -51,12 +47,7 @@ export async function unshareWeek(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", parsed.data.weekStart)
-    .maybeSingle();
+  const plan = await findWeekPlan(supabase, userId, parsed.data.weekStart);
 
   if (!plan) {
     return;

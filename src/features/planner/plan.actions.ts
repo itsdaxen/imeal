@@ -15,6 +15,7 @@ import {
   slotAssignmentSchema,
   slotTargetSchema,
 } from "./plan.schema";
+import { findWeekPlan } from "./week-plan";
 
 export type PlannerFormState = {
   error?: string;
@@ -89,12 +90,7 @@ export async function clearSlot(formData: FormData) {
   const { supabase, userId } = await requireUserId();
   const { weekStart, dayIndex, slot } = parsed.data;
 
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", weekStart)
-    .maybeSingle();
+  const plan = await findWeekPlan(supabase, userId, weekStart);
 
   if (!plan) {
     return;
@@ -417,12 +413,7 @@ export async function approveWholeWeek(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", parsed.data.weekStart)
-    .maybeSingle();
+  const plan = await findWeekPlan(supabase, userId, parsed.data.weekStart);
 
   if (!plan) {
     return;

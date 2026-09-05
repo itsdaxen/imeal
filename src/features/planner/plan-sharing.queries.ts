@@ -1,4 +1,5 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
+import { findWeekPlan } from "./week-plan";
 
 export type SharedPlan = {
   planId: string;
@@ -44,12 +45,7 @@ export async function listPlanRecipients(weekStart: string): Promise<string[]> {
     return [];
   }
 
-  const { data: plan } = await supabase
-    .from("meal_plans")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("week_start", weekStart)
-    .maybeSingle();
+  const plan = await findWeekPlan(supabase, userId, weekStart);
 
   if (!plan) {
     return [];
