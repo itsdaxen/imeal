@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireUserId } from "@/lib/supabase/session-user";
+import { copyRecipeInto } from "@/features/recipes/copy-recipe";
 
 const recipeSchema = z.object({ recipeId: z.uuid() });
 const shareSchema = recipeSchema.extend({ friendId: z.uuid() });
@@ -87,7 +88,7 @@ export async function copySharedRecipe(formData: FormData) {
     .from("recipe_shares")
     .select(
       `recipes (
-        id, title, ingredients, steps, tip, image_url,
+        id, title, ingredients, steps, tip, image_url, collection_tags,
         prep_minutes, servings, meal_tags, visibility, status
       )`,
     )
@@ -125,22 +126,12 @@ export async function copySharedRecipe(formData: FormData) {
     redirect(`/recipes/${existing.id}`);
   }
 
-  const { data: copied, error: copyError } = await supabase
-    .from("recipes")
-    .insert({
-      owner_id: userId,
-      title: source.title,
-      ingredients: source.ingredients,
-      steps: source.steps,
-      tip: source.tip,
-      image_url: source.image_url,
-      prep_minutes: source.prep_minutes,
-      servings: source.servings,
-      meal_tags: source.meal_tags,
-      source_recipe_id: source.id,
-    })
-    .select("id")
-    .single();
+  const { data: copied, error: copyError } = await copyRecipeInto(
+    supabase,
+    userId,
+    source.id,
+    source,
+  );
 
   if (copyError) {
     throw new Error("Could not save the recipe. Try again.");

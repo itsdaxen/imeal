@@ -115,6 +115,8 @@ try {
         prep_minutes: 25,
         servings: 3,
         meal_tags: ["lunch", "dinner"],
+        collection_tags: ["Comfort food"],
+        image_url: "/favicon.ico",
       })
       .select("id")
       .single(),
@@ -142,7 +144,9 @@ try {
   const copies = await result(
     recipient.client
       .from("recipes")
-      .select("id, title, ingredients, steps, tip, owner_id, source_recipe_id")
+      .select(
+        "id, title, ingredients, steps, tip, owner_id, source_recipe_id, image_url, collection_tags",
+      )
       .eq("source_recipe_id", source.id),
   );
   assert.equal(copies.length, 1);
@@ -150,6 +154,13 @@ try {
   assert.equal(copies[0].title, "Friend's tomato soup");
   assert.deepEqual(copies[0].ingredients, ["Tomatoes", "Stock"]);
   pass("the recipient saves a complete recipe under their ownership");
+
+  // Both copy paths used to write this field list out by hand, and each forgot a
+  // different part of it: the catalog dropped the photograph, sharing dropped the
+  // collections. Assert the whole recipe arrives, not just the parts anyone remembered.
+  assert.equal(copies[0].image_url, "/favicon.ico");
+  assert.deepEqual(copies[0].collection_tags, ["Comfort food"]);
+  pass("the copy keeps the photograph and the collections");
 
   await result(
     recipient.client

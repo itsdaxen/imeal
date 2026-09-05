@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireUserId } from "@/lib/supabase/session-user";
+import { copyRecipeInto } from "@/features/recipes/copy-recipe";
 
 const recipeSchema = z.object({ recipeId: z.uuid() });
 const suggestionSchema = z.object({ suggestionId: z.uuid() });
@@ -60,7 +61,7 @@ export async function saveCatalogRecipe(formData: FormData) {
   const { data: source } = await supabase
     .from("recipes")
     .select(
-      "title, ingredients, steps, tip, prep_minutes, servings, meal_tags, collection_tags",
+      "title, ingredients, steps, tip, image_url, prep_minutes, servings, meal_tags, collection_tags",
     )
     .eq("id", parsed.data.recipeId)
     .eq("visibility", "public")
@@ -71,22 +72,12 @@ export async function saveCatalogRecipe(formData: FormData) {
   }
 
   // A copy, so editing your version never changes what the catalog shows.
-  const { data: saved } = await supabase
-    .from("recipes")
-    .insert({
-      owner_id: userId,
-      title: source.title,
-      ingredients: source.ingredients,
-      steps: source.steps,
-      tip: source.tip,
-      prep_minutes: source.prep_minutes,
-      servings: source.servings,
-      meal_tags: source.meal_tags,
-      collection_tags: source.collection_tags,
-      source_recipe_id: parsed.data.recipeId,
-    })
-    .select("id")
-    .single();
+  const { data: saved } = await copyRecipeInto(
+    supabase,
+    userId,
+    parsed.data.recipeId,
+    source,
+  );
 
   revalidatePath("/recipes");
 
