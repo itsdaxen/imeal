@@ -3,16 +3,10 @@ import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
-
-export type CatalogRecipe = {
-  id: string;
-  title: string;
-  prepMinutes: number;
-  servings: number;
-  mealTags: MealSlot[];
-  collectionTags: string[];
-  imageUrl: string | null;
-};
+import {
+  type RecipeSummary,
+  SUMMARY_COLUMNS,
+} from "@/features/recipes/recipe.queries";
 
 export type Suggestion = {
   createdAt: string;
@@ -67,13 +61,11 @@ export async function listCatalog(
     mealTag?: MealSlot;
     collection?: string;
   } = {},
-): Promise<CatalogRecipe[]> {
+): Promise<RecipeSummary[]> {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("recipes")
-    .select(
-      "id, title, prep_minutes, servings, meal_tags, collection_tags, image_url",
-    )
+    .select(SUMMARY_COLUMNS)
     .eq("visibility", "public")
     .eq("status", "active")
     .order("title", { ascending: true });
@@ -95,15 +87,7 @@ export async function listCatalog(
     throw new Error(`Could not load the catalog: ${error.message}`);
   }
 
-  return data.map((recipe) => ({
-    id: recipe.id,
-    title: recipe.title,
-    prepMinutes: recipe.prep_minutes,
-    servings: recipe.servings,
-    mealTags: recipe.meal_tags,
-    collectionTags: recipe.collection_tags,
-    imageUrl: recipe.image_url,
-  }));
+  return data;
 }
 
 function toSuggestion(row: {

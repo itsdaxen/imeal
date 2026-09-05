@@ -4,9 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "./recipe.schema";
 
-const LIST_COLUMNS =
+/** Everything a recipe card draws, so the catalog and the library cannot drift apart. */
+export const SUMMARY_COLUMNS =
   "id, title, prep_minutes, servings, meal_tags, collection_tags, image_url";
-const DETAIL_COLUMNS = `${LIST_COLUMNS}, ingredients, steps, tip, owner_id, visibility`;
+const DETAIL_COLUMNS = `${SUMMARY_COLUMNS}, ingredients, steps, tip, owner_id, visibility`;
 
 export type RecipeListFilters = {
   search?: string;
@@ -60,7 +61,7 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
   // rather than leaning on RLS to mean "mine".
   let query = supabase
     .from("recipes")
-    .select(LIST_COLUMNS)
+    .select(SUMMARY_COLUMNS)
     .eq("owner_id", userId)
     .eq("status", filters.archived ? "archived" : "active")
     .order("created_at", { ascending: false });

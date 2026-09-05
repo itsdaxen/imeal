@@ -98,18 +98,7 @@ export default async function CatalogPage({
         <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <li key={recipe.id}>
-              <RecipeCard
-                href={`/catalog/${recipe.id}`}
-                recipe={{
-                  id: recipe.id,
-                  image_url: recipe.imageUrl,
-                  meal_tags: recipe.mealTags,
-                  collection_tags: recipe.collectionTags,
-                  prep_minutes: recipe.prepMinutes,
-                  servings: recipe.servings,
-                  title: recipe.title,
-                }}
-              />
+              <RecipeCard href={`/catalog/${recipe.id}`} recipe={recipe} />
             </li>
           ))}
         </ul>
