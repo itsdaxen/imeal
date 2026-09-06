@@ -4,6 +4,8 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+
+import { sessionCookie } from "./lib/harness.mjs";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
   key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   service = process.env.SUPABASE_SERVICE_KEY;
@@ -32,14 +34,7 @@ const ok = (l) => {
 try {
   const c = createClient(url, key, o);
   const { session } = await r(c.auth.signInWithPassword({ email, password }));
-  const enc =
-    "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url");
-  const p = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
-  const cookie = Array.from(
-    { length: Math.ceil(enc.length / 3180) },
-    (_, i) =>
-      `${p}${enc.length > 3180 ? `.${i}` : ""}=${enc.slice(i * 3180, (i + 1) * 3180)}`,
-  ).join("; ");
+  const cookie = sessionCookie(session);
 
   // a public catalog recipe carrying collections
   const pub = await r(

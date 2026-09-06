@@ -1,59 +1,18 @@
 // Exercises the real shared-recipe copy form with disposable users.
 // Run with: node --env-file=.env.local scripts/verify-recipe-copy.mjs
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { createInterface } from "node:readline/promises";
-import { createClient } from "@supabase/supabase-js";
 import { JSDOM } from "jsdom";
 
-const base = process.env.VERIFY_BASE_URL ?? "http://localhost:3000";
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const service = process.env.SUPABASE_SERVICE_KEY;
-assert(url && key && service, "Missing Supabase environment variables.");
-
-const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(url, service, options);
-const users = [];
-let checks = 0;
-
-async function result(request) {
-  const { data, error } = await request;
-  if (error) throw new Error(error.message);
-  return data;
-}
-
-function pass(label) {
-  checks++;
-  console.log(`PASS ${label}`);
-}
-
-async function account(label) {
-  const email = `recipe-copy-${label}-${randomUUID()}@example.test`;
-  const password = "Recipe-Copy-Probe-123!";
-  const { user } = await result(
-    admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { display_name: `${label} Probe` },
-    }),
-  );
-  users.push(user.id);
-  const client = createClient(url, key, options);
-  const { session } = await result(
-    client.auth.signInWithPassword({ email, password }),
-  );
-  const encoded =
-    "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url");
-  const prefix = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
-  const cookie = Array.from(
-    { length: Math.ceil(encoded.length / 3180) },
-    (_, index) =>
-      `${prefix}${encoded.length > 3180 ? `.${index}` : ""}=${encoded.slice(index * 3180, (index + 1) * 3180)}`,
-  ).join("; ");
-  return { client, cookie, email, id: user.id, password };
-}
+import {
+  account,
+  admin,
+  base,
+  cleanUp,
+  holdForReview,
+  pass,
+  result,
+  summary,
+} from "./lib/harness.mjs";
 
 async function sharedPage(account) {
   const response = await fetch(`${base}/recipes/shared`, {
@@ -94,9 +53,18 @@ async function submit(account, form) {
 
 try {
   await fetch(`${base}/sign-in`);
-  const owner = await account("Owner");
-  const recipient = await account("Recipient");
-  const outsider = await account("Outsider");
+  const owner = await account({
+    label: "recipe-copy-owner",
+    name: "Owner Probe",
+  });
+  const recipient = await account({
+    label: "recipe-copy-recipient",
+    name: "Recipient Probe",
+  });
+  const outsider = await account({
+    label: "recipe-copy-outsider",
+    name: "Outsider Probe",
+  });
   await result(
     admin.from("friendships").insert([
       { user_id: owner.id, friend_id: recipient.id },
@@ -185,22 +153,13 @@ try {
   assert.equal(afterRepeat.length, 1);
   pass("repeating the action opens the existing active copy");
 
-  console.log(`${checks}/${checks} shared recipe copy checks passed.`);
+  summary("shared recipe copy checks passed");
 
-  if (process.argv.includes("--browser")) {
-    console.log(`Browser fixture: ${recipient.email}`);
-    console.log(`Password: ${recipient.password}`);
-    console.log(`Shared URL: ${base}/recipes/shared`);
-    const terminal = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    await terminal.question("Press Enter when browser review is complete: ");
-    terminal.close();
-  }
+  await holdForReview([
+    `Browser fixture: ${recipient.email}`,
+    `Password: ${recipient.password}`,
+    `Shared URL: ${base}/recipes/shared`,
+  ]);
 } finally {
-  for (const id of users.reverse()) {
-    await result(admin.auth.admin.deleteUser(id));
-  }
-  console.log("Disposable recipe-copy accounts and their data removed.");
+  await cleanUp("Disposable recipe-copy accounts and their data removed.");
 }

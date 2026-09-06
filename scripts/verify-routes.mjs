@@ -10,6 +10,8 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import { sessionCookie } from "./lib/harness.mjs";
+
 const BASE = process.env.VERIFY_BASE_URL ?? "http://localhost:3000";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anon = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -107,20 +109,7 @@ try {
     throw new Error(`Could not sign in the probe user: ${signInError.message}`);
   }
 
-  // @supabase/ssr stores the session as a base64- prefixed cookie, chunked when long.
-  const ref = new URL(url).hostname.split(".")[0];
-  const encoded =
-    "base64-" +
-    Buffer.from(JSON.stringify(session.session)).toString("base64url");
-  const CHUNK = 3180;
-  const jar =
-    encoded.length <= CHUNK
-      ? [[`sb-${ref}-auth-token`, encoded]]
-      : Array.from({ length: Math.ceil(encoded.length / CHUNK) }, (_, i) => [
-          `sb-${ref}-auth-token.${i}`,
-          encoded.slice(i * CHUNK, (i + 1) * CHUNK),
-        ]);
-  const cookie = jar.map(([name, value]) => `${name}=${value}`).join("; ");
+  const cookie = sessionCookie(session.session);
 
   const probe = async (path, expected, headers) => {
     const response = await fetch(`${BASE}${path}`, {

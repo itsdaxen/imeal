@@ -2,28 +2,16 @@
 // Run with: node --env-file=.env.local scripts/verify-dashboard.mjs
 // Add --browser to keep the fixture until Enter is pressed for visual review.
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { createInterface } from "node:readline/promises";
-import { createClient } from "@supabase/supabase-js";
 import { JSDOM } from "jsdom";
 
-const base = process.env.VERIFY_BASE_URL ?? "http://localhost:3000";
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const service = process.env.SUPABASE_SERVICE_KEY;
-assert(url && key && service, "Missing Supabase environment variables.");
-
-const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(url, service, options);
-const email = `dashboard-${randomUUID()}@example.test`;
-const password = "Dashboard-Probe-123!";
-let userId;
-
-async function result(request) {
-  const { data, error } = await request;
-  if (error) throw new Error(error.message);
-  return data;
-}
+import {
+  account,
+  admin,
+  base,
+  cleanUp,
+  holdForReview,
+  result,
+} from "./lib/harness.mjs";
 
 function currentWeek() {
   const now = new Date();
@@ -41,25 +29,13 @@ function currentWeek() {
 }
 
 try {
-  const { user } = await result(
-    admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { display_name: "Dashboard Probe" },
-    }),
-  );
-  userId = user.id;
-  const client = createClient(url, key, options);
-  const { session } = await result(
-    client.auth.signInWithPassword({ email, password }),
-  );
+  const probe = await account({ label: "dashboard", name: "Dashboard Probe" });
   const recipes = await result(
-    client
+    probe.client
       .from("recipes")
       .insert([
         {
-          owner_id: user.id,
+          owner_id: probe.id,
           title: "Draft breakfast",
           ingredients: ["Oats"],
           steps: ["Cook gently."],
@@ -68,7 +44,7 @@ try {
           meal_tags: ["breakfast"],
         },
         {
-          owner_id: user.id,
+          owner_id: probe.id,
           title: "Ready dinner",
           ingredients: ["Beans"],
           steps: ["Simmer."],
@@ -81,10 +57,10 @@ try {
   );
   const { dayIndex, weekStart } = currentWeek();
   const plan = await result(
-    client
+    probe.client
       .from("meal_plans")
       .insert({
-        user_id: user.id,
+        user_id: probe.id,
         week_start: weekStart,
         enabled_slots: ["breakfast", "dinner"],
       })
@@ -95,7 +71,7 @@ try {
   const ready = recipes.find((recipe) => recipe.title === "Ready dinner");
   assert(draft && ready);
   await result(
-    client.from("meal_plan_items").insert([
+    probe.client.from("meal_plan_items").insert([
       {
         meal_plan_id: plan.id,
         recipe_id: draft.id,
@@ -112,15 +88,7 @@ try {
       },
     ]),
   );
-  const encoded =
-    "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url");
-  const prefix = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
-  const cookie = Array.from(
-    { length: Math.ceil(encoded.length / 3180) },
-    (_, index) =>
-      `${prefix}${encoded.length > 3180 ? `.${index}` : ""}=${encoded.slice(index * 3180, (index + 1) * 3180)}`,
-  ).join("; ");
-  const response = await fetch(base, { headers: { cookie } });
+  const response = await fetch(base, { headers: { cookie: probe.cookie } });
   const document = new JSDOM(await response.text()).window.document;
   const text = document.body.textContent;
   assert.equal(response.status, 200);
@@ -135,21 +103,13 @@ try {
     "PASS dashboard distinguishes proposals, ready meals, and an empty list",
   );
 
-  if (process.argv.includes("--browser")) {
-    console.log(`Browser fixture: ${email}`);
-    console.log(`Password: ${password}`);
-    console.log(`Dashboard URL: ${base}`);
-    const terminal = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    await terminal.question("Press Enter when browser review is complete: ");
-    terminal.close();
-  }
+  await holdForReview([
+    `Browser fixture: ${probe.email}`,
+    `Password: ${probe.password}`,
+    `Dashboard URL: ${base}`,
+  ]);
 } finally {
-  if (userId) {
-    await result(admin.from("meal_plans").delete().eq("user_id", userId));
-    await result(admin.auth.admin.deleteUser(userId));
-  }
-  console.log("Disposable dashboard account and its data removed.");
+  await cleanUp("Disposable dashboard account and its data removed.", (id) =>
+    result(admin.from("meal_plans").delete().eq("user_id", id)),
+  );
 }

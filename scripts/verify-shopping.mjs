@@ -2,67 +2,19 @@
 // Run with: node --env-file=.env.local scripts/verify-shopping.mjs
 // Add --browser to keep the fixture until Enter is pressed for visual review.
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { createInterface } from "node:readline/promises";
-import { createClient } from "@supabase/supabase-js";
 import { JSDOM } from "jsdom";
 
-const base = process.env.VERIFY_BASE_URL ?? "http://localhost:3000";
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const service = process.env.SUPABASE_SERVICE_KEY;
-assert(url && key && service, "Missing Supabase environment variables.");
-const options = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(url, service, options);
-const users = [];
+import {
+  account,
+  admin,
+  base,
+  cleanUp,
+  pass,
+  result,
+  summary,
+} from "./lib/harness.mjs";
+
 const week = "2026-09-07";
-let checks = 0;
-
-async function result(request) {
-  const { data, error } = await request;
-  if (error) throw new Error(error.message);
-  return data;
-}
-
-function pass(label) {
-  checks++;
-  console.log(`PASS ${label}`);
-}
-
-async function account() {
-  const email = `shopping-${randomUUID()}@example.test`;
-  const password = "Shopping-Probe-123!";
-  const { user } = await result(
-    admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { display_name: "Shopping Probe" },
-    }),
-  );
-  users.push(user.id);
-  const client = createClient(url, key, options);
-  const { session } = await result(
-    client.auth.signInWithPassword({ email, password }),
-  );
-  const encoded =
-    "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url");
-  const prefix = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
-  const chunks =
-    encoded.length <= 3180
-      ? [[prefix, encoded]]
-      : Array.from({ length: Math.ceil(encoded.length / 3180) }, (_, i) => [
-          `${prefix}.${i}`,
-          encoded.slice(i * 3180, (i + 1) * 3180),
-        ]);
-  return {
-    id: user.id,
-    email,
-    client,
-    cookie: chunks.map(([name, value]) => `${name}=${value}`).join("; "),
-  };
-}
-
 async function page(user, listId) {
   const path = `/shopping?week=${week}${listId ? `&list=${listId}` : ""}`;
   const response = await fetch(`${base}${path}`, {
@@ -108,8 +60,8 @@ const items = (user, listId) =>
 
 try {
   await fetch(`${base}/sign-in`);
-  const owner = await account();
-  const friend = await account();
+  const owner = await account({ label: "shopping", name: "Shopping Probe" });
+  const friend = await account({ label: "shopping", name: "Shopping Probe" });
   const defaultList = await result(
     owner.client
       .from("shopping_lists")
@@ -238,11 +190,9 @@ try {
     1,
   );
   pass("deleting a named list returns to shopping and preserves the default");
-  console.log(`${checks}/${checks} shopping checks passed.`);
+  summary("shopping checks passed");
 } finally {
-  for (const id of users.reverse()) {
-    await result(admin.from("meal_plans").delete().eq("user_id", id));
-    await result(admin.auth.admin.deleteUser(id));
-  }
-  console.log("Disposable shopping accounts and their data removed.");
+  await cleanUp("Disposable shopping accounts and their data removed.", (id) =>
+    result(admin.from("meal_plans").delete().eq("user_id", id)),
+  );
 }
