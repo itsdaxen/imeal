@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Description, Input, Label, TextField } from "@heroui/react";
 
 import { updatePassword, type AuthFormState } from "../auth.actions";
-import { FormMessage } from "./form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 export function ResetPasswordForm() {
   const [state, formAction, isPending] = useActionState<

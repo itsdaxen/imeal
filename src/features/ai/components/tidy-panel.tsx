@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Button, Typography } from "@heroui/react";
 
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 import { applyTidy, proposeTidy, type TidyState } from "../ai.actions";
 import type { TidyChange } from "../tidy-list";

@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { CheckChip } from "@/components/ui/check-chip";
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 import { setRecipeCollections, type RecipeFormState } from "../recipe.actions";
 import { AppDialog } from "@/components/ui/app-dialog";

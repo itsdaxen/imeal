@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { signIn, type AuthFormState } from "../auth.actions";
-import { FormMessage } from "./form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 export function SignInForm({ next }: { next?: string }) {
   const [state, formAction, isPending] = useActionState<

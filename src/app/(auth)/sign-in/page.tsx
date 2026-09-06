@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Link, Typography } from "@heroui/react";
 
 import { SignInForm } from "@/features/auth/components/sign-in-form";
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 export const metadata: Metadata = { title: "Sign in" };

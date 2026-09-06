@@ -10,7 +10,7 @@ import {
   TextField,
 } from "@heroui/react";
 
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 import { CheckChip } from "@/components/ui/check-chip";
 import { ContentCard } from "@/components/ui/content-card";
 import { ImagePicker } from "@/components/ui/image-picker";

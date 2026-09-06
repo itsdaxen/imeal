@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@heroui/react";
 
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 import {
   RecipeForm,
   type RecipeFormValues,
@@ -113,7 +113,7 @@ export function RecipeImport() {
         </Card.Header>
         <ol className="flex list-none flex-col gap-5 p-0">
           {[
-            ["1", "Paste", "Include the title, ingredients, and method."],
+            ["1", "Paste", "Include the title, ingredients, and steps."],
             [
               "2",
               "Review",
@@ -166,7 +166,7 @@ export function RecipeImport() {
 
             <div className="flex flex-col gap-2">
               <Typography type="body-sm" weight="medium">
-                Method
+                Steps
               </Typography>
               <ol className="flex list-decimal flex-col gap-1 pl-5">
                 {state.draft.steps.map((step) => (

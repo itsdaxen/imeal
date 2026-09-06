@@ -5,7 +5,7 @@ import { MailCheck } from "lucide-react";
 import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { requestPasswordReset, type AuthFormState } from "../auth.actions";
-import { FormMessage } from "./form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 const RESEND_SECONDS = 30;
 

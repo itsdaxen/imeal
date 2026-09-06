@@ -12,7 +12,7 @@ import {
 
 import { ContentCard } from "@/components/ui/content-card";
 import { PanelTitle } from "@/components/ui/panel-title";
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 
 import { deleteAccount, type DeleteAccountState } from "../profile.actions";
 

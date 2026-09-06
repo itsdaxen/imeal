@@ -11,7 +11,7 @@ import {
   TextField,
 } from "@heroui/react";
 
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 import { CheckChip } from "@/components/ui/check-chip";
 import { ContentCard } from "@/components/ui/content-card";
 import { ImagePicker } from "@/components/ui/image-picker";
@@ -108,7 +108,7 @@ export function RecipeForm({
 
         <ContentCard className="gap-5" density="spacious">
           <Card.Header className="flex-col items-start gap-1 p-0">
-            <PanelTitle level={2}>Method</PanelTitle>
+            <PanelTitle level={2}>Steps</PanelTitle>
             <Card.Description>
               Keep each instruction focused so it is easy to follow while
               cooking.

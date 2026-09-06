@@ -5,7 +5,7 @@ import { Typography } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 
-import { FormMessage } from "@/features/auth/components/form-message";
+import { FormMessage } from "@/components/ui/form-message";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 import { generateWeekPlan, type PlannerFormState } from "../plan.actions";
