@@ -22,7 +22,10 @@ import type { ShoppingItem } from "../shopping.queries";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
-type Change = { id: string; kind: "toggle" } | { id: string; kind: "remove" };
+type Change =
+  | { fields: Partial<ShoppingItem>; id: string; kind: "edit" }
+  | { id: string; kind: "remove" }
+  | { id: string; kind: "toggle" };
 type Editing = { item: ShoppingItem; mode: "quantity" | "rename" } | null;
 type SortMode = "added" | "alpha" | "category";
 
@@ -72,13 +75,21 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   const { run: send } = useServerAction();
   const [editing, setEditing] = useState<Editing>(null);
   const [sort, setSort] = useState<SortMode>("added");
-  const [shown, apply] = useOptimistic(items, (current, change: Change) =>
-    change.kind === "remove"
-      ? current.filter((item) => item.id !== change.id)
-      : current.map((item) =>
-          item.id === change.id ? { ...item, checked: !item.checked } : item,
-        ),
-  );
+  const [shown, apply] = useOptimistic(items, (current, change: Change) => {
+    if (change.kind === "remove") {
+      return current.filter((item) => item.id !== change.id);
+    }
+
+    return current.map((item) => {
+      if (item.id !== change.id) {
+        return item;
+      }
+
+      return change.kind === "edit"
+        ? { ...item, ...change.fields }
+        : { ...item, checked: !item.checked };
+    });
+  });
 
   const ordered = useMemo(() => sortItems(shown, sort), [shown, sort]);
   const needed = ordered.filter((item) => !item.checked);
@@ -257,7 +268,23 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
       >
         {editing ? (
           <form
-            action={closing(updateItem, () => setEditing(null))}
+            // The row behind the dialog changes as the dialog goes, rather than a
+            // beat later — the same reason a tick lands immediately.
+            action={closing(
+              (data) => {
+                apply({
+                  fields:
+                    editing.mode === "quantity"
+                      ? { quantity: Number(data.get("quantity")) }
+                      : { name: String(data.get("name")) },
+                  id: editing.item.id,
+                  kind: "edit",
+                });
+
+                return updateItem(data);
+              },
+              () => setEditing(null),
+            )}
             className="flex items-end gap-2"
           >
             <input name="itemId" type="hidden" value={editing.item.id} />
