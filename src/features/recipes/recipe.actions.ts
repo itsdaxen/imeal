@@ -14,6 +14,7 @@ import type { SupabaseServerClient } from "@/lib/supabase/server";
 import { requireUserId } from "@/lib/supabase/session-user";
 
 import { collectionTagsSchema, parseRecipeForm } from "./recipe.schema";
+import { firstIssue } from "@/lib/form-errors";
 
 export type RecipeFormState = {
   error?: string;
@@ -50,7 +51,7 @@ export async function createRecipe(
   const parsed = parseRecipeForm(formData);
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the form." };
+    return { error: firstIssue(parsed.error, "Check the form.") };
   }
 
   const { supabase, userId } = await requireUserId();
@@ -95,7 +96,7 @@ export async function updateRecipe(
   const parsed = parseRecipeForm(formData);
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the form." };
+    return { error: firstIssue(parsed.error, "Check the form.") };
   }
 
   const { supabase, userId } = await requireUserId();

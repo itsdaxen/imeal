@@ -12,6 +12,7 @@ import {
   signInSchema,
   signUpSchema,
 } from "./auth.schema";
+import { firstIssue } from "@/lib/form-errors";
 
 export type AuthFormState = {
   error?: string;
@@ -21,10 +22,6 @@ export type AuthFormState = {
 };
 
 const SIGNED_IN_HOME = "/";
-
-function firstIssue(error: { issues: { message: string }[] }) {
-  return error.issues[0]?.message ?? "Check the form and try again.";
-}
 
 export async function signIn(
   _previous: AuthFormState,
@@ -36,7 +33,7 @@ export async function signIn(
   });
 
   if (!parsed.success) {
-    return { error: firstIssue(parsed.error) };
+    return { error: firstIssue(parsed.error, "Check the form and try again.") };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -64,7 +61,7 @@ export async function signUp(
   });
 
   if (!parsed.success) {
-    return { error: firstIssue(parsed.error) };
+    return { error: firstIssue(parsed.error, "Check the form and try again.") };
   }
 
   const requestHeaders = await headers();
@@ -102,7 +99,7 @@ export async function requestPasswordReset(
   });
 
   if (!parsed.success) {
-    return { error: firstIssue(parsed.error) };
+    return { error: firstIssue(parsed.error, "Check the form and try again.") };
   }
 
   const requestHeaders = await headers();
@@ -133,7 +130,7 @@ export async function updatePassword(
   });
 
   if (!parsed.success) {
-    return { error: firstIssue(parsed.error) };
+    return { error: firstIssue(parsed.error, "Check the form and try again.") };
   }
 
   const supabase = await createSupabaseServerClient();

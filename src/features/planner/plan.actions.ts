@@ -17,6 +17,7 @@ import {
 } from "./plan.schema";
 import { findWeekPlan } from "./week-plan";
 import { namesToAdd } from "@/lib/names";
+import { firstIssue } from "@/lib/form-errors";
 
 export type PlannerFormState = {
   error?: string;
@@ -123,7 +124,7 @@ export async function generateWeekPlan(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the options." };
+    return { error: firstIssue(parsed.error, "Check the options.") };
   }
 
   const { supabase, userId } = await requireUserId();

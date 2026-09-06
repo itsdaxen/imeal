@@ -14,6 +14,7 @@ import {
 } from "@/features/images/upload";
 
 import { parseDeleteAccountForm, parseProfileForm } from "./profile.schema";
+import { firstIssue } from "@/lib/form-errors";
 
 export type ProfileFormState = {
   error?: string;
@@ -94,7 +95,7 @@ export async function deleteAccount(
   const parsed = parseDeleteAccountForm(formData);
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the form." };
+    return { error: firstIssue(parsed.error, "Check the form.") };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -128,7 +129,7 @@ export async function updateProfile(
   const parsed = parseProfileForm(formData);
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the form." };
+    return { error: firstIssue(parsed.error, "Check the form.") };
   }
 
   const supabase = await createSupabaseServerClient();

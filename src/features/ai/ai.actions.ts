@@ -10,6 +10,7 @@ import { listSchema } from "@/features/shopping/shopping.schema";
 import { readRecipe, readTidy } from "./ai";
 import type { DraftRecipe } from "./draft-recipe";
 import type { TidyableItem, TidyChange } from "./tidy-list";
+import { firstIssue } from "@/lib/form-errors";
 
 const pasteSchema = z.object({
   text: z.string().trim().min(1, "Paste a recipe first."),
@@ -33,7 +34,7 @@ export async function draftRecipe(
 
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Paste a recipe first.",
+      error: firstIssue(parsed.error, "Paste a recipe first."),
     };
   }
 

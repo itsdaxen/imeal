@@ -9,6 +9,7 @@ import { requireUserId } from "@/lib/supabase/session-user";
 import { resolveWeekList } from "./shopping.queries";
 import { listSchema } from "./shopping.schema";
 import { namesToAdd } from "@/lib/names";
+import { firstIssue } from "@/lib/form-errors";
 
 const weekSchema = z.object({ weekStart: z.iso.date() });
 const plannedMealSchema = weekSchema.extend({
@@ -222,7 +223,7 @@ export async function updateItem(formData: FormData) {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Check that value.");
+    throw new Error(firstIssue(parsed.error, "Check that value."));
   }
 
   const { itemId, ...changes } = parsed.data;
@@ -366,7 +367,7 @@ export async function renameShoppingList(formData: FormData) {
     .safeParse({ listId: formData.get("listId"), name: formData.get("name") });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Name the list.");
+    throw new Error(firstIssue(parsed.error, "Name the list."));
   }
 
   const { supabase, userId } = await requireUserId();
