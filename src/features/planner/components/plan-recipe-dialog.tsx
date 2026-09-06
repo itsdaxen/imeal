@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Label, ListBox, Select } from "@heroui/react";
+import { Button } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { assignRecipeToSlot } from "../plan.actions";
 import { AppDialog } from "@/components/ui/app-dialog";
+import { SelectField } from "@/components/ui/select-field";
 
 type Day = { index: number; label: string; dateLabel: string };
 
@@ -48,47 +49,26 @@ export function PlanRecipeDialog({
           <input name="recipeId" type="hidden" value={recipeId} />
           <input name="weekStart" type="hidden" value={weekStart} />
 
-          <Select defaultSelectedKey={String(days[0].index)} name="dayIndex">
-            <Label>Day</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
-                {days.map((day) => (
-                  <ListBox.Item
-                    id={String(day.index)}
-                    key={day.index}
-                    textValue={`${day.label}, ${day.dateLabel}`}
-                  >
-                    {day.label} · {day.dateLabel}
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
+          <SelectField
+            defaultSelectedKey={String(days[0].index)}
+            label="Day"
+            name="dayIndex"
+            options={days.map((day) => ({
+              id: String(day.index),
+              label: `${day.label} · ${day.dateLabel}`,
+              textValue: `${day.label}, ${day.dateLabel}`,
+            }))}
+          />
 
-          <Select defaultSelectedKey={slots[0]} name="slot">
-            <Label>Meal</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
-                {slots.map((slot) => (
-                  <ListBox.Item
-                    id={slot}
-                    key={slot}
-                    textValue={SLOT_LABELS[slot]}
-                  >
-                    {SLOT_LABELS[slot]}
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
+          <SelectField
+            defaultSelectedKey={slots[0]}
+            label="Meal"
+            name="slot"
+            options={slots.map((slot) => ({
+              id: slot,
+              label: SLOT_LABELS[slot],
+            }))}
+          />
 
           <Button className="w-full" type="submit">
             Add to plan

@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  Disclosure,
-  Input,
-  Label,
-  ListBox,
-  Select,
-  TextField,
-} from "@heroui/react";
+import { Disclosure, Input, Label, TextField } from "@heroui/react";
 
-export type FilterOption = { id: string; label: string };
+import { SelectField, type SelectOption } from "./select-field";
+
+export type FilterOption = SelectOption;
 
 export type Filter = {
   /** Stable id, also used to label the select for screen readers. */
@@ -61,31 +56,14 @@ export function FilterBar({
           <Disclosure.Content>
             <Disclosure.Body className="flex flex-wrap gap-3 pt-3">
               {filters.map((filter) => (
-                <div
-                  className="flex min-w-44 flex-1 flex-col gap-1"
+                <SelectField
+                  className="min-w-44 flex-1"
                   key={filter.id}
-                >
-                  <Label id={filter.id}>{filter.label}</Label>
-                  <Select
-                    aria-labelledby={filter.id}
-                    onSelectionChange={(key) => filter.onChange(String(key))}
-                    selectedKey={filter.value}
-                  >
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {filter.options.map((option) => (
-                          <ListBox.Item id={option.id} key={option.id}>
-                            {option.label}
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </div>
+                  label={filter.label}
+                  onChange={filter.onChange}
+                  options={filter.options}
+                  selectedKey={filter.value}
+                />
               ))}
             </Disclosure.Body>
           </Disclosure.Content>

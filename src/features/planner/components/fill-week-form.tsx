@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Label, ListBox, Select, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 
@@ -10,6 +10,7 @@ import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 import { generateWeekPlan, type PlannerFormState } from "../plan.actions";
 import { GENERATION_SOURCES } from "../plan.schema";
+import { SelectField } from "@/components/ui/select-field";
 
 const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
   mine: "My recipes",
@@ -111,30 +112,12 @@ export function FillWeekForm({
 
       {lists.length > 0 ? (
         <div className="flex max-w-sm flex-col gap-1">
-          <Label id="shoppingList">Shopping list</Label>
-          <Select
-            aria-labelledby="shoppingList"
+          <SelectField
             defaultSelectedKey={targetListId ?? lists[0]?.id}
+            label="Shopping list"
             name="listId"
-          >
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
-                {lists.map((list) => (
-                  <ListBox.Item
-                    id={list.id}
-                    key={list.id}
-                    textValue={list.name}
-                  >
-                    {list.name}
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
+            options={lists.map((list) => ({ id: list.id, label: list.name }))}
+          />
         </div>
       ) : null}
 
