@@ -115,16 +115,24 @@ button:disabled,
 }
 
 /**
- * Selection is position, and position is black. HeroUI's toggle defaults to the accent,
- * which would make a sort control look like product state — the same green that means
- * "approved" elsewhere. The tokens are declared on the button, not the group, so they
- * have to be re-pointed there or the child's own declaration shadows them.
+ * A selected segment is a raised pill on a recessed track, the way a segmented control
+ * has always worked: unselected segments keep the default grey, the selected one lifts
+ * to the surface colour with the standard shadow.
+ *
+ * Not the accent, because that green means "approved" elsewhere and a sort control is
+ * not product state. Not the foreground either — solid black made a minor preference
+ * the loudest thing on the page. The tokens are declared on the button rather than the
+ * group, so they have to be re-pointed there or the child's own declaration shadows them.
  */
 [data-slot="toggle-button"] {
-  --toggle-button-bg-selected: var(--foreground);
-  --toggle-button-bg-selected-hover: var(--foreground);
-  --toggle-button-bg-selected-pressed: var(--foreground);
-  --toggle-button-fg-selected: var(--background);
+  --toggle-button-bg-selected: var(--surface);
+  --toggle-button-bg-selected-hover: var(--surface);
+  --toggle-button-bg-selected-pressed: var(--surface);
+  --toggle-button-fg-selected: var(--foreground);
+}
+
+[data-slot="toggle-button"][data-selected="true"] {
+  box-shadow: var(--surface-shadow);
 }
 
 /**

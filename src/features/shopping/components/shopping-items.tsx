@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo, useOptimistic, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import {
+  ArrowDownAZ,
+  Clock,
+  type LucideIcon,
+  MoreHorizontal,
+  Tags,
+} from "lucide-react";
 import {
   Button,
   Chip,
@@ -29,10 +35,10 @@ type Change =
 type Editing = { item: ShoppingItem; mode: "quantity" | "rename" } | null;
 type SortMode = "added" | "alpha" | "category";
 
-const SORTS: Array<{ id: SortMode; label: string }> = [
-  { id: "added", label: "Added" },
-  { id: "alpha", label: "A–Z" },
-  { id: "category", label: "Category" },
+const SORTS: Array<{ icon: LucideIcon; id: SortMode; label: string }> = [
+  { icon: Clock, id: "added", label: "Added" },
+  { icon: ArrowDownAZ, id: "alpha", label: "A–Z" },
+  { icon: Tags, id: "category", label: "Category" },
 ];
 
 const UNCATEGORISED = "Uncategorised";
@@ -207,17 +213,20 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   return (
     <>
       {shown.length > 1 ? (
-        <div className="flex flex-wrap items-center gap-3 pt-5">
+        <div className="flex justify-center pt-5">
           <ToggleButtonGroup
             aria-label="Sort the list"
-            className="self-start"
             disallowEmptySelection
             onSelectionChange={(keys) => setSort([...keys][0] as SortMode)}
             selectedKeys={new Set([sort])}
             selectionMode="single"
+            size="sm"
           >
-            {SORTS.map((option) => (
-              <ToggleButton className="min-h-11" id={option.id} key={option.id}>
+            {SORTS.map((option, index) => (
+              <ToggleButton id={option.id} key={option.id}>
+                {/* Between segments, not before the first one. */}
+                {index > 0 ? <ToggleButtonGroup.Separator /> : null}
+                <option.icon aria-hidden="true" className="size-4" />
                 {option.label}
               </ToggleButton>
             ))}
