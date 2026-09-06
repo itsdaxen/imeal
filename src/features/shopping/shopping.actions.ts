@@ -8,6 +8,7 @@ import { requireUserId } from "@/lib/supabase/session-user";
 
 import { resolveWeekList } from "./shopping.queries";
 import { listSchema } from "./shopping.schema";
+import { namesToAdd } from "@/lib/names";
 
 const weekSchema = z.object({ weekStart: z.iso.date() });
 const plannedMealSchema = weekSchema.extend({
@@ -106,11 +107,9 @@ export async function addPlannedMealToShoppingList(formData: FormData) {
     throw new Error("That meal is no longer part of this week.");
   }
 
-  const present = new Set(
-    (existing ?? []).map((item) => item.name.trim().toLocaleLowerCase()),
-  );
-  const ingredients = recipe.ingredients.filter(
-    (name) => !present.has(name.trim().toLocaleLowerCase()),
+  const ingredients = namesToAdd(
+    recipe.ingredients,
+    (existing ?? []).map((item) => item.name),
   );
 
   if (ingredients.length > 0) {
@@ -279,12 +278,13 @@ export async function addStaplesToList(formData: FormData) {
     throw new Error("Could not load this list's items.");
   }
 
-  const present = new Set(
-    (existing ?? []).map((item) => item.name.toLowerCase()),
+  const wanted = new Set(
+    namesToAdd(
+      staples.map((staple) => staple.name),
+      (existing ?? []).map((item) => item.name),
+    ),
   );
-  const missing = staples.filter(
-    (staple) => !present.has(staple.name.toLowerCase()),
-  );
+  const missing = staples.filter((staple) => wanted.has(staple.name));
 
   if (missing.length) {
     const { error } = await supabase.from("shopping_items").insert(

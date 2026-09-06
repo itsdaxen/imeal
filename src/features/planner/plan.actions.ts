@@ -7,7 +7,7 @@ import type { SupabaseServerClient } from "@/lib/supabase/server";
 import { requireUserId } from "@/lib/supabase/session-user";
 
 import { pickReplacement, planWeek } from "./generate";
-import { ingredientsToAdd } from "./meal-ingredients";
+
 import { listPlannableRecipes } from "./plan.queries";
 import {
   generationSchema,
@@ -16,6 +16,7 @@ import {
   slotTargetSchema,
 } from "./plan.schema";
 import { findWeekPlan } from "./week-plan";
+import { namesToAdd } from "@/lib/names";
 
 export type PlannerFormState = {
   error?: string;
@@ -276,7 +277,7 @@ async function addMealIngredients({
     return;
   }
 
-  const ingredients = ingredientsToAdd(
+  const ingredients = namesToAdd(
     recipe.ingredients,
     (existing ?? []).map((item) => item.name),
   );
