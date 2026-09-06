@@ -1,5 +1,7 @@
 import { Link } from "@heroui/react";
 
+import { LegalLinks } from "./legal-links";
+
 export function AppFooter() {
   return (
     <footer className="mt-14 flex flex-col gap-2 border-t border-separator py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
@@ -9,12 +11,7 @@ export function AppFooter() {
         reserved.
       </span>
       <span className="flex flex-wrap items-center gap-4">
-        <Link className="text-xs" href="/privacy">
-          Privacy
-        </Link>
-        <Link className="text-xs" href="/terms">
-          Terms
-        </Link>
+        <LegalLinks />
         <Link
           className="text-xs"
           href="https://thedaxen.com/"

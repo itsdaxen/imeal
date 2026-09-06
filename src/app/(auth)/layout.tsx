@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 
 import authKitchen from "../../../public/auth-kitchen.webp";
+import { LegalLinks } from "@/components/ui/legal-links";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -29,12 +30,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
         <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
           <span>© {new Date().getFullYear()} iMeal</span>
-          <Link className="text-xs" href="/privacy">
-            Privacy
-          </Link>
-          <Link className="text-xs" href="/terms">
-            Terms
-          </Link>
+          <LegalLinks />
         </footer>
       </section>
 
