@@ -8,7 +8,7 @@ import { FormMessage } from "@/components/ui/form-message";
 
 import { applyTidy, proposeTidy, type TidyState } from "../ai.actions";
 import type { TidyChange } from "../tidy-list";
-import { AppDialog } from "@/components/ui/app-dialog";
+import { AppDialog, closing } from "@/components/ui/app-dialog";
 
 type TidyPanelProps = {
   items: ReadonlyArray<{ id: string; name: string; category: string | null }>;
@@ -104,7 +104,7 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
               ))}
             </ul>
 
-            <form action={applyTidy}>
+            <form action={closing(applyTidy, () => setDismissed(true))}>
               <input name="listId" type="hidden" value={listId} />
               <Button type="submit">Apply these changes</Button>
             </form>

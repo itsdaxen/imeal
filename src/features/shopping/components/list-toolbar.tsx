@@ -24,7 +24,7 @@ import {
   removeListMember,
   renameShoppingList,
 } from "../shopping.actions";
-import { AppDialog } from "@/components/ui/app-dialog";
+import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { useServerAction } from "@/lib/use-server-action";
 
 type Member = { displayName: string; id: string };
@@ -163,7 +163,10 @@ export function ListToolbar({
         isOpen={open === "rename"}
         onOpenChange={() => setOpen("none")}
       >
-        <form action={renameShoppingList} className="flex gap-2">
+        <form
+          action={closing(renameShoppingList, () => setOpen("none"))}
+          className="flex gap-2"
+        >
           <input name="listId" type="hidden" value={listId} />
           <TextField
             className="flex-1"

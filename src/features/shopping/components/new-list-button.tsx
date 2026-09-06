@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button, Input, Label, TextField } from "@heroui/react";
 
 import { createShoppingList } from "../shopping.actions";
-import { AppDialog } from "@/components/ui/app-dialog";
+import { AppDialog, closing } from "@/components/ui/app-dialog";
 
 /** Sits at the end of the list tabs, where "one more list" belongs. */
 export function NewListButton() {
@@ -23,7 +23,10 @@ export function NewListButton() {
       </Button>
 
       <AppDialog heading="New list" isOpen={isOpen} onOpenChange={setIsOpen}>
-        <form action={createShoppingList} className="flex gap-2">
+        <form
+          action={closing(createShoppingList, () => setIsOpen(false))}
+          className="flex gap-2"
+        >
           <TextField className="flex-1" isRequired name="name">
             <Label>Name</Label>
             <Input autoFocus placeholder="Market, party, the other house" />

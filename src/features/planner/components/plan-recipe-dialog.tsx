@@ -7,7 +7,7 @@ import { ActionButton } from "@/components/ui/action";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { assignRecipeToSlot } from "../plan.actions";
-import { AppDialog } from "@/components/ui/app-dialog";
+import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { SelectField } from "@/components/ui/select-field";
 
 type Day = { index: number; label: string; dateLabel: string };
@@ -45,7 +45,10 @@ export function PlanRecipeDialog({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
       >
-        <form action={assignRecipeToSlot} className="flex flex-col gap-5">
+        <form
+          action={closing(assignRecipeToSlot, () => setIsOpen(false))}
+          className="flex flex-col gap-5"
+        >
           <input name="recipeId" type="hidden" value={recipeId} />
           <input name="weekStart" type="hidden" value={weekStart} />
 

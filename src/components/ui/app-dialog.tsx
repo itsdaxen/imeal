@@ -5,6 +5,32 @@ import { Modal } from "@heroui/react";
 
 import { ControlledDialogTrigger } from "./controlled-dialog-trigger";
 
+/**
+ * A form action that also dismisses the dialog it was submitted from.
+ *
+ * A dialog is a question; once you answer it, it should get out of the way. Several
+ * stayed open over the page they had just changed, which reads as a submit that did
+ * not work — you press Save, the list renames behind the dialog, and the dialog sits
+ * there inviting you to press Save again.
+ *
+ * The dialog closes as soon as the action is dispatched rather than when it finishes,
+ * for the same reason the rest of the app updates optimistically: a control that waits
+ * for a round trip before acknowledging you looks broken. The pending promise is still
+ * returned so React owns it — dropping it would turn a failed write into an unhandled
+ * rejection instead of something the error boundary can show.
+ */
+export function closing(
+  action: (data: FormData) => void | Promise<void>,
+  close: () => void,
+) {
+  return (data: FormData) => {
+    const finished = action(data);
+    close();
+
+    return finished;
+  };
+}
+
 const widths = {
   sm: "sm:max-w-sm",
   md: "sm:max-w-md",

@@ -19,7 +19,7 @@ import { IconButton } from "@/components/ui/icon-button";
 
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
-import { AppDialog } from "@/components/ui/app-dialog";
+import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 type Change = { id: string; kind: "toggle" } | { id: string; kind: "remove" };
@@ -256,7 +256,10 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
         width="sm"
       >
         {editing ? (
-          <form action={updateItem} className="flex items-end gap-2">
+          <form
+            action={closing(updateItem, () => setEditing(null))}
+            className="flex items-end gap-2"
+          >
             <input name="itemId" type="hidden" value={editing.item.id} />
 
             {editing.mode === "quantity" ? (
