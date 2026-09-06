@@ -12,6 +12,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 
 import { assignRecipeToSlot } from "../plan.actions";
 import { CardGrid } from "@/components/ui/card-grid";
+import { collectionOptions } from "@/features/recipes/recipe-filters";
 
 /**
  * The same card and grid as the library, so choosing a meal looks like browsing
@@ -61,10 +62,7 @@ export function AssignmentBrowser({
                   id: "assignCollection",
                   label: "Collection",
                   onChange: setCollection,
-                  options: [
-                    { id: "any", label: "Any collection" },
-                    ...collections.map((name) => ({ id: name, label: name })),
-                  ],
+                  options: collectionOptions(collections),
                   value: collection,
                 },
               ]

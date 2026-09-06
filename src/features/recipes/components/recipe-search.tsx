@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 
 import { FilterBar } from "@/components/ui/filter-bar";
 
-import { MEAL_SLOTS, type MealSlot } from "../recipe.schema";
+import { type MealSlot } from "../recipe.schema";
+import {
+  collectionOptions,
+  mealOptions,
+} from "@/features/recipes/recipe-filters";
 
 type RecipeSearchProps = {
   archived?: boolean;
@@ -76,10 +80,7 @@ export function RecipeSearch({
                 label: "Collection",
                 onChange: (value: string) =>
                   setCollectionTerm(value === "any" ? "" : value),
-                options: [
-                  { id: "any", label: "Any collection" },
-                  ...collections.map((name) => ({ id: name, label: name })),
-                ],
+                options: collectionOptions(collections),
                 value: collectionTerm || "any",
               },
             ]
@@ -89,10 +90,7 @@ export function RecipeSearch({
           label: "Meal",
           onChange: (value) =>
             routeWithFilters(archived ? "archived" : "active", value),
-          options: [
-            { id: "any", label: "Any meal" },
-            ...MEAL_SLOTS.map((slot) => ({ id: slot, label: slot })),
-          ],
+          options: mealOptions,
           value: mealTag ?? "any",
         },
       ]}

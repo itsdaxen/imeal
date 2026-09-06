@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FilterBar } from "@/components/ui/filter-bar";
-import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
+import { type MealSlot } from "@/features/recipes/recipe.schema";
+import {
+  collectionOptions,
+  mealOptions,
+} from "@/features/recipes/recipe-filters";
 
 export function CatalogSearch({
   collections,
@@ -49,10 +53,7 @@ export function CatalogSearch({
           label: "Meal",
           onChange: (value) =>
             navigate(value === "any" ? undefined : (value as MealSlot)),
-          options: [
-            { id: "any", label: "Any meal" },
-            ...MEAL_SLOTS.map((slot) => ({ id: slot, label: slot })),
-          ],
+          options: mealOptions,
           value: mealTag ?? "any",
         },
         ...(collections.length > 0
@@ -62,10 +63,7 @@ export function CatalogSearch({
                 label: "Collection",
                 onChange: (value: string) =>
                   navigate(mealTag, value === "any" ? undefined : value),
-                options: [
-                  { id: "any", label: "Any collection" },
-                  ...collections.map((name) => ({ id: name, label: name })),
-                ],
+                options: collectionOptions(collections),
                 value: collection ?? "any",
               },
             ]
