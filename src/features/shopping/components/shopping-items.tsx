@@ -213,7 +213,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
   return (
     <>
       {shown.length > 1 ? (
-        <div className="flex justify-center pt-5">
+        <div className="flex justify-end">
           <ToggleButtonGroup
             aria-label="Sort the list"
             disallowEmptySelection
@@ -222,10 +222,14 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
             selectionMode="single"
             size="sm"
           >
-            {SORTS.map((option, index) => (
-              <ToggleButton id={option.id} key={option.id}>
-                {/* Between segments, not before the first one. */}
-                {index > 0 ? <ToggleButtonGroup.Separator /> : null}
+            {SORTS.map((option) => (
+              // Below the app's 44px floor on purpose: sorting is a preference you
+              // set once, not something reached for mid-aisle.
+              <ToggleButton
+                className="min-h-9 px-3"
+                id={option.id}
+                key={option.id}
+              >
                 <option.icon aria-hidden="true" className="size-4" />
                 {option.label}
               </ToggleButton>

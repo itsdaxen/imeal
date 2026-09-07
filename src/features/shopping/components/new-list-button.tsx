@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button, Input, Label, TextField } from "@heroui/react";
+import { Button, cn, Input, Label, TextField } from "@heroui/react";
 
 import { createShoppingList } from "../shopping.actions";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
 
 /** Sits at the end of the list tabs, where "one more list" belongs. */
-export function NewListButton() {
+export function NewListButton({ className }: { className?: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <Button
-        className="min-h-11 shrink-0"
+        className={cn("shrink-0", className)}
         onPress={() => setIsOpen(true)}
         variant="tertiary"
       >

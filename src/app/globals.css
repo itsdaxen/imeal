@@ -49,14 +49,22 @@ summary,
   cursor: pointer;
 }
 
-:where(button, summary, [role="button"]) {
-  min-height: 2.75rem;
-}
+/*
+ * The floor sits in `base` so a utility can lift off it. Unlayered rules beat layered
+ * ones whatever their specificity, so while these lived outside a layer a `min-h-9`
+ * on a control was silently ignored — the opposite of what the note above promises.
+ * Everything else already asks for 44px or more, so the floor still does its job.
+ */
+@layer base {
+  :where(button, summary, [role="button"]) {
+    min-height: 2.75rem;
+  }
 
-/* Menus and selection controls are rendered in portals, so component-local layout
-   cannot enforce their target size reliably. Keep the interaction rhythm here. */
-:where([role="menuitem"], [role="option"], [role="radio"], [role="tab"]) {
-  min-height: 2.75rem;
+  /* Menus and selection controls are rendered in portals, so component-local layout
+     cannot enforce their target size reliably. Keep the interaction rhythm here. */
+  :where([role="menuitem"], [role="option"], [role="radio"], [role="tab"]) {
+    min-height: 2.75rem;
+  }
 }
 
 /* HeroUI's select value keeps a taller internal line box than its text needs. Align

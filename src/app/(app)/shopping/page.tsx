@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Link, Typography } from "@heroui/react";
+import { cn, Link, Typography } from "@heroui/react";
 
 import { ShoppingBasket } from "lucide-react";
 
@@ -86,48 +86,65 @@ export default async function ShoppingPage({
         title={list.listName}
       />
 
-      <nav aria-label="Shopping lists" className="flex flex-col gap-2 py-4">
-        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
-          {lists.map((entry) => (
-            <Link
-              aria-current={entry.id === list.listId ? "page" : undefined}
-              className={`min-h-11 shrink-0 rounded-full px-4 py-3 text-sm no-underline ${
-                entry.id === list.listId
-                  ? "bg-foreground font-medium text-background"
-                  : "bg-surface text-foreground"
-              }`}
-              href={`/shopping?week=${weekStart}&list=${entry.id}`}
-              key={entry.id}
-            >
-              {entry.name}
-              {entry.isOwn ? "" : " · shared"}
-            </Link>
-          ))}
-          <NewListButton />
-        </div>
-      </nav>
-
       <PageGrid>
-        {list.listId ? (
-          <ContentCard aria-label="Items" className={span.full}>
-            <AddItemForm key={list.listId} listId={list.listId} />
+        {/* The tabs live inside the panel rather than above it, so the open list reads
+            as the front of a stack rather than a separate row of buttons. */}
+        <ContentCard
+          appearance="media"
+          aria-label="Items"
+          className={cn(span.full, "gap-0")}
+          density="flush"
+        >
+          <nav
+            aria-label="Shopping lists"
+            className="flex min-w-0 shrink-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-b border-separator bg-default px-3 py-2 [&::-webkit-scrollbar]:hidden"
+          >
+            {lists.map((entry) => {
+              const isOpen = entry.id === list.listId;
 
-            {list.items.length === 0 ? (
-              <EmptyState
-                bare
-                description="Add something above, or send your staples across from the list menu."
-                icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
-                title="Nothing on this list yet"
-              />
-            ) : (
-              <ShoppingItems items={list.items} />
-            )}
-          </ContentCard>
-        ) : (
-          <Typography className={span.full} color="muted" type="body">
-            Create a shopping list to get started.
-          </Typography>
-        )}
+              return (
+                <Link
+                  aria-current={isOpen ? "page" : undefined}
+                  className={`grid min-h-10 shrink-0 place-items-center rounded-full px-4 text-sm no-underline transition-colors ${
+                    isOpen
+                      ? "bg-foreground font-medium text-background"
+                      : "text-muted hover:bg-surface hover:text-foreground"
+                  }`}
+                  href={`/shopping?week=${weekStart}&list=${entry.id}`}
+                  key={entry.id}
+                >
+                  {entry.name}
+                  {entry.isOwn ? "" : " · shared"}
+                </Link>
+              );
+            })}
+
+            <NewListButton className="ml-1 min-h-10" />
+          </nav>
+
+          {list.listId ? (
+            <div className="flex flex-col gap-4 p-5 sm:p-6">
+              <AddItemForm key={list.listId} listId={list.listId} />
+
+              {list.items.length === 0 ? (
+                <EmptyState
+                  bare
+                  description="Add something above, or send your staples across from the list menu."
+                  icon={
+                    <ShoppingBasket aria-hidden="true" className="size-6" />
+                  }
+                  title="Nothing on this list yet"
+                />
+              ) : (
+                <ShoppingItems items={list.items} />
+              )}
+            </div>
+          ) : (
+            <Typography className="p-6" color="muted" type="body">
+              Create a shopping list to get started.
+            </Typography>
+          )}
+        </ContentCard>
       </PageGrid>
     </PageShell>
   );
