@@ -91,10 +91,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
         </Card.Content>
 
         <Card.Header className="flex-col items-start justify-center gap-5 p-6 sm:p-8 lg:p-10">
-          <TagList label="Meals this suits" tags={recipe.meal_tags} />
-          {recipe.collection_tags.length > 0 ? (
-            <TagList label="Collections" tags={recipe.collection_tags} />
-          ) : null}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <TagList label="Meals this suits" tags={recipe.meal_tags} />
+            {recipe.collection_tags.length > 0 ? (
+              <TagList label="Collections" tags={recipe.collection_tags} />
+            ) : null}
+          </div>
           {/* The catalog action sits in the menu, but its state has to stay visible
               here — otherwise a pending or declined suggestion is invisible. */}
           {isOwner && suggestion ? (
