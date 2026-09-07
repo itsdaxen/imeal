@@ -49,7 +49,11 @@ function categoryOf(item: ShoppingItem) {
 
 function sortItems(items: ShoppingItem[], mode: SortMode) {
   if (mode === "added") {
-    return items;
+    return [...items].sort(
+      (left, right) =>
+        new Date(right.createdAt).getTime() -
+        new Date(left.createdAt).getTime(),
+    );
   }
 
   return [...items].sort((left, right) => {
@@ -226,12 +230,12 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
               // Below the app's 44px floor on purpose: sorting is a preference you
               // set once, not something reached for mid-aisle.
               <ToggleButton
-                className="min-h-9 px-3"
+                aria-label={option.label}
+                className="min-h-9 min-w-9 px-2"
                 id={option.id}
                 key={option.id}
               >
                 <option.icon aria-hidden="true" className="size-4" />
-                {option.label}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
@@ -272,6 +276,10 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
           </ul>
         </section>
       ) : null}
+
+      <Typography className="self-end pt-2" color="muted" type="body-sm">
+        {shown.length} {shown.length === 1 ? "item" : "items"}
+      </Typography>
 
       <AppDialog
         heading={editing?.mode === "quantity" ? "Change quantity" : "Rename"}

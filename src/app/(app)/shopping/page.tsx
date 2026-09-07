@@ -59,7 +59,7 @@ export default async function ShoppingPage({
   const open = lists.find((entry) => entry.id === list.listId);
 
   return (
-    <PageShell gap="snug" width="narrow">
+    <PageShell gap="snug" width="wide">
       <PageHeader
         actions={
           list.listId ? (
@@ -107,7 +107,7 @@ export default async function ShoppingPage({
                   aria-current={isOpen ? "page" : undefined}
                   className={`grid min-h-10 shrink-0 place-items-center rounded-full px-4 text-sm no-underline transition-colors ${
                     isOpen
-                      ? "bg-foreground font-medium text-background"
+                      ? "bg-accent-soft font-medium text-accent"
                       : "text-muted hover:bg-surface hover:text-foreground"
                   }`}
                   href={`/shopping?week=${weekStart}&list=${entry.id}`}

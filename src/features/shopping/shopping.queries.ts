@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listSchema } from "./shopping.schema";
 
 export type ShoppingItem = {
+  createdAt: string;
   id: string;
   name: string;
   quantity: number;
@@ -126,10 +127,12 @@ export async function getShoppingList(
         .maybeSingle(),
       supabase
         .from("shopping_items")
-        .select("id, name, quantity, unit, source, category, checked")
+        .select(
+          "id, name, quantity, unit, source, category, checked, created_at",
+        )
         .eq("list_id", listId)
         .order("checked", { ascending: true })
-        .order("name", { ascending: true }),
+        .order("created_at", { ascending: false }),
     ],
   );
 
@@ -148,7 +151,10 @@ export async function getShoppingList(
     listName: list.name,
     planId,
     targetListId,
-    items: data,
+    items: data.map(({ created_at, ...item }) => ({
+      ...item,
+      createdAt: created_at,
+    })),
     remaining: data.filter((item) => !item.checked).length,
   };
 }
