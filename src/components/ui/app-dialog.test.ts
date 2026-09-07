@@ -16,9 +16,10 @@ describe("closing", () => {
     const close = vi.fn();
     let settle = () => {};
 
-    closing(() => new Promise<void>((resolve) => (settle = resolve)), close)(
-      new FormData(),
-    );
+    closing(
+      () => new Promise<void>((resolve) => (settle = resolve)),
+      close,
+    )(new FormData());
 
     // A dialog that waits for the round trip before dismissing looks unresponsive.
     expect(close).toHaveBeenCalledOnce();
@@ -27,7 +28,10 @@ describe("closing", () => {
 
   it("hands the pending promise back, so a failed write is not swallowed", async () => {
     const failure = Promise.reject(new Error("nope"));
-    const returned = closing(() => failure, () => {})(new FormData());
+    const returned = closing(
+      () => failure,
+      () => {},
+    )(new FormData());
 
     await expect(returned).rejects.toThrow("nope");
   });

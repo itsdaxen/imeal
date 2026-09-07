@@ -133,19 +133,32 @@ button:disabled,
   --link-hover: var(--accent);
 }
 
-.link:not(.button):hover,
-.link:not(.button)[data-hovered="true"],
-.link:not(.button):active,
-.link:not(.button)[data-pressed="true"] {
+/*
+ * You are already here: the current page keeps whatever colour its own styling gives
+ * it, so it is excluded from the hover colour rather than given a replacement one.
+ *
+ * This used to name white, which was right while the only current-page link was the
+ * dark header pill whose text is already white — and silently wrong the moment a light
+ * pill with dark text appeared, which is how the shopping tabs ended up white-on-green
+ * under the cursor. There is no one colour that suits every current-page link; not
+ * changing it is the only rule that does.
+ */
+.link:not(.button):not([aria-current="page"]):is(
+    :hover,
+    [data-hovered="true"],
+    :active,
+    [data-pressed="true"]
+  ) {
   color: var(--link-hover);
-  text-decoration: none;
 }
 
-/* You are already here: the current page keeps its colour under the cursor. The
-   value is explicit because currentcolor here would resolve against the inherited
-   colour, not the pill's own. */
-.link:not(.button)[aria-current="page"] {
-  --link-hover: var(--background);
+.link:not(.button):is(
+    :hover,
+    [data-hovered="true"],
+    :active,
+    [data-pressed="true"]
+  ) {
+  text-decoration: none;
 }
 
 /**
