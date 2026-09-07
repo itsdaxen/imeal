@@ -28,20 +28,25 @@ type ListToolbarProps = {
   children?: ReactNode;
   currentUserId: string;
   friends: Person[];
+  hasStaples: boolean;
   isOwn: boolean;
   listId: string;
   listName: string;
   members: Member[];
+  /** How many staples are not already on this list. */
+  staplesToAdd: number;
 };
 
 export function ListToolbar({
   children,
   currentUserId,
   friends,
+  hasStaples,
   isOwn,
   listId,
   listName,
   members,
+  staplesToAdd,
 }: ListToolbarProps) {
   const { run } = useServerAction();
   const [open, setOpen] = useState<"none" | "rename" | "share">("none");
@@ -73,14 +78,36 @@ export function ListToolbar({
                 Rename list
               </Dropdown.Item>
             ) : null}
+            {/* Saying what will happen beats a menu item that looks live and does
+                nothing, so the action only appears when there is something to add
+                and says how much. */}
+            {hasStaples ? (
+              <Dropdown.Item
+                id="staples"
+                isDisabled={staplesToAdd === 0}
+                onAction={() => {
+                  run(addStaplesToList, { listId });
+                }}
+                textValue={
+                  staplesToAdd === 0
+                    ? "Staples already on this list"
+                    : `Add ${staplesToAdd} staples`
+                }
+              >
+                {staplesToAdd === 0
+                  ? "Staples already on this list"
+                  : `Add ${staplesToAdd} ${staplesToAdd === 1 ? "staple" : "staples"}`}
+              </Dropdown.Item>
+            ) : null}
+
+            {/* The way to the staples themselves, always — it is the only route to
+                that page, and hiding it once you own staples strands you there. */}
             <Dropdown.Item
-              id="staples"
-              onAction={() => {
-                run(addStaplesToList, { listId });
-              }}
-              textValue="Add staples"
+              href="/shopping/staples"
+              id="edit-staples"
+              textValue={hasStaples ? "Edit staples" : "Set up staples"}
             >
-              Add staples
+              {hasStaples ? "Edit staples" : "Set up staples"}
             </Dropdown.Item>
             <Dropdown.Item
               id="clear"

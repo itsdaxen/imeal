@@ -19,10 +19,12 @@ import {
   getShoppingList,
   listMembers,
   listShoppingLists,
+  listStaples,
 } from "@/features/shopping/shopping.queries";
 import { listSchema } from "@/features/shopping/shopping.schema";
 import { PageShell } from "@/components/ui/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
+import { namesToAdd } from "@/lib/names";
 
 export const metadata: Metadata = { title: "Shopping" };
 
@@ -41,7 +43,7 @@ export default async function ShoppingPage({
   const weekStart = resolveWeekStart(
     typeof week === "string" ? week : undefined,
   );
-  const [list, lists, friends, user] = await Promise.all([
+  const [list, lists, friends, user, staples] = await Promise.all([
     getShoppingList(
       weekStart,
       typeof requestedListId === "string" ? requestedListId : undefined,
@@ -49,6 +51,7 @@ export default async function ShoppingPage({
     listShoppingLists(),
     listFriends(),
     getCurrentUser(),
+    listStaples(),
   ]);
 
   if (requestedListId !== undefined && !list.listId) {
@@ -57,6 +60,16 @@ export default async function ShoppingPage({
 
   const members = list.listId ? await listMembers(list.listId) : [];
   const open = lists.find((entry) => entry.id === list.listId);
+
+  // Counted here, with the same rule the action uses, so the menu can say what
+  // pressing it will do instead of quietly doing nothing.
+  const activeStaples = staples
+    .filter((staple) => staple.active)
+    .map((staple) => staple.name);
+  const staplesToAdd = namesToAdd(
+    activeStaples,
+    list.items.map((item) => item.name),
+  ).length;
 
   return (
     <PageShell gap="snug" width="wide">
@@ -67,9 +80,11 @@ export default async function ShoppingPage({
               currentUserId={user?.id ?? ""}
               friends={friends}
               isOwn={open?.isOwn ?? false}
+              hasStaples={activeStaples.length > 0}
               listId={list.listId}
               listName={list.listName}
               members={members}
+              staplesToAdd={staplesToAdd}
             >
               {list.items.length > 0 ? (
                 <TidyPanel items={list.items} listId={list.listId} />
