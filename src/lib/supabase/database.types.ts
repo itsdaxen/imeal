@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5";
   };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       friend_requests: {
@@ -667,6 +692,13 @@ export type Database = {
         Returns: undefined;
       };
       default_shopping_list: { Args: { p_user: string }; Returns: string };
+      find_friend_by_email: {
+        Args: { p_email: string };
+        Returns: {
+          display_name: string;
+          id: string;
+        }[];
+      };
       is_admin: { Args: never; Returns: boolean };
       is_friend: { Args: { p_other: string }; Returns: boolean };
       is_list_member: { Args: { p_list_id: string }; Returns: boolean };
@@ -825,6 +857,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["user", "admin"],

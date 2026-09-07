@@ -1,5 +1,4 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
-import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type Person = { id: string; displayName: string };
@@ -83,25 +82,34 @@ export async function listOutgoingRequests(): Promise<FriendRequest[]> {
   return data.map((row) => ({ id: row.id, person: toPerson(row.addressee) }));
 }
 
-export async function searchPeople(term: string): Promise<Person[]> {
-  const search = term.trim();
+/**
+ * The one person at this address, if they want to be found.
+ *
+ * By address rather than by name, because a name search made you guess how someone
+ * spelled their own, and matched strangers who happened to share it. Exact only: the
+ * database function will not answer a partial address, so this cannot be used to walk
+ * the list of people who use the app.
+ */
+export async function findPersonByEmail(email: string): Promise<Person[]> {
+  const address = email.trim();
 
-  if (search.length < 2) {
+  if (!address) {
     return [];
   }
 
   const { supabase, userId } = await optionalUserId();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, display_name")
-    .eq("friend_discoverable", true)
-    .ilike("display_name", `%${escapeLikePattern(search)}%`)
-    .limit(10);
+  if (!userId) {
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc("find_friend_by_email", {
+    p_email: address,
+  });
 
   if (error) {
     throw new Error(`Could not search: ${error.message}`);
   }
 
-  return data.filter((profile) => profile.id !== userId).map(toPerson);
+  return (data ?? []).map(toPerson);
 }
