@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Button, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
 import { RecipeSearch } from "@/features/recipes/components/recipe-search";
@@ -13,6 +13,7 @@ import { BookOpen, SearchX } from "lucide-react";
 
 import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PendingButton } from "@/components/ui/pending-button";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { PageShell } from "@/components/ui/page-shell";
 import { CardGrid } from "@/components/ui/card-grid";
@@ -131,9 +132,9 @@ export default async function RecipesPage({
               {showArchived ? (
                 <form action={restoreRecipe}>
                   <input name="recipeId" type="hidden" value={recipe.id} />
-                  <Button className="min-h-11" type="submit" variant="tertiary">
+                  <PendingButton className="min-h-11" variant="tertiary">
                     Restore
-                  </Button>
+                  </PendingButton>
                 </form>
               ) : null}
             </li>

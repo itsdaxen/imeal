@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
-import { Button, Card, Link, Typography } from "@heroui/react";
+import { Card, Link, Typography } from "@heroui/react";
 
 import { UsersRound } from "lucide-react";
 
 import { BackLink } from "@/components/ui/back-link";
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
+import { PendingButton } from "@/components/ui/pending-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PersonAvatar } from "@/components/ui/person-avatar";
@@ -102,23 +103,15 @@ export default async function SharedRecipesPage() {
                   <div className="flex flex-wrap items-center gap-1">
                     <form action={copySharedRecipe}>
                       <input name="recipeId" type="hidden" value={recipe.id} />
-                      <Button
-                        className="min-h-11"
-                        type="submit"
-                        variant="tertiary"
-                      >
+                      <PendingButton className="min-h-11" variant="tertiary">
                         Save a copy
-                      </Button>
+                      </PendingButton>
                     </form>
                     <form action={dropSharedRecipe}>
                       <input name="recipeId" type="hidden" value={recipe.id} />
-                      <Button
-                        className="min-h-11"
-                        type="submit"
-                        variant="ghost"
-                      >
+                      <PendingButton className="min-h-11" variant="ghost">
                         Remove
-                      </Button>
+                      </PendingButton>
                     </form>
                   </div>
                 </Card.Footer>

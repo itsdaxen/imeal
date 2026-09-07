@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
-import { Button, Disclosure, Link } from "@heroui/react";
+import { Disclosure, Link } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
 import { PlannerOptions } from "@/features/planner/components/planner-options";
 import { SharedWeekInbox } from "@/features/planner/components/shared-week-inbox";
+import { PendingButton } from "@/components/ui/pending-button";
 import {
   listPlanRecipients,
   listPlansSharedWithMe,
@@ -76,14 +77,13 @@ export default async function PlannerPage({
         <form action={generateShoppingList}>
           <input name="weekStart" type="hidden" value={weekStart} />
           <input name="listId" type="hidden" value={destination.listId ?? ""} />
-          <Button
+          <PendingButton
             className="min-h-11"
             isDisabled={plan.meals.length === 0 || !destination.listId}
-            type="submit"
             variant="tertiary"
           >
             Add to shopping list
-          </Button>
+          </PendingButton>
         </form>
       </div>
 

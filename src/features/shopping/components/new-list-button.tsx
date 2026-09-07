@@ -6,6 +6,7 @@ import { Button, cn, Input, Label, TextField } from "@heroui/react";
 
 import { createShoppingList } from "../shopping.actions";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
+import { PendingButton } from "@/components/ui/pending-button";
 
 /** Sits at the end of the list tabs, where "one more list" belongs. */
 export function NewListButton({ className }: { className?: string }) {
@@ -31,9 +32,7 @@ export function NewListButton({ className }: { className?: string }) {
             <Label>Name</Label>
             <Input autoFocus placeholder="Market, party, the other house" />
           </TextField>
-          <Button className="self-end" type="submit">
-            Create
-          </Button>
+          <PendingButton className="self-end">Create</PendingButton>
         </form>
       </AppDialog>
     </>

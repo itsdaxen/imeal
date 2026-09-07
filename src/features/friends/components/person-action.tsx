@@ -1,4 +1,4 @@
-import { Button } from "@heroui/react";
+import { PendingButton } from "@/components/ui/pending-button";
 
 type PersonActionProps = {
   action: (formData: FormData) => Promise<void>;
@@ -18,9 +18,9 @@ export function PersonAction({
   return (
     <form action={action}>
       <input name={name} type="hidden" value={value} />
-      <Button className="min-h-11" type="submit" variant={variant}>
+      <PendingButton className="min-h-11" variant={variant}>
         {label}
-      </Button>
+      </PendingButton>
     </form>
   );
 }

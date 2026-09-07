@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button, Typography } from "@heroui/react";
 
 import { PersonAvatar } from "@/components/ui/person-avatar";
@@ -28,12 +29,14 @@ export function ShareDialog({
   recipeId: string;
   recipientIds: string[];
 }) {
-  const { run: send } = useServerAction();
+  const { isPending, run: send } = useServerAction();
+  const [pendingFriend, setPendingFriend] = useState<string | null>(null);
   // The button flips between Share and Stop sharing, so it has to flip on press
   // rather than after the round trip — otherwise it reads as an unresponsive control.
   const [shared, toggle] = useOptimisticSet(recipientIds);
 
   function run(friendId: string, action: ServerAction) {
+    setPendingFriend(friendId);
     send(action, { friendId, recipeId }, () => toggle(friendId));
   }
 
@@ -63,6 +66,7 @@ export function ShareDialog({
               </span>
 
               <Button
+                isPending={isPending && pendingFriend === friend.id}
                 onPress={() =>
                   run(friend.id, isShared ? unshareRecipe : shareRecipe)
                 }

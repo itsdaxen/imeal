@@ -9,7 +9,6 @@ import {
   Tags,
 } from "lucide-react";
 import {
-  Button,
   Chip,
   Dropdown,
   Input,
@@ -22,6 +21,7 @@ import {
 } from "@heroui/react";
 
 import { IconButton } from "@/components/ui/icon-button";
+import { PendingButton } from "@/components/ui/pending-button";
 
 import { removeItem, toggleItemChecked, updateItem } from "../shopping.actions";
 import type { ShoppingItem } from "../shopping.queries";
@@ -332,7 +332,7 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
               </TextField>
             )}
 
-            <Button type="submit">Save</Button>
+            <PendingButton>Save</PendingButton>
           </form>
         ) : null}
       </AppDialog>

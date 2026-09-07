@@ -1,4 +1,7 @@
+"use client";
+
 import type { ComponentPropsWithoutRef } from "react";
+import { useFormStatus } from "react-dom";
 
 import { Button, buttonVariants, cn, Link } from "@heroui/react";
 
@@ -53,11 +56,19 @@ type ActionButtonProps = Omit<
   tier: Exclude<ActionTier, "quiet">;
 };
 
-export function ActionButton({ className, tier, ...props }: ActionButtonProps) {
+export function ActionButton({
+  className,
+  isPending,
+  tier,
+  ...props
+}: ActionButtonProps) {
+  const { pending } = useFormStatus();
+
   return (
     <Button
       className={cn("min-h-11", className)}
       data-action-tier={tier}
+      isPending={isPending || pending}
       variant={tierVariant[tier]}
       {...props}
     />

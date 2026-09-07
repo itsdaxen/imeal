@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 
-import { Button } from "@heroui/react";
-
 import { Library, SearchX } from "lucide-react";
 
 import { SectionTitle } from "@/components/ui/section-title";
@@ -11,6 +9,7 @@ import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
 import { RecipeCard } from "@/features/recipes/components/recipe-card";
+import { PendingButton } from "@/components/ui/pending-button";
 import { CatalogSearch } from "@/features/catalog/components/catalog-search";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { PageShell } from "@/components/ui/page-shell";
@@ -153,13 +152,9 @@ export default async function CatalogPage({
                         type="hidden"
                         value={suggestion.id}
                       />
-                      <Button
-                        className="min-h-11"
-                        type="submit"
-                        variant="ghost"
-                      >
+                      <PendingButton className="min-h-11" variant="ghost">
                         Withdraw
-                      </Button>
+                      </PendingButton>
                     </form>
                   ) : null}
                 </li>

@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
-import {
-  Button,
-  Card,
-  Input,
-  Label,
-  TextField,
-  Typography,
-} from "@heroui/react";
+import { Card, Input, Label, TextField, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
+import { PendingButton } from "@/components/ui/pending-button";
 import { ActionLink } from "@/components/ui/action";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PersonAvatar } from "@/components/ui/person-avatar";
@@ -55,10 +49,6 @@ export default async function AdminPage() {
       {pending.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-border p-8 text-center sm:p-12">
           <SectionTitle>The queue is clear</SectionTitle>
-          <Typography className="mt-2 text-muted" type="body">
-            New catalog suggestions will appear here with everything needed to
-            review them.
-          </Typography>
         </section>
       ) : (
         <ul className="flex list-none flex-col gap-6 p-0">
@@ -140,9 +130,9 @@ export default async function AdminPage() {
                       type="hidden"
                       value={suggestion.id}
                     />
-                    <Button className="w-full sm:w-auto" type="submit">
+                    <PendingButton className="w-full sm:w-auto">
                       Publish to catalog
-                    </Button>
+                    </PendingButton>
                   </form>
 
                   <form
@@ -158,9 +148,7 @@ export default async function AdminPage() {
                       <Label>Reason for declining</Label>
                       <Input placeholder="Optional note for the author" />
                     </TextField>
-                    <Button type="submit" variant="ghost">
-                      Decline
-                    </Button>
+                    <PendingButton variant="ghost">Decline</PendingButton>
                   </form>
                 </Card.Footer>
               </ContentCard>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import { LoaderCircle, MoreHorizontal } from "lucide-react";
 import { Dropdown } from "@heroui/react";
 
 import { IconButton } from "@/components/ui/icon-button";
@@ -35,12 +35,19 @@ export function MealMenu({
   return (
     <Dropdown>
       <IconButton
-        isPending={isPending}
-        label="Meal options"
+        isDisabled={isPending}
+        label={isPending ? "Picking another meal" : "Meal options"}
         size="sm"
         variant="ghost"
       >
-        <MoreHorizontal aria-hidden="true" className="size-5" />
+        {isPending ? (
+          <LoaderCircle
+            aria-hidden="true"
+            className="size-5 animate-spin motion-reduce:animate-none"
+          />
+        ) : (
+          <MoreHorizontal aria-hidden="true" className="size-5" />
+        )}
       </IconButton>
       <Dropdown.Popover placement="bottom end">
         <Dropdown.Menu>

@@ -29,11 +29,13 @@ export function PlannerOptions({
 }: PlannerOptionsProps) {
   const [dialog, setDialog] = useState<"clear" | "share" | null>(null);
   const clearForm = useRef<HTMLFormElement>(null);
-  const { run: send } = useServerAction();
+  const { isPending, run: send } = useServerAction();
+  const [pendingFriend, setPendingFriend] = useState<string | null>(null);
   // Same reasoning as sharing a recipe: the label flips, so it flips on press.
   const [shared, toggleShared] = useOptimisticSet(recipientIds);
 
   function runShare(friendId: string, action: ServerAction) {
+    setPendingFriend(friendId);
     send(action, { friendId, weekStart }, () => toggleShared(friendId));
   }
 
@@ -88,6 +90,7 @@ export function PlannerOptions({
                 <span>{friend.displayName}</span>
                 <Button
                   className="min-h-11"
+                  isPending={isPending && pendingFriend === friend.id}
                   onPress={() =>
                     runShare(friend.id, isShared ? unshareWeek : shareWeek)
                   }

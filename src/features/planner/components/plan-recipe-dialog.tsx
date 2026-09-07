@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
@@ -9,6 +8,7 @@ import type { MealSlot } from "@/features/recipes/recipe.schema";
 import { assignRecipeToSlot } from "../plan.actions";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { SelectField } from "@/components/ui/select-field";
+import { PendingButton } from "@/components/ui/pending-button";
 
 type Day = { index: number; label: string; dateLabel: string };
 
@@ -73,9 +73,7 @@ export function PlanRecipeDialog({
             }))}
           />
 
-          <Button className="w-full" type="submit">
-            Add to plan
-          </Button>
+          <PendingButton className="w-full">Add to plan</PendingButton>
         </form>
       </AppDialog>
     </>

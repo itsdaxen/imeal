@@ -4,16 +4,10 @@ import type { ReactNode } from "react";
 
 import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
-import {
-  Button,
-  Dropdown,
-  Input,
-  Label,
-  TextField,
-  Typography,
-} from "@heroui/react";
+import { Dropdown, Input, Label, TextField, Typography } from "@heroui/react";
 
 import { IconButton } from "@/components/ui/icon-button";
+import { PendingButton } from "@/components/ui/pending-button";
 import type { Person } from "@/features/friends/friend.queries";
 
 import {
@@ -139,9 +133,9 @@ export function ListToolbar({
                 <input name="listId" type="hidden" value={listId} />
                 <input name="userId" type="hidden" value={friend.id} />
                 <span className="text-sm">{friend.displayName}</span>
-                <Button className="min-h-11" type="submit" variant="tertiary">
+                <PendingButton className="min-h-11" variant="tertiary">
                   {isMember ? "Remove" : "Share"}
-                </Button>
+                </PendingButton>
               </form>
             );
           })
@@ -151,9 +145,9 @@ export function ListToolbar({
           <form action={removeListMember} className="self-start">
             <input name="listId" type="hidden" value={listId} />
             <input name="userId" type="hidden" value={currentUserId} />
-            <Button className="min-h-11" type="submit" variant="ghost">
+            <PendingButton className="min-h-11" variant="ghost">
               Leave this list
-            </Button>
+            </PendingButton>
           </form>
         ) : null}
       </AppDialog>
@@ -177,9 +171,7 @@ export function ListToolbar({
             <Label>Name</Label>
             <Input autoFocus />
           </TextField>
-          <Button className="self-end" type="submit">
-            Save
-          </Button>
+          <PendingButton className="self-end">Save</PendingButton>
         </form>
       </AppDialog>
     </div>

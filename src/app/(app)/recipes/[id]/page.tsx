@@ -6,13 +6,13 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
+import { PendingButton } from "@/components/ui/pending-button";
 import { TagList } from "@/components/ui/tag-list";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { listFriends } from "@/features/friends/friend.queries";
 import { RecipeOwnerMenu } from "@/features/recipes/components/recipe-owner-menu";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 import { saveCatalogRecipe } from "@/features/catalog/catalog.actions";
-import { Button } from "@heroui/react";
 import {
   getRecipe,
   listOwnedCollections,
@@ -139,16 +139,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
             ) : isCatalogRecipe ? (
               <form action={saveCatalogRecipe}>
                 <input name="recipeId" type="hidden" value={recipe.id} />
-                <Button className="min-h-11" type="submit" variant="tertiary">
+                <PendingButton className="min-h-11" variant="tertiary">
                   Save a copy
-                </Button>
+                </PendingButton>
               </form>
             ) : (
               <form action={copySharedRecipe}>
                 <input name="recipeId" type="hidden" value={recipe.id} />
-                <Button className="min-h-11" type="submit" variant="tertiary">
+                <PendingButton className="min-h-11" variant="tertiary">
                   Save a copy
-                </Button>
+                </PendingButton>
               </form>
             )}
           </div>
