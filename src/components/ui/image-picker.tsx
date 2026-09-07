@@ -89,7 +89,7 @@ export function ImagePicker({
 
       <div className="flex flex-wrap gap-2">
         <label
-          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-default px-4 text-sm font-medium text-foreground"
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-3xl bg-default px-4 text-sm font-medium text-foreground"
           htmlFor={`${name}-picker`}
         >
           <ImagePlus aria-hidden="true" className="size-4" />

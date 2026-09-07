@@ -67,31 +67,14 @@ summary,
   }
 }
 
-/* HeroUI makes desktop fields shorter than our standard actions and gives ordinary
-   buttons pill geometry. Keep the library's size variants, while giving form rows a
-   shared 44px baseline and reserving pills for compact and icon-only controls. */
+/* Keep form rows on a shared 44px baseline. Radius belongs to HeroUI for HeroUI
+   controls; overriding it here makes compound components disagree with their own
+   popovers, menus, and states. */
 @layer components {
   .input:not(textarea),
   .input-group:not(:has([data-slot="input-group-textarea"])),
   .select__trigger {
     min-height: 2.75rem;
-  }
-
-  .button:not(.button--sm):not(.button--icon-only) {
-    border-radius: var(--radius-field);
-  }
-
-  /* Menus are inset controls anchored to another control, not standalone cards.
-     Keep their options touchable while preventing a short menu from looking like
-     a large floating panel. */
-  .select__popover,
-  .dropdown__popover {
-    border-radius: var(--radius-field);
-  }
-
-  .select__popover .list-box-item,
-  .dropdown__popover .list-box-item {
-    border-radius: var(--radius-lg);
   }
 
   /* HeroUI makes the entire modal body muted, which also washes out names and
@@ -107,7 +90,6 @@ summary,
     min-width: 2.75rem;
     min-height: 2.75rem;
     padding: 0;
-    border-radius: 9999px;
   }
 }
 
@@ -147,14 +129,14 @@ button:disabled,
  * the same signal without moving anything. Links over a photograph opt out by setting
  * --link-hover to their own colour.
  */
-.link {
+.link:not(.button) {
   --link-hover: var(--accent);
 }
 
-.link:hover,
-.link[data-hovered="true"],
-.link:active,
-.link[data-pressed="true"] {
+.link:not(.button):hover,
+.link:not(.button)[data-hovered="true"],
+.link:not(.button):active,
+.link:not(.button)[data-pressed="true"] {
   color: var(--link-hover);
   text-decoration: none;
 }
@@ -162,7 +144,7 @@ button:disabled,
 /* You are already here: the current page keeps its colour under the cursor. The
    value is explicit because currentcolor here would resolve against the inherited
    colour, not the pill's own. */
-.link[aria-current="page"] {
+.link:not(.button)[aria-current="page"] {
   --link-hover: var(--background);
 }
 
@@ -186,18 +168,6 @@ button:disabled,
 [data-slot="toggle-button"][data-selected="true"] {
   box-shadow: var(--surface-shadow);
 }
-
-/**
- * Corner radius has four steps and each one has a job:
- *
- *   full     pills, compact controls, and avatars
- *   1.5rem   surface  — cards and panels (HeroUI's `.card` supplies this)
- *   0.75rem  controls and inset elements — fields, actions, media, cells, tiles
- *   0.375rem micro    — checkbox-sized squares, where an inset radius reads as a circle
- *
- * `rounded-lg` and `rounded-2xl` are deliberately absent: they were the two values the
- * codebase reached for when nobody had decided which step applied.
- */
 
 /**
  * Where every field in a form is required, the asterisk distinguishes nothing and is

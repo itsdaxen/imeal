@@ -48,7 +48,7 @@ export function FilterBar({
       {filters.length > 0 ? (
         <Disclosure>
           <Disclosure.Heading>
-            <Disclosure.Trigger className="flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-left hover:bg-default/60">
+            <Disclosure.Trigger className="flex min-h-11 w-full items-center justify-between px-3 text-left hover:bg-default/60">
               Filters
               <Disclosure.Indicator />
             </Disclosure.Trigger>

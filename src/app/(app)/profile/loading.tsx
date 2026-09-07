@@ -24,7 +24,7 @@ export default function ProfileLoading() {
           <FieldSkeleton />
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[0, 1, 2, 3].map((index) => (
-              <Skeleton className="h-11 w-full rounded-xl" key={index} />
+              <Skeleton className="h-11 w-full" key={index} />
             ))}
           </div>
         </div>
@@ -32,7 +32,7 @@ export default function ProfileLoading() {
 
       <ContentCard className="gap-5" density="spacious">
         <Skeleton className="h-7 w-44" />
-        <Skeleton className="h-11 w-full rounded-xl" />
+        <Skeleton className="h-11 w-full" />
       </ContentCard>
     </PageShell>
   );

@@ -119,7 +119,7 @@ function NextMealCard({
 
       <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 p-5 sm:p-7">
         {/* Glass over a photograph, so it sits outside the surface scale on purpose. */}
-        <Card.Header className="max-w-md gap-1 rounded-xl border border-media-panel-border bg-linear-to-br from-media-panel-start to-media-panel-end p-4 backdrop-blur-md">
+        <Card.Header className="max-w-md gap-1 rounded-3xl border border-media-panel-border bg-linear-to-br from-media-panel-start to-media-panel-end p-4 backdrop-blur-md">
           <Eyebrow tone="media">
             {nextMeal.dayLabel} · {nextMeal.slot}
           </Eyebrow>
@@ -134,7 +134,7 @@ function NextMealCard({
 
         <Card.Footer>
           <ActionLink
-            className="rounded-full bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline transition-transform [--link-hover:var(--imeal-media-action-foreground)] motion-safe:hover:scale-[1.03]"
+            className="rounded-3xl bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline transition-transform [--link-hover:var(--imeal-media-action-foreground)] motion-safe:hover:scale-[1.03]"
             href={
               nextMeal.approved
                 ? `/cook/${nextMeal.id}`

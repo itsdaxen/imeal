@@ -17,8 +17,8 @@ export default function RecipeDetailLoading() {
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-4 w-44" />
           <div className="flex gap-3">
-            <Skeleton className="h-11 w-40 rounded-full" />
-            <Skeleton className="h-11 w-28 rounded-full" />
+            <Skeleton className="h-11 w-40" />
+            <Skeleton className="h-11 w-28" />
           </div>
         </div>
       </ContentCard>

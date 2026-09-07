@@ -105,7 +105,7 @@ export default async function ShoppingPage({
               return (
                 <Link
                   aria-current={isOpen ? "page" : undefined}
-                  className={`grid min-h-10 shrink-0 place-items-center rounded-full px-4 text-sm no-underline transition-colors ${
+                  className={`grid min-h-10 shrink-0 place-items-center rounded-3xl px-4 text-sm no-underline transition-colors ${
                     isOpen
                       ? "bg-accent-soft font-medium text-accent"
                       : "text-muted hover:bg-surface hover:text-foreground"
@@ -119,7 +119,7 @@ export default async function ShoppingPage({
               );
             })}
 
-            <NewListButton className="ml-1 min-h-10" />
+            <NewListButton className="ml-2 min-h-10" />
           </nav>
 
           {list.listId ? (

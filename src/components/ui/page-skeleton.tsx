@@ -13,7 +13,7 @@ export function PageHeadingSkeleton({ action = true }: { action?: boolean }) {
         <Skeleton className="h-9 w-56" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-      {action ? <Skeleton className="h-11 w-36 rounded-full" /> : null}
+      {action ? <Skeleton className="h-11 w-36" /> : null}
     </header>
   );
 }

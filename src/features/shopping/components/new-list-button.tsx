@@ -17,7 +17,7 @@ export function NewListButton({ className }: { className?: string }) {
       <Button
         className={cn("shrink-0", className)}
         onPress={() => setIsOpen(true)}
-        variant="tertiary"
+        variant="ghost"
       >
         <Plus aria-hidden="true" className="size-4" />
         New list

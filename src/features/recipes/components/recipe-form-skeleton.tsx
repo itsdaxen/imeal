@@ -36,10 +36,10 @@ export function RecipeFormSkeleton() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {[0, 1, 2, 3].map((index) => (
-              <Skeleton className="h-11 w-full rounded-xl" key={index} />
+              <Skeleton className="h-11 w-full" key={index} />
             ))}
           </div>
-          <Skeleton className="h-11 w-full rounded-full" />
+          <Skeleton className="h-11 w-full" />
         </ContentCard>
       </div>
     </PageShell>

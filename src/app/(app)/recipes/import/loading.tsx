@@ -20,7 +20,7 @@ export default function ImportRecipeLoading() {
               to be allowed to wrap rather than force the page sideways. */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Skeleton className="h-4 w-40 max-w-full" />
-            <Skeleton className="h-11 w-36 max-w-full rounded-full" />
+            <Skeleton className="h-11 w-36 max-w-full" />
           </div>
         </ContentCard>
 
