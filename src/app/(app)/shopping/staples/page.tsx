@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 
-import { ShoppingBasket } from "lucide-react";
 import { Input, Label, TextField } from "@heroui/react";
 
 import { BackLink } from "@/components/ui/back-link";
 import { ActionButton } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { StaplesList } from "@/features/shopping/components/staples-list";
 import { addStaple } from "@/features/shopping/shopping.actions";
@@ -51,16 +49,7 @@ export default async function StaplesPage() {
           </form>
         </ContentCard>
 
-        {staples.length === 0 ? (
-          <div className={span.full}>
-            <EmptyState
-              icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
-              title="No staples yet"
-            />
-          </div>
-        ) : (
-          <StaplesList staples={staples} />
-        )}
+        <StaplesList staples={staples} />
       </PageGrid>
     </PageShell>
   );

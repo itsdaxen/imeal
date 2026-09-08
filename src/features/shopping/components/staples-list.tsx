@@ -1,15 +1,18 @@
 "use client";
 
 import { useOptimistic } from "react";
+
 import { Typography } from "@heroui/react";
+import { ShoppingBasket } from "lucide-react";
 
 import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { span } from "@/components/ui/page-grid";
 import { SectionTitle } from "@/components/ui/section-title";
+import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 import { removeStaple, toggleStaple } from "../shopping.actions";
 import { StapleMenu } from "./staple-menu";
-import { type ServerAction, useServerAction } from "@/lib/use-server-action";
 
 export type Staple = { active: boolean; id: string; name: string };
 
@@ -69,14 +72,22 @@ export function StaplesList({ staples }: { staples: Staple[] }) {
 
   return (
     <>
+      {/* The panel is here whether or not it holds anything, so the page does not
+          swap one shape for another the moment you add your first staple. */}
       <ContentCard aria-label="Active staples" className={span.wide}>
         <SectionTitle>Ready to add · {active.length}</SectionTitle>
         {active.length > 0 ? (
           rows(active)
-        ) : (
+        ) : shown.length > 0 ? (
           <Typography color="muted" type="body-sm">
             Resume a paused staple when you need it again.
           </Typography>
+        ) : (
+          <EmptyState
+            bare
+            icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
+            title="No staples yet"
+          />
         )}
       </ContentCard>
 
