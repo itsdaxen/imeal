@@ -1,7 +1,11 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type Person = { id: string; displayName: string };
+export type Person = {
+  avatarUrl: string | null;
+  displayName: string;
+  id: string;
+};
 
 export type FriendRequest = {
   id: string;
@@ -9,12 +13,14 @@ export type FriendRequest = {
 };
 
 function toPerson(profile: {
+  avatar_url?: string | null;
   id: string;
   display_name: string | null;
 }): Person {
   return {
-    id: profile.id,
+    avatarUrl: profile.avatar_url ?? null,
     displayName: profile.display_name?.trim() || "A cook",
+    id: profile.id,
   };
 }
 
@@ -27,7 +33,9 @@ export async function listFriends(): Promise<Person[]> {
 
   const { data, error } = await supabase
     .from("friendships")
-    .select("friend:profiles!friendships_friend_id_fkey (id, display_name)")
+    .select(
+      "friend:profiles!friendships_friend_id_fkey (id, display_name, avatar_url)",
+    )
     .eq("user_id", userId);
 
   if (error) {
@@ -42,7 +50,7 @@ export async function listIncomingRequests(): Promise<FriendRequest[]> {
   const { data, error } = await supabase
     .from("friend_requests")
     .select(
-      "id, requester:profiles!friend_requests_requester_id_fkey (id, display_name)",
+      "id, requester:profiles!friend_requests_requester_id_fkey (id, display_name, avatar_url)",
     )
     .eq("status", "pending");
 
@@ -70,7 +78,7 @@ export async function listOutgoingRequests(): Promise<FriendRequest[]> {
   const { data, error } = await supabase
     .from("friend_requests")
     .select(
-      "id, addressee:profiles!friend_requests_addressee_id_fkey (id, display_name)",
+      "id, addressee:profiles!friend_requests_addressee_id_fkey (id, display_name, avatar_url)",
     )
     .eq("status", "pending")
     .eq("requester_id", userId);

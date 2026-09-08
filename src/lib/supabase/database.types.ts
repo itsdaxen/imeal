@@ -695,6 +695,7 @@ export type Database = {
       find_friend_by_email: {
         Args: { p_email: string };
         Returns: {
+          avatar_url: string;
           display_name: string;
           id: string;
         }[];

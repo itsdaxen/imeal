@@ -16,6 +16,7 @@ export type PersonAction = {
 
 export type PersonEntry = {
   actions: PersonAction[];
+  avatarUrl?: string | null;
   context?: string;
   id: string;
   name: string;
@@ -51,6 +52,7 @@ export function PeopleList({ people }: { people: PersonEntry[] }) {
               {entry.label}
             </Button>
           ))}
+          avatarUrl={person.avatarUrl}
           context={person.context}
           key={person.id}
           name={person.name}
