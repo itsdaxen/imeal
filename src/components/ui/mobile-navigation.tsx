@@ -9,6 +9,7 @@ import {
   isCurrentSection,
   type AppHeaderNavigationItem,
 } from "./header-navigation";
+import { CountBadge } from "@/features/friends/components/friends-tabs";
 
 type MobileNavigationProps = {
   items: ReadonlyArray<AppHeaderNavigationItem>;
@@ -102,6 +103,7 @@ export function MobileNavigation({ items }: MobileNavigationProps) {
                     onPress={() => setIsOpen(false)}
                   >
                     {item.label}
+                    {item.badge ? <CountBadge count={item.badge} /> : null}
                   </Link>
                 </li>
               );

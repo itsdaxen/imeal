@@ -8,6 +8,7 @@ import { StickyHeader } from "@/components/ui/sticky-header";
 import { AccountMenu } from "@/features/auth/components/account-menu";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
+import { listIncomingRequests } from "@/features/friends/friend.queries";
 
 const navigationItems = [
   { href: "/", label: "Today" },
@@ -16,12 +17,13 @@ const navigationItems = [
   { href: "/recipes", label: "Recipes" },
   { href: "/catalog", label: "Catalog" },
   { href: "/friends", label: "Friends" },
-];
+] as const;
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const [user, isAdmin] = await Promise.all([
+  const [user, isAdmin, incoming] = await Promise.all([
     getCurrentUser(),
     isCurrentUserAdmin(),
+    listIncomingRequests(),
   ]);
 
   // The proxy already redirects anonymous requests; this covers a session that
@@ -42,11 +44,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             />
           }
           homeHref="/"
-          navigationItems={
-            isAdmin
-              ? [...navigationItems, { href: "/admin", label: "Moderation" }]
-              : navigationItems
-          }
+          navigationItems={[
+            // Someone waiting on you is worth seeing from any page, not only the one
+            // you would have to think to visit.
+            ...navigationItems.map((item) =>
+              item.href === "/friends"
+                ? { ...item, badge: incoming.length }
+                : item,
+            ),
+            ...(isAdmin ? [{ href: "/admin", label: "Moderation" }] : []),
+          ]}
           navigationLabel="Main navigation"
         />
       </StickyHeader>

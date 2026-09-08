@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { cva } from "class-variance-authority";
 import { Link } from "@heroui/react";
 
+import { CountBadge } from "@/features/friends/components/friends-tabs";
+
 const navigationLinkVariants = cva(
   "flex min-h-11 items-center rounded-full px-4 no-underline transition-[min-height] duration-200 ease-out group-data-[stuck=true]:min-h-9 motion-reduce:transition-none",
   {
@@ -19,6 +21,8 @@ const navigationLinkVariants = cva(
 );
 
 export type AppHeaderNavigationItem = {
+  /** Shown beside the label when something is waiting there. */
+  badge?: number;
   href: string;
   label: string;
 };
@@ -59,6 +63,7 @@ export function HeaderNavigation({
                 href={item.href}
               >
                 {item.label}
+                {item.badge ? <CountBadge count={item.badge} /> : null}
               </Link>
             </li>
           );
