@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Badge, cn, Link } from "@heroui/react";
 
 /**
@@ -8,13 +11,11 @@ import { Badge, cn, Link } from "@heroui/react";
  * routes cannot do that to each other, and the count sits where you would look for it
  * rather than appearing as a new heading.
  */
-export function FriendsTabs({
-  current,
-  waiting,
-}: {
-  current: "friends" | "invites";
-  waiting: number;
-}) {
+export function FriendsTabs({ waiting }: { waiting: number }) {
+  // Read here rather than passed in: the layout that renders this is not re-rendered
+  // when you move between its children, so a value resolved on the server would still
+  // name the tab you came from.
+  const pathname = usePathname();
   const tabs = [
     { href: "/friends", id: "friends" as const, label: "Friends" },
     { href: "/friends/invites", id: "invites" as const, label: "Invitations" },
@@ -24,7 +25,10 @@ export function FriendsTabs({
     <nav aria-label="Friends sections">
       <ul className="flex list-none items-center gap-1 p-0">
         {tabs.map((tab) => {
-          const isOpen = tab.id === current;
+          const isOpen =
+            tab.href === "/friends"
+              ? pathname === "/friends"
+              : pathname.startsWith(tab.href);
 
           return (
             <li key={tab.id}>

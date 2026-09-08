@@ -7,9 +7,6 @@ import { MailCheck } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { PanelTitle } from "@/components/ui/panel-title";
-import { PageHeader } from "@/components/ui/page-header";
-import { PageShell } from "@/components/ui/page-shell";
-import { FriendsTabs } from "@/features/friends/components/friends-tabs";
 import { PeopleList } from "@/features/friends/components/people-list";
 import {
   acceptFriendRequest,
@@ -30,11 +27,7 @@ export default async function InvitesPage() {
   ]);
 
   return (
-    <PageShell gap="snug" width="narrow">
-      <PageHeader title="Invitations" />
-
-      <FriendsTabs current="invites" waiting={incoming.length} />
-
+    <>
       {/* Both panels are always here, empty or not: a page that grows a section the
           moment someone writes to you rearranges itself while you are reading it. */}
       <ContentCard>
@@ -67,6 +60,7 @@ export default async function InvitesPage() {
                     variant: "ghost" as const,
                   },
                 ],
+                avatarUrl: request.person.avatarUrl,
                 context: "Sent you a request",
                 id: request.id,
                 name: request.person.displayName,
@@ -100,6 +94,7 @@ export default async function InvitesPage() {
                     variant: "ghost" as const,
                   },
                 ],
+                avatarUrl: request.person.avatarUrl,
                 context: "Request sent",
                 id: request.id,
                 name: request.person.displayName,
@@ -108,6 +103,6 @@ export default async function InvitesPage() {
           )}
         </Card.Content>
       </ContentCard>
-    </PageShell>
+    </>
   );
 }

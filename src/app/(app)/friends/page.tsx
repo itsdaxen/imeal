@@ -8,9 +8,6 @@ import { ActionButton, ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { PanelTitle } from "@/components/ui/panel-title";
-import { PageHeader } from "@/components/ui/page-header";
-import { PageShell } from "@/components/ui/page-shell";
-import { FriendsTabs } from "@/features/friends/components/friends-tabs";
 import { PersonAction } from "@/features/friends/components/person-action";
 import { PeopleList } from "@/features/friends/components/people-list";
 import { PersonRow } from "@/features/friends/components/person-row";
@@ -49,11 +46,7 @@ export default async function FriendsPage({
   const receivedIds = new Set(incoming.map((request) => request.person.id));
 
   return (
-    <PageShell gap="snug" width="narrow">
-      <PageHeader title="Friends" />
-
-      <FriendsTabs current="friends" waiting={incoming.length} />
-
+    <>
       <ContentCard>
         <Card.Header>
           <PanelTitle>Add someone by email</PanelTitle>
@@ -113,6 +106,7 @@ export default async function FriendsPage({
                       />
                     )
                   }
+                  avatarUrl={person.avatarUrl}
                   context="Search result"
                   key={person.id}
                   name={person.displayName}
@@ -148,6 +142,7 @@ export default async function FriendsPage({
                     variant: "ghost" as const,
                   },
                 ],
+                avatarUrl: person.avatarUrl,
                 context: "Can receive shared weeks and recipes",
                 id: person.id,
                 name: person.displayName,
@@ -156,6 +151,6 @@ export default async function FriendsPage({
           )}
         </Card.Content>
       </ContentCard>
-    </PageShell>
+    </>
   );
 }
