@@ -8,6 +8,17 @@ import { requireUserId } from "@/lib/supabase/session-user";
 const personSchema = z.object({ personId: z.uuid() });
 const requestSchema = z.object({ requestId: z.uuid() });
 
+/**
+ * The waiting count is drawn by the layout, and a layout is not re-rendered by
+ * revalidating one of its pages — so the badge would keep yesterday's number until a
+ * full load. Revalidating the layout costs one extra render and keeps it honest.
+ */
+function revalidateFriends() {
+  revalidatePath("/friends");
+  revalidatePath("/friends/invites");
+  revalidatePath("/", "layout");
+}
+
 export async function sendFriendRequest(formData: FormData) {
   const parsed = personSchema.safeParse({ personId: formData.get("personId") });
 
@@ -23,7 +34,7 @@ export async function sendFriendRequest(formData: FormData) {
     .from("friend_requests")
     .insert({ requester_id: userId, addressee_id: parsed.data.personId });
 
-  revalidatePath("/friends");
+  revalidateFriends();
 }
 
 export async function acceptFriendRequest(formData: FormData) {
@@ -40,7 +51,7 @@ export async function acceptFriendRequest(formData: FormData) {
     p_request_id: parsed.data.requestId,
   });
 
-  revalidatePath("/friends");
+  revalidateFriends();
 }
 
 export async function declineFriendRequest(formData: FormData) {
@@ -57,7 +68,7 @@ export async function declineFriendRequest(formData: FormData) {
     p_request_id: parsed.data.requestId,
   });
 
-  revalidatePath("/friends");
+  revalidateFriends();
 }
 
 export async function withdrawFriendRequest(formData: FormData) {
@@ -76,7 +87,7 @@ export async function withdrawFriendRequest(formData: FormData) {
     .eq("id", parsed.data.requestId)
     .eq("requester_id", userId);
 
-  revalidatePath("/friends");
+  revalidateFriends();
 }
 
 export async function removeFriend(formData: FormData) {
@@ -97,5 +108,5 @@ export async function removeFriend(formData: FormData) {
         `and(user_id.eq.${parsed.data.personId},friend_id.eq.${userId})`,
     );
 
-  revalidatePath("/friends");
+  revalidateFriends();
 }
