@@ -161,6 +161,20 @@ button:disabled,
   text-decoration: none;
 }
 
+/*
+ * A badge beside a word, rather than hanging off the corner of an icon.
+ *
+ * HeroUI's badge is an overlay: it is absolutely positioned and nudged out past its
+ * anchor. Standing on its own in a line of text that makes it drift over whatever sits
+ * to its right, so inline badges are returned to the flow. Fully round at any width,
+ * because a two-digit count should read as the same object as a one-digit one.
+ */
+.badge[data-inline] {
+  position: static;
+  transform: none;
+  border-radius: calc(infinity * 1px);
+}
+
 /**
  * A selected segment is a raised pill on a recessed track, the way a segmented control
  * has always worked: unselected segments keep the default grey, the selected one lifts

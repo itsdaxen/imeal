@@ -1,4 +1,4 @@
-import { cn, Link } from "@heroui/react";
+import { Badge, cn, Link } from "@heroui/react";
 
 /**
  * Friends and invitations are two routes shown as one strip.
@@ -54,18 +54,26 @@ export function FriendsTabs({
 /**
  * The number of people waiting on you.
  *
- * Announced as words because "Friends 2" read aloud is a riddle; the digit is for
- * the eye only.
+ * HeroUI's Badge, so the colour and size come from the same place as everything else.
+ * It is built to hang off the corner of an avatar or an icon, which is why it carries
+ * `position: absolute` by default; `data-inline` in globals.css puts it back in the
+ * line, beside a word instead of on top of one.
+ *
+ * Announced as words because "Friends 2" read aloud is a riddle; the digit is for the
+ * eye only.
  */
 export function CountBadge({ count }: { count: number }) {
   return (
     <>
-      <span
+      <Badge
         aria-hidden="true"
-        className="grid min-w-5 place-items-center rounded-full bg-accent px-1.5 text-xs font-medium text-accent-foreground"
+        color="danger"
+        data-inline=""
+        size="sm"
+        variant="primary"
       >
         {count > 9 ? "9+" : count}
-      </span>
+      </Badge>
       <span className="sr-only">
         {count === 1 ? "1 waiting on you" : `${count} waiting on you`}
       </span>

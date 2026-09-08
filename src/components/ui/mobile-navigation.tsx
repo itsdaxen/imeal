@@ -94,7 +94,7 @@ export function MobileNavigation({ items }: MobileNavigationProps) {
                 <li key={item.href}>
                   <Link
                     aria-current={isActive ? "page" : undefined}
-                    className={`flex min-h-11 w-full items-center rounded-xl px-3 text-sm font-medium no-underline transition-colors motion-reduce:transition-none ${
+                    className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-medium no-underline transition-colors motion-reduce:transition-none ${
                       isActive
                         ? "bg-foreground text-background"
                         : "text-muted hover:bg-default hover:text-foreground"

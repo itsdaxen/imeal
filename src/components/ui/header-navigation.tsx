@@ -7,7 +7,7 @@ import { Link } from "@heroui/react";
 import { CountBadge } from "@/features/friends/components/friends-tabs";
 
 const navigationLinkVariants = cva(
-  "flex min-h-11 items-center rounded-full px-4 no-underline transition-[min-height] duration-200 ease-out group-data-[stuck=true]:min-h-9 motion-reduce:transition-none",
+  "flex min-h-11 items-center gap-2 rounded-full px-4 no-underline transition-[min-height] duration-200 ease-out group-data-[stuck=true]:min-h-9 motion-reduce:transition-none",
   {
     variants: {
       state: {
