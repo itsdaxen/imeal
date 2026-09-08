@@ -7,7 +7,6 @@ import { UsersRound } from "lucide-react";
 import { ActionButton, ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
-import { Eyebrow } from "@/components/ui/eyebrow";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
@@ -51,16 +50,12 @@ export default async function FriendsPage({
 
   return (
     <PageShell gap="snug" width="narrow">
-      <PageHeader
-        description="Share recipes and shopping lists with the people you cook with."
-        title="Friends"
-      />
+      <PageHeader title="Friends" />
 
       <FriendsTabs current="friends" waiting={incoming.length} />
 
       <ContentCard>
-        <Card.Header className="gap-1">
-          <Eyebrow>Search</Eyebrow>
+        <Card.Header>
           <PanelTitle>Add someone by email</PanelTitle>
         </Card.Header>
 
@@ -129,8 +124,7 @@ export default async function FriendsPage({
       </ContentCard>
 
       <ContentCard>
-        <Card.Header className="gap-1">
-          <Eyebrow>Connected</Eyebrow>
+        <Card.Header>
           <PanelTitle>Your friends</PanelTitle>
         </Card.Header>
 

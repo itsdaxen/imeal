@@ -8,7 +8,8 @@ type EmptyStateProps = {
   actions?: ReactNode;
   /** Drops the surface where this already sits inside a panel of its own. */
   bare?: boolean;
-  description: ReactNode;
+  /** Only where it says something the title does not — usually the way out. */
+  description?: ReactNode;
   icon: ReactNode;
   /**
    * `1` where this is the whole page's message, which is the recovery screens.
@@ -44,9 +45,11 @@ export function EmptyState({
         >
           {title}
         </Typography>
-        <Typography className="text-center" color="muted" type="body">
-          {description}
-        </Typography>
+        {description ? (
+          <Typography className="text-center" color="muted" type="body">
+            {description}
+          </Typography>
+        ) : null}
       </div>
       {actions ? (
         <div className="flex flex-wrap items-center justify-center gap-3">

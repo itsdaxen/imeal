@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
-import { Eyebrow } from "@/components/ui/eyebrow";
 
 export type LegalSection = {
   content: ReactNode;
@@ -23,8 +22,7 @@ export function LegalPage({
 }) {
   return (
     <article className="pb-8">
-      <Eyebrow>Legal</Eyebrow>
-      <Typography className="mt-3" type="h1" weight="semibold">
+      <Typography type="h1" weight="semibold">
         {title}
       </Typography>
       <Typography className="mt-3" color="muted" type="body-sm">

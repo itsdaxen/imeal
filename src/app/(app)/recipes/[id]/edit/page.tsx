@@ -48,7 +48,6 @@ export default async function EditRecipePage({
             Back to recipe
           </ActionLink>
         }
-        description={<>Keep the version you plan and cook accurate.</>}
         title={<>Edit recipe</>}
       />
 

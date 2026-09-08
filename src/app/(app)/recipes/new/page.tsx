@@ -20,9 +20,6 @@ export default async function NewRecipePage() {
             Import from pasted text
           </ActionLink>
         }
-        description={
-          <>Save a favorite in a format that is easy to plan, shop, and cook.</>
-        }
         title={<>Add a recipe</>}
       />
 

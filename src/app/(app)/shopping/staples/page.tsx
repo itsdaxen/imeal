@@ -54,7 +54,6 @@ export default async function StaplesPage() {
         {staples.length === 0 ? (
           <div className={span.full}>
             <EmptyState
-              description="Add the things you buy most weeks, then send them to any shopping list in one step."
               icon={<ShoppingBasket aria-hidden="true" className="size-6" />}
               title="No staples yet"
             />

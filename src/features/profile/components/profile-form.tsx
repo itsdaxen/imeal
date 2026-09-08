@@ -1,14 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  Button,
-  Card,
-  Description,
-  Input,
-  Label,
-  TextField,
-} from "@heroui/react";
+import { Button, Card, Input, Label, TextField } from "@heroui/react";
 
 import { FormMessage } from "@/components/ui/form-message";
 import { CheckChip } from "@/components/ui/check-chip";
@@ -52,9 +45,6 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       <ContentCard className="gap-5" density="spacious">
         <Card.Header className="flex-col items-start gap-1 p-0">
           <PanelTitle level={2}>Your identity</PanelTitle>
-          <Card.Description>
-            This is how friends recognize you across iMeal.
-          </Card.Description>
         </Card.Header>
 
         <ImagePicker
@@ -73,16 +63,12 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         >
           <Label>Display name</Label>
           <Input placeholder="How friends will see you" />
-          <Description>Friends search for you by this name.</Description>
         </TextField>
       </ContentCard>
 
       <ContentCard className="gap-5" density="spacious">
         <Card.Header className="flex-col items-start gap-1 p-0">
           <PanelTitle level={2}>Planning defaults</PanelTitle>
-          <Card.Description>
-            New weeks start from these settings. You can still change any week.
-          </Card.Description>
         </Card.Header>
 
         <div className="grid items-start gap-5 sm:grid-cols-[12rem_1fr]">
@@ -125,7 +111,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         </Card.Header>
 
         <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl bg-surface-secondary px-4 text-sm font-medium">
-          <span>Let other people find me by name</span>
+          <span>Let other people find me by my email address</span>
           <input
             className="peer sr-only"
             defaultChecked={profile.discoverable}

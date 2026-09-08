@@ -19,15 +19,7 @@ export default async function ProfilePage() {
 
   return (
     <PageShell width="narrow">
-      <PageHeader
-        description={
-          <>
-            How you appear to friends, and the defaults used when planning a
-            week.
-          </>
-        }
-        title={<>Profile</>}
-      />
+      <PageHeader title={<>Profile</>} />
 
       <ProfileForm profile={profile} />
       <DeleteAccountForm />

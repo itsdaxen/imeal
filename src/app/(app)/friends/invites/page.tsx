@@ -6,7 +6,6 @@ import { MailCheck } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
-import { Eyebrow } from "@/components/ui/eyebrow";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
@@ -32,18 +31,14 @@ export default async function InvitesPage() {
 
   return (
     <PageShell gap="snug" width="narrow">
-      <PageHeader
-        description="Requests waiting on you, and the ones you are waiting on."
-        title="Invitations"
-      />
+      <PageHeader title="Invitations" />
 
       <FriendsTabs current="invites" waiting={incoming.length} />
 
       {/* Both panels are always here, empty or not: a page that grows a section the
           moment someone writes to you rearranges itself while you are reading it. */}
       <ContentCard>
-        <Card.Header className="gap-1">
-          <Eyebrow>Waiting on you</Eyebrow>
+        <Card.Header>
           <PanelTitle>Received</PanelTitle>
         </Card.Header>
 
@@ -51,7 +46,6 @@ export default async function InvitesPage() {
           {incoming.length === 0 ? (
             <EmptyState
               bare
-              description="When someone asks to cook with you, it will appear here."
               icon={<MailCheck aria-hidden="true" className="size-6" />}
               title="Nothing to answer"
             />
@@ -83,8 +77,7 @@ export default async function InvitesPage() {
       </ContentCard>
 
       <ContentCard>
-        <Card.Header className="gap-1">
-          <Eyebrow>Waiting on a reply</Eyebrow>
+        <Card.Header>
           <PanelTitle>Sent</PanelTitle>
         </Card.Header>
 
@@ -92,7 +85,6 @@ export default async function InvitesPage() {
           {outgoing.length === 0 ? (
             <EmptyState
               bare
-              description="Add someone by their email address from the Friends tab."
               icon={<MailCheck aria-hidden="true" className="size-6" />}
               title="Nothing sent"
             />
