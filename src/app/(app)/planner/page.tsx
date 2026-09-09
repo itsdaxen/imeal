@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Disclosure, Link } from "@heroui/react";
+import { Disclosure } from "@heroui/react";
 
 import { FillWeekForm } from "@/features/planner/components/fill-week-form";
 import { PlannerOptions } from "@/features/planner/components/planner-options";
@@ -26,6 +26,7 @@ import {
   resolveWeekStart,
 } from "@/features/planner/week";
 import { PageHeader } from "@/components/ui/page-header";
+import { WeekSwitcher } from "@/features/planner/components/week-switcher";
 
 export const metadata: Metadata = { title: "Planner" };
 
@@ -109,28 +110,12 @@ export default async function PlannerPage({
         </Disclosure>
       </ContentCard>
 
-      <WeekGrid plan={plan} weekStart={weekStart} />
-
-      <nav
-        aria-label="Change week"
-        className="flex items-center justify-center gap-6"
+      <WeekSwitcher
+        nextHref={`/planner?week=${addWeeks(weekStart, 1)}`}
+        previousHref={`/planner?week=${addWeeks(weekStart, -1)}`}
       >
-        <Link
-          className="inline-flex min-h-11 items-center"
-          href={`/planner?week=${addWeeks(weekStart, -1)}`}
-        >
-          Previous
-        </Link>
-        <Link className="inline-flex min-h-11 items-center" href="/planner">
-          This week
-        </Link>
-        <Link
-          className="inline-flex min-h-11 items-center"
-          href={`/planner?week=${addWeeks(weekStart, 1)}`}
-        >
-          Next
-        </Link>
-      </nav>
+        <WeekGrid plan={plan} weekStart={weekStart} />
+      </WeekSwitcher>
     </PageShell>
   );
 }
