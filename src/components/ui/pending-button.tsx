@@ -26,7 +26,9 @@ export function BusyContent({
 
       {busy ? (
         <span className="absolute inset-0 grid place-items-center">
-          <Spinner aria-label="Working" size="sm" />
+          {/* `current`, not the default accent: on the primary button that accent is
+              the background, and the spinner was drawing green on green. */}
+          <Spinner aria-label="Working" color="current" size="sm" />
         </span>
       ) : null}
     </>
