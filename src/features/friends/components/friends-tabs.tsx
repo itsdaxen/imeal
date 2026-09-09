@@ -1,7 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Badge, cn, Link } from "@heroui/react";
+import type { ReactNode } from "react";
+import NextLink from "next/link";
+import { Badge, cn } from "@heroui/react";
+
+import { PendingPanel } from "@/components/ui/pending-panel";
+import { useRouteTabs } from "@/lib/use-route-tabs";
 
 /**
  * Friends and invitations are two routes shown as one strip.
@@ -11,47 +15,53 @@ import { Badge, cn, Link } from "@heroui/react";
  * routes cannot do that to each other, and the count sits where you would look for it
  * rather than appearing as a new heading.
  */
-export function FriendsTabs({ waiting }: { waiting: number }) {
-  // Read here rather than passed in: the layout that renders this is not re-rendered
-  // when you move between its children, so a value resolved on the server would still
-  // name the tab you came from.
-  const pathname = usePathname();
-  const tabs = [
-    { href: "/friends", id: "friends" as const, label: "Friends" },
-    { href: "/friends/invites", id: "invites" as const, label: "Invitations" },
-  ];
+const TABS = [
+  { href: "/friends", id: "friends", label: "Friends" },
+  { href: "/friends/invites", id: "invites", label: "Invitations" },
+] as const;
+
+export function FriendsTabs({
+  children,
+  waiting,
+}: {
+  children: ReactNode;
+  waiting: number;
+}) {
+  const { isPending, open, selected } = useRouteTabs(TABS);
 
   return (
-    <nav aria-label="Friends sections">
-      <ul className="flex list-none items-center gap-1 p-0">
-        {tabs.map((tab) => {
-          const isOpen =
-            tab.href === "/friends"
-              ? pathname === "/friends"
-              : pathname.startsWith(tab.href);
+    <>
+      <nav aria-label="Friends sections">
+        <ul className="flex list-none items-center gap-1 p-0">
+          {TABS.map((tab) => {
+            const isOpen = tab.id === selected;
 
-          return (
-            <li key={tab.id}>
-              <Link
-                aria-current={isOpen ? "page" : undefined}
-                className={cn(
-                  "flex min-h-11 items-center gap-2 rounded-3xl px-4 text-sm no-underline transition-colors",
-                  isOpen
-                    ? "bg-accent-soft font-medium text-accent"
-                    : "text-muted hover:bg-default hover:text-foreground",
-                )}
-                href={tab.href}
-              >
-                {tab.label}
-                {tab.id === "invites" && waiting > 0 ? (
-                  <CountBadge count={waiting} />
-                ) : null}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+            return (
+              <li key={tab.id}>
+                <NextLink
+                  aria-current={isOpen ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-11 items-center gap-2 rounded-3xl px-4 text-sm no-underline transition-colors",
+                    isOpen
+                      ? "bg-accent-soft font-medium text-accent"
+                      : "text-muted hover:bg-default hover:text-foreground",
+                  )}
+                  href={tab.href}
+                  onClick={open(tab)}
+                >
+                  {tab.label}
+                  {tab.id === "invites" && waiting > 0 ? (
+                    <CountBadge count={waiting} />
+                  ) : null}
+                </NextLink>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <PendingPanel isPending={isPending}>{children}</PendingPanel>
+    </>
   );
 }
 

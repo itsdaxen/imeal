@@ -27,7 +27,7 @@ export default async function InvitesPage() {
   ]);
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       {/* Both panels are always here, empty or not: a page that grows a section the
           moment someone writes to you rearranges itself while you are reading it. */}
       <ContentCard>
@@ -103,6 +103,6 @@ export default async function InvitesPage() {
           )}
         </Card.Content>
       </ContentCard>
-    </>
+    </div>
   );
 }

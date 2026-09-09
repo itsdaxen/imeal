@@ -18,8 +18,7 @@ export default async function FriendsLayout({
   return (
     <PageShell gap="snug" width="narrow">
       <PageHeader title="Friends" />
-      <FriendsTabs waiting={incoming.length} />
-      {children}
+      <FriendsTabs waiting={incoming.length}>{children}</FriendsTabs>
     </PageShell>
   );
 }

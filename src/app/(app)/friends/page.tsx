@@ -46,7 +46,7 @@ export default async function FriendsPage({
   const receivedIds = new Set(incoming.map((request) => request.person.id));
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <ContentCard>
         <Card.Header>
           <PanelTitle>Add someone by email</PanelTitle>
@@ -151,6 +151,6 @@ export default async function FriendsPage({
           )}
         </Card.Content>
       </ContentCard>
-    </>
+    </div>
   );
 }
