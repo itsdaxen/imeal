@@ -123,6 +123,7 @@ export type Database = {
           meal_plan_id: string;
           recipe_id: string;
           slot: Database["public"]["Enums"]["meal_slot"];
+          slot_index: number;
           updated_at: string;
         };
         Insert: {
@@ -133,6 +134,7 @@ export type Database = {
           meal_plan_id: string;
           recipe_id: string;
           slot: Database["public"]["Enums"]["meal_slot"];
+          slot_index: number;
           updated_at?: string;
         };
         Update: {
@@ -143,6 +145,7 @@ export type Database = {
           meal_plan_id?: string;
           recipe_id?: string;
           slot?: Database["public"]["Enums"]["meal_slot"];
+          slot_index?: number;
           updated_at?: string;
         };
         Relationships: [
@@ -258,7 +261,6 @@ export type Database = {
           avatar_url: string | null;
           created_at: string;
           default_enabled_slots: Database["public"]["Enums"]["meal_slot"][];
-          default_meals_per_week: number;
           display_name: string | null;
           friend_discoverable: boolean;
           id: string;
@@ -268,7 +270,6 @@ export type Database = {
           avatar_url?: string | null;
           created_at?: string;
           default_enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
-          default_meals_per_week?: number;
           display_name?: string | null;
           friend_discoverable?: boolean;
           id: string;
@@ -278,7 +279,6 @@ export type Database = {
           avatar_url?: string | null;
           created_at?: string;
           default_enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
-          default_meals_per_week?: number;
           display_name?: string | null;
           friend_discoverable?: boolean;
           id?: string;
