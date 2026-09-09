@@ -1,9 +1,11 @@
 "use client";
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Button, buttonVariants, cn, Link } from "@heroui/react";
+
+import { BusyContent } from "./pending-button";
 
 /**
  * The rank an action holds on its page.
@@ -51,26 +53,32 @@ export function ActionLink({ className, tier, ...props }: ActionLinkProps) {
 
 type ActionButtonProps = Omit<
   ComponentPropsWithoutRef<typeof Button>,
-  "variant"
+  "children" | "variant"
 > & {
+  /** Plain nodes only: the busy spinner has to sit over them. */
+  children?: ReactNode;
   tier: Exclude<ActionTier, "quiet">;
 };
 
 export function ActionButton({
+  children,
   className,
   isPending,
   tier,
   ...props
 }: ActionButtonProps) {
   const { pending } = useFormStatus();
+  const busy = Boolean(isPending) || pending;
 
   return (
     <Button
-      className={cn("min-h-11", className)}
+      className={cn("relative min-h-11", className)}
       data-action-tier={tier}
-      isPending={isPending || pending}
+      isPending={busy}
       variant={tierVariant[tier]}
       {...props}
-    />
+    >
+      <BusyContent busy={busy}>{children}</BusyContent>
+    </Button>
   );
 }
