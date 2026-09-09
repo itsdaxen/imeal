@@ -6,8 +6,8 @@ export type Profile = {
   avatarUrl: string | null;
   displayName: string;
   discoverable: boolean;
-  defaultMealsPerWeek: number;
-  defaultEnabledSlots: MealSlot[];
+  /** The shape of a day: its meal types in order, repeats included. */
+  defaultDay: MealSlot[];
 };
 
 export async function getProfile(): Promise<Profile | null> {
@@ -20,7 +20,7 @@ export async function getProfile(): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "display_name, avatar_url, friend_discoverable, default_meals_per_week, default_enabled_slots",
+      "display_name, avatar_url, friend_discoverable, default_enabled_slots",
     )
     .eq("id", userId)
     .maybeSingle();
@@ -37,7 +37,6 @@ export async function getProfile(): Promise<Profile | null> {
     avatarUrl: data.avatar_url,
     displayName: data.display_name ?? "",
     discoverable: data.friend_discoverable,
-    defaultMealsPerWeek: data.default_meals_per_week,
-    defaultEnabledSlots: data.default_enabled_slots,
+    defaultDay: data.default_enabled_slots,
   };
 }

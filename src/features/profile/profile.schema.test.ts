@@ -14,9 +14,9 @@ function form(entries: Array<[string, string]>) {
 
 const valid: Array<[string, string]> = [
   ["displayName", "  Ada  "],
-  ["defaultMealsPerWeek", "7"],
-  ["defaultEnabledSlots", "lunch"],
-  ["defaultEnabledSlots", "dinner"],
+  ["defaultMealsPerDay", "4"],
+  ["defaultMealTypes", "lunch"],
+  ["defaultMealTypes", "dinner"],
   ["discoverable", "on"],
 ];
 
@@ -27,8 +27,8 @@ describe("parseProfileForm", () => {
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.displayName).toBe("Ada");
-    expect(result.data.defaultEnabledSlots).toEqual(["lunch", "dinner"]);
-    expect(result.data.defaultMealsPerWeek).toBe(7);
+    expect(result.data.defaultMealTypes).toEqual(["lunch", "dinner"]);
+    expect(result.data.defaultMealsPerDay).toBe(4);
   });
 
   it("treats a checked box as discoverable", () => {
@@ -48,10 +48,10 @@ describe("parseProfileForm", () => {
 
   it.each([
     ["a blank display name", [["displayName", "   "]]],
-    ["no meal slots", [["defaultEnabledSlots", ""]]],
-    ["an unknown slot", [["defaultEnabledSlots", "brunch"]]],
-    ["zero meals a week", [["defaultMealsPerWeek", "0"]]],
-    ["more meals than we track", [["defaultMealsPerWeek", "29"]]],
+    ["no kinds of meal", [["defaultMealTypes", ""]]],
+    ["an unknown kind of meal", [["defaultMealTypes", "brunch"]]],
+    ["zero meals a day", [["defaultMealsPerDay", "0"]]],
+    ["more meals than a day holds", [["defaultMealsPerDay", "13"]]],
   ])("rejects %s", (_label, overrides) => {
     const keys = new Set(
       (overrides as Array<[string, string]>).map(([key]) => key),

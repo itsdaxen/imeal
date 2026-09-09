@@ -6,22 +6,31 @@ import { Check } from "lucide-react";
  * has to carry the focus ring the input would otherwise show.
  */
 export function CheckChip({
+  checked,
   defaultChecked,
   label,
   name,
+  onChange,
   value,
 }: {
+  /** Controlled where something else depends on the answer; uncontrolled otherwise. */
+  checked?: boolean;
   defaultChecked?: boolean;
   label: string;
   name: string;
+  onChange?: (checked: boolean) => void;
   value: string;
 }) {
   return (
     <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border px-3 text-sm capitalize transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent-soft/50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent">
       <input
+        checked={checked}
         className="peer sr-only"
         defaultChecked={defaultChecked}
         name={name}
+        onChange={
+          onChange ? (event) => onChange(event.target.checked) : undefined
+        }
         type="checkbox"
         value={value}
       />

@@ -15,6 +15,7 @@ import {
 
 import { parseDeleteAccountForm, parseProfileForm } from "./profile.schema";
 import { firstIssue } from "@/lib/form-errors";
+import { buildDay } from "@/features/planner/day-shape";
 
 export type ProfileFormState = {
   error?: string;
@@ -177,8 +178,12 @@ export async function updateProfile(
           : {}),
       display_name: parsed.data.displayName,
       friend_discoverable: parsed.data.discoverable,
-      default_meals_per_week: parsed.data.defaultMealsPerWeek,
-      default_enabled_slots: parsed.data.defaultEnabledSlots,
+      // Stored as the day itself rather than as a count beside a list of types,
+      // so there is only one answer to "how many meals is a day".
+      default_enabled_slots: buildDay(
+        parsed.data.defaultMealTypes,
+        parsed.data.defaultMealsPerDay,
+      ),
     })
     .eq("id", user.id);
 

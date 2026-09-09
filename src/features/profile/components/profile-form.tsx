@@ -4,15 +4,14 @@ import { useActionState, useState } from "react";
 import { Button, Card, Input, Label, TextField } from "@heroui/react";
 
 import { FormMessage } from "@/components/ui/form-message";
-import { CheckChip } from "@/components/ui/check-chip";
 import { ContentCard } from "@/components/ui/content-card";
 import { ImagePicker } from "@/components/ui/image-picker";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { IMAGE_TYPES } from "@/features/images/image";
-import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
 
 import { updateProfile, type ProfileFormState } from "../profile.actions";
 import type { Profile } from "../profile.queries";
+import { PlanningDefaults } from "./planning-defaults";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [isDirty, setIsDirty] = useState(false);
@@ -71,34 +70,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <PanelTitle level={2}>Planning defaults</PanelTitle>
         </Card.Header>
 
-        <div className="grid items-start gap-5 sm:grid-cols-[12rem_1fr]">
-          <TextField
-            defaultValue={String(profile.defaultMealsPerWeek)}
-            isRequired
-            name="defaultMealsPerWeek"
-            type="number"
-          >
-            <Label>Meals per week</Label>
-            <Input max={28} min={1} />
-          </TextField>
-
-          <fieldset className="flex flex-col gap-3">
-            <legend className="text-sm font-medium text-foreground">
-              Meal slots
-            </legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {MEAL_SLOTS.map((slot) => (
-                <CheckChip
-                  defaultChecked={profile.defaultEnabledSlots.includes(slot)}
-                  key={slot}
-                  label={slot}
-                  name="defaultEnabledSlots"
-                  value={slot}
-                />
-              ))}
-            </div>
-          </fieldset>
-        </div>
+        <PlanningDefaults day={profile.defaultDay} />
       </ContentCard>
 
       <ContentCard className="gap-5" density="spacious">
