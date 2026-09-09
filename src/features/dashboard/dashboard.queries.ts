@@ -29,15 +29,20 @@ export type DashboardData = {
       hasMeal: boolean;
     }>;
   };
-  nextMeal: {
-    id: string;
-    title: string;
-    dayLabel: string;
-    slot: MealSlot;
-    prepMinutes: number;
+  /**
+   * Everything planned for the next day that has anything, earliest slot first. More
+   * than one is normal — a day is usually a few meals, not one — so the hero carries
+   * the whole day rather than picking a single meal out of it.
+   */
+  nextMeals: Array<{
     approved: boolean;
+    dayLabel: string;
+    id: string;
     imageUrl: string | null;
-  } | null;
+    prepMinutes: number;
+    slot: MealSlot;
+    title: string;
+  }>;
   today: {
     label: string;
     slots: Array<{
@@ -127,17 +132,20 @@ export async function getDashboardData(
         hasMeal: plan.meals.some((meal) => meal.dayIndex === day.index),
       })),
     },
-    nextMeal: upcoming
-      ? {
-          id: upcoming.recipe.id,
-          title: upcoming.recipe.title,
-          dayLabel: days[upcoming.dayIndex].label,
-          slot: upcoming.slot,
-          prepMinutes: upcoming.recipe.prepMinutes,
-          approved: upcoming.approved,
-          imageUrl: upcoming.recipe.imageUrl,
-        }
-      : null,
+    nextMeals: upcoming
+      ? plan.meals
+          .filter((meal) => meal.dayIndex === upcoming.dayIndex)
+          .sort((a, b) => slotRank(a.slot) - slotRank(b.slot))
+          .map((meal) => ({
+            approved: meal.approved,
+            dayLabel: days[meal.dayIndex].label,
+            id: meal.recipe.id,
+            imageUrl: meal.recipe.imageUrl,
+            prepMinutes: meal.recipe.prepMinutes,
+            slot: meal.slot,
+            title: meal.recipe.title,
+          }))
+      : [],
     today: {
       label: todayIndex === -1 ? "Today" : days[todayIndex].label,
       slots: todaySlots,

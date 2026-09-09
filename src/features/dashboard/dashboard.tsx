@@ -23,7 +23,7 @@ import { PageShell } from "@/components/ui/page-shell";
 
 import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
-import { RecipeImage } from "@/components/ui/recipe-image";
+import { NextMealSlider } from "./components/next-meal-slider";
 
 function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (
@@ -71,10 +71,10 @@ function WeekBand({ week }: Pick<DashboardData, "week">) {
 }
 
 function NextMealCard({
-  nextMeal,
+  nextMeals,
   weekStart,
-}: Pick<DashboardData, "nextMeal" | "weekStart">) {
-  if (!nextMeal) {
+}: Pick<DashboardData, "nextMeals" | "weekStart">) {
+  if (nextMeals.length === 0) {
     return (
       // Empty, this is the biggest object on the page and the least informative, so
       // it uses the same empty state as everywhere else rather than a bespoke one.
@@ -104,48 +104,7 @@ function NextMealCard({
       density="flush"
       id="next-meal"
     >
-      <RecipeImage
-        className="absolute inset-0 size-full"
-        fill
-        id={nextMeal.id}
-        imageUrl={nextMeal.imageUrl}
-        // The hero above the fold, and so the page's LCP element.
-        preload
-        sizes="(min-width: 1024px) 66vw, 100vw"
-      />
-
-      {/* A soft floor under the panel, so a pale photograph cannot swallow its edge. */}
-      <div className="absolute inset-x-0 bottom-0 z-10 h-2/3 bg-linear-to-t from-black/45 to-transparent" />
-
-      <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 p-5 sm:p-7">
-        {/* Glass over a photograph, so it sits outside the surface scale on purpose. */}
-        <Card.Header className="max-w-md gap-1 rounded-3xl border border-media-panel-border bg-linear-to-br from-media-panel-start to-media-panel-end p-4 backdrop-blur-md">
-          <Eyebrow tone="media">
-            {nextMeal.dayLabel} · {nextMeal.slot}
-          </Eyebrow>
-          <PanelTitle className="text-media-foreground">
-            {nextMeal.title}
-          </PanelTitle>
-          <Card.Description className="text-media-muted">
-            {nextMeal.prepMinutes} minutes ·{" "}
-            {nextMeal.approved ? "ready to cook" : "awaiting approval"}
-          </Card.Description>
-        </Card.Header>
-
-        <Card.Footer>
-          <ActionLink
-            className="rounded-3xl bg-media-action px-5 py-2.5 font-semibold text-media-action-foreground no-underline transition-transform [--link-hover:var(--imeal-media-action-foreground)] motion-safe:hover:scale-[1.03]"
-            href={
-              nextMeal.approved
-                ? `/cook/${nextMeal.id}`
-                : `/planner?week=${weekStart}`
-            }
-            tier="primary"
-          >
-            {nextMeal.approved ? "Start cooking" : "Review the plan"}
-          </ActionLink>
-        </Card.Footer>
-      </div>
+      <NextMealSlider meals={nextMeals} weekStart={weekStart} />
     </ContentCard>
   );
 }
@@ -334,7 +293,7 @@ export async function Dashboard() {
 
         <PageGrid>
           <WeekBand week={data.week} />
-          <NextMealCard nextMeal={data.nextMeal} weekStart={data.weekStart} />
+          <NextMealCard nextMeals={data.nextMeals} weekStart={data.weekStart} />
           <TodayCard today={data.today} weekStart={data.weekStart} />
           <ShoppingBand shopping={data.shopping} weekStart={data.weekStart} />
 
