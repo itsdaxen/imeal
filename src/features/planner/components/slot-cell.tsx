@@ -10,20 +10,25 @@ import { RecipeImage } from "@/components/ui/recipe-image";
 
 type SlotCellProps = {
   dayIndex: number;
+  /** "Lunch", or "Lunch 2" where the day holds more than one. */
+  label: string;
   meal?: PlannedMeal;
   onMealChange: RunMealChange;
   slot: MealSlot;
+  slotIndex: number;
   weekStart: string;
 };
 
 export function SlotCell({
   dayIndex,
+  label,
   meal,
   onMealChange,
   slot,
+  slotIndex,
   weekStart,
 }: SlotCellProps) {
-  const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}`;
+  const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}&index=${slotIndex}`;
 
   return (
     <div
@@ -47,12 +52,12 @@ export function SlotCell({
           </span>
 
           <Typography
-            className="capitalize"
+            className=""
             color="muted"
             type="body-xs"
             weight="semibold"
           >
-            {slot}
+            {label}
           </Typography>
           <Link
             className="line-clamp-2 text-sm font-semibold text-foreground no-underline"
@@ -88,7 +93,7 @@ export function SlotCell({
           <span aria-hidden="true" className="text-lg leading-none">
             +
           </span>
-          Add <span className="capitalize">{slot}</span>
+          Add {label.toLocaleLowerCase()}
         </Link>
       )}
     </div>

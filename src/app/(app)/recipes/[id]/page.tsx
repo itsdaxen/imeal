@@ -24,6 +24,7 @@ import { PlanRecipeDialog } from "@/features/planner/components/plan-recipe-dial
 import { currentWeekStart, weekDays } from "@/features/planner/week";
 import { PageShell } from "@/components/ui/page-shell";
 import { RecipeImage } from "@/components/ui/recipe-image";
+import { getWeekPlan } from "@/features/planner/plan.queries";
 
 type RecipePageProps = { params: Promise<{ id: string }> };
 
@@ -38,10 +39,11 @@ export async function generateMetadata({
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { id } = await params;
-  const [recipe, user, isAdmin] = await Promise.all([
+  const [recipe, user, isAdmin, week] = await Promise.all([
     getRecipe(id),
     getCurrentUser(),
     isCurrentUserAdmin(),
+    getWeekPlan(currentWeekStart()),
   ]);
 
   if (!recipe) {
@@ -122,6 +124,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <div className="flex flex-wrap items-center gap-3">
             {isOwner || isCatalogRecipe ? (
               <PlanRecipeDialog
+                day={week.day}
                 days={weekDays(currentWeekStart())}
                 recipeId={recipe.id}
                 slots={recipe.meal_tags}

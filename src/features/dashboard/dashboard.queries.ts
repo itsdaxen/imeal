@@ -1,4 +1,5 @@
 import { getWeekPlan } from "@/features/planner/plan.queries";
+import { mealLabel } from "@/features/planner/day-shape";
 import {
   currentWeekStart,
   formatWeekLabel,
@@ -99,12 +100,14 @@ export async function getDashboardData(
   const upcoming = selectNextMeal(plan.meals, todayIndex);
 
   // The old app's home screen answered one question first: what am I cooking today.
-  const todaySlots = plan.enabledSlots.map((slot) => {
+  const todaySlots = plan.day.map((slot, slotIndex) => {
     const meal = plan.meals.find(
-      (planned) => planned.dayIndex === todayIndex && planned.slot === slot,
+      (planned) =>
+        planned.dayIndex === todayIndex && planned.slotIndex === slotIndex,
     );
 
     return {
+      label: mealLabel(plan.day, slotIndex),
       slot,
       meal: meal
         ? {
@@ -123,7 +126,7 @@ export async function getDashboardData(
       label: formatWeekLabel(weekStart),
       plannedMeals: plan.meals.length,
       approvedMeals: plan.meals.filter((meal) => meal.approved).length,
-      totalSlots: plan.enabledSlots.length * days.length,
+      totalSlots: plan.day.length * days.length,
       days: days.map((day) => ({
         label: day.label,
         shortLabel: day.shortLabel,

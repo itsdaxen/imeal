@@ -7,6 +7,8 @@ export type PlannableRecipe = {
 
 export type PlannedSlot = {
   dayIndex: number;
+  /** Which meal of the day, since a day may want two lunches. */
+  slotIndex: number;
   slot: MealSlot;
   recipeId: string;
 };
@@ -22,7 +24,8 @@ type PlanWeekOptions = {
   recipes: ReadonlyArray<PlannableRecipe>;
   /** Injected so the selection can be made deterministic in tests. */
   shuffle?: <T>(items: ReadonlyArray<T>) => T[];
-  slots: ReadonlyArray<MealSlot>;
+  /** The shape of a day: its meal types in order, repeats included. */
+  day: ReadonlyArray<MealSlot>;
 };
 
 const DAYS_IN_WEEK = 7;
@@ -45,18 +48,22 @@ function shuffleRandomly<T>(items: ReadonlyArray<T>): T[] {
  * recipes fails the whole run and says which slot and by how much.
  */
 export function planWeek({
+  day: shape,
   days = DAYS_IN_WEEK,
   locked = [],
   recipes,
   shuffle = shuffleRandomly,
-  slots,
 }: PlanWeekOptions): GenerationResult {
   const spent = new Set(locked.map((meal) => meal.recipeId));
   const assignments: PlannedSlot[] = [];
 
-  for (const slot of slots) {
+  // By position rather than by type: a day of two lunches needs two passes, and each
+  // one has to find its own recipes because a week never repeats a recipe.
+  for (const [slotIndex, slot] of shape.entries()) {
     const takenDays = new Set(
-      locked.filter((meal) => meal.slot === slot).map((meal) => meal.dayIndex),
+      locked
+        .filter((meal) => meal.slotIndex === slotIndex)
+        .map((meal) => meal.dayIndex),
     );
     const openDays = Array.from({ length: days }, (_, day) => day).filter(
       (day) => !takenDays.has(day),
@@ -84,7 +91,7 @@ export function planWeek({
     openDays.forEach((dayIndex, position) => {
       const recipe = chosen[position];
       spent.add(recipe.id);
-      assignments.push({ dayIndex, slot, recipeId: recipe.id });
+      assignments.push({ dayIndex, slotIndex, slot, recipeId: recipe.id });
     });
   }
 

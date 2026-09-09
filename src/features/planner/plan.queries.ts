@@ -1,11 +1,14 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
+import { DEFAULT_DAY } from "./day-shape";
 
 export type PlannedMeal = {
   id: string;
   approved: boolean;
   dayIndex: number;
+  /** Which meal of the day this is, since a day may hold two lunches. */
+  slotIndex: number;
   slot: MealSlot;
   recipe: {
     id: string;
@@ -17,17 +20,37 @@ export type PlannedMeal = {
 
 export type WeekPlan = {
   planId: string | null;
-  enabledSlots: MealSlot[];
+  /** The shape of every day this week: its meal types in order, repeats included. */
+  day: MealSlot[];
   meals: PlannedMeal[];
 };
 
-const DEFAULT_SLOTS: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
+/**
+ * The day a week starts from before anyone has planned it.
+ *
+ * Read from the profile rather than assumed: the planning defaults were saved and then
+ * never consulted by anything, so changing them appeared to do nothing at all.
+ */
+async function defaultDay(
+  supabase: Awaited<ReturnType<typeof optionalUserId>>["supabase"],
+  userId: string,
+): Promise<MealSlot[]> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("default_enabled_slots")
+    .eq("id", userId)
+    .maybeSingle();
+
+  return data?.default_enabled_slots?.length
+    ? data.default_enabled_slots
+    : DEFAULT_DAY;
+}
 
 export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   const { supabase, userId } = await optionalUserId();
 
   if (!userId) {
-    return { planId: null, enabledSlots: DEFAULT_SLOTS, meals: [] };
+    return { day: DEFAULT_DAY, meals: [], planId: null };
   }
 
   // Scoped to this user explicitly: a week someone shares with you is readable
@@ -45,15 +68,17 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   }
 
   if (!plan) {
-    return { planId: null, enabledSlots: DEFAULT_SLOTS, meals: [] };
+    return { day: await defaultDay(supabase, userId), meals: [], planId: null };
   }
 
   const { data: items, error: itemsError } = await supabase
     .from("meal_plan_items")
     .select(
-      "id, approved, day_index, slot, recipes (id, title, prep_minutes, image_url)",
+      "id, approved, day_index, slot_index, slot, recipes (id, title, prep_minutes, image_url)",
     )
-    .eq("meal_plan_id", plan.id);
+    .eq("meal_plan_id", plan.id)
+    .order("day_index")
+    .order("slot_index");
 
   if (itemsError) {
     throw new Error(`Could not load the planned meals: ${itemsError.message}`);
@@ -65,6 +90,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
       id: item.id,
       approved: item.approved,
       dayIndex: item.day_index,
+      slotIndex: item.slot_index,
       slot: item.slot,
       recipe: {
         id: item.recipes.id,
@@ -74,12 +100,16 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
       },
     }));
 
-  return { planId: plan.id, enabledSlots: plan.enabled_slots, meals };
+  return {
+    day: plan.enabled_slots.length > 0 ? plan.enabled_slots : DEFAULT_DAY,
+    meals,
+    planId: plan.id,
+  };
 }
 
-export function mealAt(plan: WeekPlan, dayIndex: number, slot: MealSlot) {
+export function mealAt(plan: WeekPlan, dayIndex: number, slotIndex: number) {
   return plan.meals.find(
-    (meal) => meal.dayIndex === dayIndex && meal.slot === slot,
+    (meal) => meal.dayIndex === dayIndex && meal.slotIndex === slotIndex,
   );
 }
 

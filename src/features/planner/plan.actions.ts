@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,9 +16,11 @@ import {
   slotAssignmentSchema,
   slotTargetSchema,
 } from "./plan.schema";
-import { findWeekPlan } from "./week-plan";
+import { findWeekPlan, openWeek } from "./week-plan";
+import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
 import { namesToAdd } from "@/lib/names";
 import { firstIssue } from "@/lib/form-errors";
+import { buildDay, MAX_MEALS_PER_DAY } from "./day-shape";
 
 export type PlannerFormState = {
   error?: string;
@@ -34,6 +37,7 @@ export async function assignRecipeToSlot(formData: FormData) {
   const parsed = slotAssignmentSchema.safeParse({
     weekStart: formData.get("weekStart"),
     dayIndex: formData.get("dayIndex"),
+    slotIndex: formData.get("slotIndex"),
     slot: formData.get("slot"),
     recipeId: formData.get("recipeId"),
   });
@@ -43,31 +47,21 @@ export async function assignRecipeToSlot(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { weekStart, dayIndex, slot, recipeId } = parsed.data;
+  const { weekStart, dayIndex, slotIndex, slot, recipeId } = parsed.data;
 
   // An empty plan row is harmless if the item write fails, so these two writes
   // do not need a transaction.
-  const { data: plan, error: planError } = await supabase
-    .from("meal_plans")
-    .upsert(
-      { user_id: userId, week_start: weekStart },
-      { onConflict: "user_id,week_start" },
-    )
-    .select("id")
-    .single();
-
-  if (planError) {
-    throw new Error(`Could not open that week: ${planError.message}`);
-  }
+  const plan = await openWeek(supabase, userId, weekStart);
 
   const { error: itemError } = await supabase.from("meal_plan_items").upsert(
     {
       meal_plan_id: plan.id,
       recipe_id: recipeId,
       day_index: dayIndex,
+      slot_index: slotIndex,
       slot,
     },
-    { onConflict: "meal_plan_id,day_index,slot" },
+    { onConflict: "meal_plan_id,day_index,slot_index" },
   );
 
   if (itemError) {
@@ -82,6 +76,7 @@ export async function clearSlot(formData: FormData) {
   const parsed = slotTargetSchema.safeParse({
     weekStart: formData.get("weekStart"),
     dayIndex: formData.get("dayIndex"),
+    slotIndex: formData.get("slotIndex"),
     slot: formData.get("slot"),
   });
 
@@ -90,7 +85,7 @@ export async function clearSlot(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { weekStart, dayIndex, slot } = parsed.data;
+  const { weekStart, dayIndex, slotIndex } = parsed.data;
 
   const plan = await findWeekPlan(supabase, userId, weekStart);
 
@@ -103,7 +98,7 @@ export async function clearSlot(formData: FormData) {
     .delete()
     .eq("meal_plan_id", plan.id)
     .eq("day_index", dayIndex)
-    .eq("slot", slot);
+    .eq("slot_index", slotIndex);
 
   if (error) {
     throw new Error(`Could not clear that slot: ${error.message}`);
@@ -120,6 +115,7 @@ export async function generateWeekPlan(
     weekStart: formData.get("weekStart"),
     source: formData.get("source"),
     slots: formData.getAll("slots"),
+    mealsPerDay: formData.get("mealsPerDay") || undefined,
     listId: formData.get("listId") || undefined,
   });
 
@@ -128,7 +124,9 @@ export async function generateWeekPlan(
   }
 
   const { supabase, userId } = await requireUserId();
-  const { weekStart, source, slots, listId } = parsed.data;
+  const { weekStart, source, slots, mealsPerDay, listId } = parsed.data;
+  // The day being filled, which is the kinds chosen plus any extra meals asked for.
+  const day = buildDay(slots, mealsPerDay ?? slots.length);
 
   if (listId) {
     const { data: destination } = await supabase
@@ -144,9 +142,9 @@ export async function generateWeekPlan(
 
   const recipes = await listPlannableRecipes(source);
   const result = planWeek({
+    day,
     locked: [],
     recipes,
-    slots,
   });
 
   if (!result.ok) {
@@ -157,7 +155,7 @@ export async function generateWeekPlan(
 
   const { error } = await supabase.rpc("apply_generated_plan", {
     p_week_start: weekStart,
-    p_slots: slots,
+    p_slots: day,
     p_assignments: result.assignments,
   });
 
@@ -207,13 +205,14 @@ export async function shuffleMeal(formData: FormData) {
 
   const { data: planned } = await supabase
     .from("meal_plan_items")
-    .select("day_index, slot, recipe_id")
+    .select("day_index, slot_index, slot, recipe_id")
     .eq("meal_plan_id", meal.meal_plan_id);
 
   const replacement = pickReplacement({
     current: meal.recipe_id,
     planned: (planned ?? []).map((item) => ({
       dayIndex: item.day_index,
+      slotIndex: item.slot_index,
       slot: item.slot,
       recipeId: item.recipe_id,
     })),
@@ -449,4 +448,45 @@ export async function deleteWeekPlan(formData: FormData) {
 
   revalidatePath("/planner");
   redirect(`/planner?week=${parsed.data.weekStart}`);
+}
+
+/**
+ * Adds one more meal to a day.
+ *
+ * The day's shape lives on the plan, so a longer day is a longer `enabled_slots` and
+ * nothing is written into `meal_plan_items` until a recipe is chosen for it — an empty
+ * meal is the absence of a row, exactly as an unplanned breakfast always was.
+ */
+export async function addMealToDay(formData: FormData) {
+  const parsed = z
+    .object({ slot: z.enum(MEAL_SLOTS), weekStart: z.iso.date() })
+    .safeParse({
+      slot: formData.get("slot"),
+      weekStart: formData.get("weekStart"),
+    });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { slot, weekStart } = parsed.data;
+
+  const opened = await openWeek(supabase, userId, weekStart);
+  const { data: plan } = await supabase
+    .from("meal_plans")
+    .select("enabled_slots")
+    .eq("id", opened.id)
+    .single();
+
+  if (!plan || plan.enabled_slots.length >= MAX_MEALS_PER_DAY) {
+    return;
+  }
+
+  await supabase
+    .from("meal_plans")
+    .update({ enabled_slots: [...plan.enabled_slots, slot] })
+    .eq("id", opened.id);
+
+  revalidatePath("/planner");
 }

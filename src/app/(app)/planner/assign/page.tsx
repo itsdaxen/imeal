@@ -20,12 +20,18 @@ export const metadata: Metadata = { title: "Plan a meal" };
 export default async function AssignPage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string; day?: string; slot?: string }>;
+  searchParams: Promise<{
+    day?: string;
+    index?: string;
+    slot?: string;
+    week?: string;
+  }>;
 }) {
-  const { week, day, slot } = await searchParams;
+  const { day, index, slot, week } = await searchParams;
   const target = slotTargetSchema.safeParse({
     weekStart: resolveWeekStart(week),
     dayIndex: day,
+    slotIndex: index,
     slot,
   });
 
@@ -33,14 +39,14 @@ export default async function AssignPage({
     notFound();
   }
 
-  const { weekStart, dayIndex, slot: mealSlot } = target.data;
+  const { weekStart, dayIndex, slotIndex, slot: mealSlot } = target.data;
   const [recipes, plan] = await Promise.all([
     listOwnedRecipes({ mealTag: mealSlot }),
     getWeekPlan(weekStart),
   ]);
   const dayLabel = weekDays(weekStart)[dayIndex].label;
   const current = plan.meals.find(
-    (meal) => meal.dayIndex === dayIndex && meal.slot === mealSlot,
+    (meal) => meal.dayIndex === dayIndex && meal.slotIndex === slotIndex,
   );
 
   return (
@@ -91,6 +97,7 @@ export default async function AssignPage({
         />
       ) : (
         <AssignmentBrowser
+          slotIndex={slotIndex}
           dayIndex={dayIndex}
           mealSlot={mealSlot}
           recipes={recipes}

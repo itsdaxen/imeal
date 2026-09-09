@@ -12,6 +12,8 @@ import type { PlannedMeal, WeekPlan } from "../plan.queries";
 import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
 import { useServerAction } from "@/lib/use-server-action";
+import { MAX_MEALS_PER_DAY, mealLabel } from "../day-shape";
+import { AddMealButton } from "./add-meal-button";
 
 type WeekGridProps = {
   plan: WeekPlan;
@@ -46,8 +48,10 @@ function applyChange(meals: PlannedMeal[], change: MealChange) {
   );
 }
 
-function mealAt(meals: PlannedMeal[], dayIndex: number, slot: string) {
-  return meals.find((meal) => meal.dayIndex === dayIndex && meal.slot === slot);
+function mealAt(meals: PlannedMeal[], dayIndex: number, slotIndex: number) {
+  return meals.find(
+    (meal) => meal.dayIndex === dayIndex && meal.slotIndex === slotIndex,
+  );
 }
 
 export function WeekGrid({ plan, weekStart }: WeekGridProps) {
@@ -77,17 +81,26 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
 
         <Card.Content>
           <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            {plan.enabledSlots.map((slot) => (
+            {plan.day.map((slot, slotIndex) => (
               <SlotCell
                 dayIndex={day.index}
-                key={slot}
-                meal={mealAt(meals, day.index, slot)}
+                key={String(slotIndex)}
+                label={mealLabel(plan.day, slotIndex)}
+                meal={mealAt(meals, day.index, slotIndex)}
                 onMealChange={runMealChange}
                 slot={slot}
+                slotIndex={slotIndex}
                 weekStart={weekStart}
               />
             ))}
           </div>
+
+          {/* After the last meal, because that is where another one goes. */}
+          {plan.day.length < MAX_MEALS_PER_DAY ? (
+            <div className="pt-3">
+              <AddMealButton weekStart={weekStart} />
+            </div>
+          ) : null}
         </Card.Content>
       </ContentCard>
     );

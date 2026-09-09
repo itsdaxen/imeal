@@ -95,6 +95,7 @@ try {
     meal_plan_id: plan?.id,
     recipe_id: recipe?.id,
     day_index: 0,
+    slot_index: 0,
     slot: "dinner",
   });
   check(

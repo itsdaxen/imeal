@@ -20,7 +20,7 @@ describe("planWeek", () => {
     const result = planWeek({
       recipes: recipes(7, ["dinner"]),
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result.ok).toBe(true);
@@ -35,7 +35,7 @@ describe("planWeek", () => {
     const result = planWeek({
       recipes: recipes(20, ["lunch", "dinner"]),
       shuffle: inOrder,
-      slots: ["lunch", "dinner"],
+      day: ["lunch", "dinner"],
     });
 
     expect(result.ok).toBe(true);
@@ -48,7 +48,7 @@ describe("planWeek", () => {
     const result = planWeek({
       recipes: recipes(4, ["dinner"]),
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result).toEqual({
@@ -63,7 +63,7 @@ describe("planWeek", () => {
     const result = planWeek({
       recipes: [...recipes(7, ["lunch"]), ...recipes(2, ["dinner"])],
       shuffle: inOrder,
-      slots: ["lunch", "dinner"],
+      day: ["lunch", "dinner"],
     });
 
     expect(result.ok).toBe(false);
@@ -74,10 +74,10 @@ describe("planWeek", () => {
 
   it("only asks for the days an approved meal has not already taken", () => {
     const result = planWeek({
-      locked: [{ dayIndex: 0, slot: "dinner", recipeId: "kept" }],
+      locked: [{ dayIndex: 0, slotIndex: 0, slot: "dinner", recipeId: "kept" }],
       recipes: recipes(6, ["dinner"]),
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result.ok).toBe(true);
@@ -91,10 +91,12 @@ describe("planWeek", () => {
   it("does not reuse a recipe an approved meal is already using", () => {
     const pool = recipes(7, ["dinner"]);
     const result = planWeek({
-      locked: [{ dayIndex: 0, slot: "dinner", recipeId: pool[0].id }],
+      locked: [
+        { dayIndex: 0, slotIndex: 0, slot: "dinner", recipeId: pool[0].id },
+      ],
       recipes: pool,
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result.ok).toBe(true);
@@ -107,6 +109,7 @@ describe("planWeek", () => {
   it("leaves a fully approved slot alone", () => {
     const locked = Array.from({ length: 7 }, (_, dayIndex) => ({
       dayIndex,
+      slotIndex: 0,
       slot: "dinner" as const,
       recipeId: `kept-${dayIndex}`,
     }));
@@ -114,7 +117,7 @@ describe("planWeek", () => {
       locked,
       recipes: recipes(7, ["dinner"]),
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result.ok && result.assignments).toEqual([]);
@@ -124,7 +127,7 @@ describe("planWeek", () => {
     const result = planWeek({
       recipes: [...recipes(7, ["breakfast"]), ...recipes(7, ["dinner"])],
       shuffle: inOrder,
-      slots: ["dinner"],
+      day: ["dinner"],
     });
 
     expect(result.ok).toBe(true);
@@ -142,7 +145,9 @@ describe("pickReplacement", () => {
     expect(
       pickReplacement({
         current: pool[0].id,
-        planned: [{ dayIndex: 0, slot: "dinner", recipeId: pool[1].id }],
+        planned: [
+          { dayIndex: 0, slotIndex: 0, slot: "dinner", recipeId: pool[1].id },
+        ],
         recipes: pool,
         shuffle: inOrder,
         slot: "dinner",

@@ -20,7 +20,7 @@ const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
 
 type FillWeekFormProps = {
   compact?: boolean;
-  enabledSlots: ReadonlyArray<MealSlot>;
+  day: ReadonlyArray<MealSlot>;
   lists: ReadonlyArray<{ id: string; name: string }>;
   targetListId: string | null;
   weekStart: string;
@@ -28,7 +28,7 @@ type FillWeekFormProps = {
 
 export function FillWeekForm({
   compact = false,
-  enabledSlots,
+  day,
   lists,
   targetListId,
   weekStart,
@@ -43,8 +43,9 @@ export function FillWeekForm({
       <form action={formAction}>
         <input name="weekStart" type="hidden" value={weekStart} />
         <input name="source" type="hidden" value="both" />
-        {enabledSlots.map((slot) => (
-          <input key={slot} name="slots" type="hidden" value={slot} />
+        {/* Keyed by position: the day repeats types, so the type is not unique. */}
+        {day.map((slot, slotIndex) => (
+          <input key={slotIndex} name="slots" type="hidden" value={slot} />
         ))}
         {targetListId ? (
           <input name="listId" type="hidden" value={targetListId} />
@@ -88,8 +89,14 @@ export function FillWeekForm({
           </div>
         </fieldset>
 
+        {/* The checkboxes carry the kinds; this carries how many meals a day holds,
+            which the kinds alone cannot say once a day repeats one of them. */}
+        <input name="mealsPerDay" type="hidden" value={day.length} />
+
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-foreground">Slots</legend>
+          <legend className="text-sm font-medium text-foreground">
+            Kinds of meal
+          </legend>
           <div className="flex flex-wrap gap-4">
             {MEAL_SLOTS.map((slot) => (
               <label
@@ -98,7 +105,7 @@ export function FillWeekForm({
               >
                 <input
                   className="size-4 accent-accent"
-                  defaultChecked={enabledSlots.includes(slot)}
+                  defaultChecked={day.includes(slot)}
                   name="slots"
                   type="checkbox"
                   value={slot}

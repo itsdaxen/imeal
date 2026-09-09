@@ -23,10 +23,12 @@ export function AssignmentBrowser({
   dayIndex,
   mealSlot,
   recipes,
+  slotIndex,
   weekStart,
 }: {
   dayIndex: number;
   mealSlot: MealSlot;
+  slotIndex: number;
   recipes: RecipeSummary[];
   weekStart: string;
 }) {
@@ -100,6 +102,7 @@ export function AssignmentBrowser({
                 <input name="weekStart" type="hidden" value={weekStart} />
                 <input name="dayIndex" type="hidden" value={dayIndex} />
                 <input name="slot" type="hidden" value={mealSlot} />
+                <input name="slotIndex" type="hidden" value={slotIndex} />
                 <input name="recipeId" type="hidden" value={recipe.id} />
                 {/* One per card, so these stay neutral: a grid of identical
                     primaries is a wall of green and leaves the page with no
