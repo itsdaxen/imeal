@@ -13,6 +13,7 @@ import { listFriends } from "@/features/friends/friend.queries";
 import { RecipeOwnerMenu } from "@/features/recipes/components/recipe-owner-menu";
 import { isCurrentUserAdmin } from "@/features/catalog/catalog.queries";
 import { saveCatalogRecipe } from "@/features/catalog/catalog.actions";
+import { CatalogAdminMenu } from "@/features/catalog/components/catalog-admin-menu";
 import {
   getRecipe,
   listOwnedCollections,
@@ -79,6 +80,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
             recipientIds={recipientIds}
             suggestion={suggestion}
           />
+        ) : isCatalogRecipe && isAdmin ? (
+          <CatalogAdminMenu recipeId={recipe.id} />
         ) : null}
         <Card.Content className="min-h-64 flex-none p-0 md:min-h-[30rem]">
           <RecipeImage
@@ -94,10 +97,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
         <Card.Header className="flex-col items-start justify-center gap-5 p-6 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center gap-1.5">
-            <TagList label="Meals this suits" tags={recipe.meal_tags} />
-            {recipe.collection_tags.length > 0 ? (
-              <TagList label="Collections" tags={recipe.collection_tags} />
-            ) : null}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <TagList label="Meals this suits" tags={recipe.meal_tags} />
+              {recipe.collection_tags.length > 0 ? (
+                <TagList label="Collections" tags={recipe.collection_tags} />
+              ) : null}
+            </div>
           </div>
           {/* The catalog action sits in the menu, but its state has to stay visible
               here — otherwise a pending or declined suggestion is invisible. */}
@@ -137,11 +142,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             >
               Cook this
             </ActionLink>
-            {isOwner ? null : isCatalogRecipe && isAdmin ? (
-              <ActionLink href={`/recipes/${recipe.id}/edit`} tier="neutral">
-                Edit as moderator
-              </ActionLink>
-            ) : isCatalogRecipe ? (
+            {isOwner ? null : isCatalogRecipe ? (
               <form action={saveCatalogRecipe}>
                 <input name="recipeId" type="hidden" value={recipe.id} />
                 <PendingButton className="min-h-11" variant="tertiary">

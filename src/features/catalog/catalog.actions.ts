@@ -135,10 +135,15 @@ export async function archiveCatalogRecipe(formData: FormData) {
 
   const { supabase } = await requireUserId();
 
-  await supabase.rpc("archive_catalog_recipe", {
+  const { error } = await supabase.rpc("archive_catalog_recipe", {
     p_recipe_id: parsed.data.recipeId,
   });
 
+  if (error) {
+    throw new Error("Could not delete the catalog recipe.");
+  }
+
   revalidatePath("/catalog");
   revalidatePath("/admin");
+  redirect("/catalog");
 }
