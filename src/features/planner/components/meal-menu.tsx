@@ -12,25 +12,29 @@ import type { RunMealChange } from "./week-grid";
 import { useServerAction } from "@/lib/use-server-action";
 
 type MealMenuProps = {
+  /** Built by the cell, so the menu and the empty slot lead to the same place. */
+  assignHref: string;
   dayIndex: number;
   itemId: string;
   onMealChange: RunMealChange;
   recipeId: string;
   slot: MealSlot;
+  slotIndex: number;
   weekStart: string;
 };
 
 export function MealMenu({
+  assignHref,
   dayIndex,
   itemId,
   onMealChange,
   recipeId,
   slot,
+  slotIndex,
   weekStart,
 }: MealMenuProps) {
   const router = useRouter();
   const { isPending, run } = useServerAction();
-  const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}`;
 
   return (
     <Dropdown>
@@ -76,9 +80,10 @@ export function MealMenu({
             className="text-danger"
             id="remove"
             onAction={() =>
-              onMealChange({ dayIndex, kind: "remove", slot }, clearSlot, {
+              onMealChange({ dayIndex, kind: "remove", slotIndex }, clearSlot, {
                 dayIndex: String(dayIndex),
                 slot,
+                slotIndex: String(slotIndex),
                 weekStart,
               })
             }

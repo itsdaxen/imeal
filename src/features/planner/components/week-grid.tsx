@@ -6,8 +6,6 @@ import { Card, Typography } from "@heroui/react";
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
 
-import type { MealSlot } from "@/features/recipes/recipe.schema";
-
 import type { PlannedMeal, WeekPlan } from "../plan.queries";
 import { weekDays } from "../week";
 import { SlotCell } from "./slot-cell";
@@ -27,7 +25,7 @@ type WeekGridProps = {
  */
 export type MealChange =
   | { itemId: string; kind: "approval" }
-  | { dayIndex: number; kind: "remove"; slot: MealSlot };
+  | { dayIndex: number; kind: "remove"; slotIndex: number };
 
 export type RunMealChange = (
   change: MealChange,
@@ -39,7 +37,10 @@ function applyChange(meals: PlannedMeal[], change: MealChange) {
   if (change.kind === "remove") {
     return meals.filter(
       (meal) =>
-        !(meal.dayIndex === change.dayIndex && meal.slot === change.slot),
+        !(
+          meal.dayIndex === change.dayIndex &&
+          meal.slotIndex === change.slotIndex
+        ),
     );
   }
 

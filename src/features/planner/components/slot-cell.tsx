@@ -76,11 +76,13 @@ export function SlotCell({
               weekStart={weekStart}
             />
             <MealMenu
+              assignHref={assignHref}
               dayIndex={dayIndex}
               itemId={meal.id}
               onMealChange={onMealChange}
               recipeId={meal.recipe.id}
               slot={slot}
+              slotIndex={slotIndex}
               weekStart={weekStart}
             />
           </div>
