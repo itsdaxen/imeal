@@ -53,7 +53,10 @@ function addRecipe(person, fields) {
   );
 }
 
-/** Submits the real edit form, so the server action under test is the one that runs. */
+/**
+ * Submits a real form from a rendered page, so the server action under test is the one
+ * that runs and the fields are the ones the page actually puts on the wire.
+ */
 async function submitEdit(person, recipeId, overrides) {
   const path = `/recipes/${recipeId}/edit`;
   const page = await fetch(`${base}${path}`, {
@@ -87,6 +90,50 @@ async function submitEdit(person, recipeId, overrides) {
   });
   await response.text();
   assert(response.status < 400, `Edit form returned ${response.status}`);
+}
+
+async function submitProfile(person, overrides) {
+  const page = await fetch(`${base}/profile`, {
+    headers: { cookie: person.cookie },
+  });
+  assert.equal(page.status, 200);
+
+  const document = new JSDOM(await page.text()).window.document;
+  const form = [...document.forms].find((entry) =>
+    entry.querySelector('input[name="displayName"]'),
+  );
+  assert(form, "Expected the profile form");
+
+  const data = new FormData();
+  for (const field of form.querySelectorAll("input[name], textarea[name]")) {
+    if (field.type === "checkbox" && !field.checked) continue;
+    if (field.type === "file") continue;
+    if (field.type === "radio" && !field.checked) continue;
+    if (field.name === "defaultMealTypes") {
+      if (field.checked) data.append(field.name, field.value);
+      continue;
+    }
+    data.set(field.name, field.value);
+  }
+  assert(
+    [...data.keys()].some((name) => name.startsWith("$ACTION_")),
+    "Server action is wired into the profile form",
+  );
+  // The picker renders this hidden field empty and fills it in when you press Remove.
+  assert(
+    data.has("remove-avatar"),
+    "The profile form carries the removal field",
+  );
+  for (const [name, value] of Object.entries(overrides)) data.set(name, value);
+
+  const response = await fetch(`${base}/profile`, {
+    method: "POST",
+    body: data,
+    redirect: "manual",
+    headers: { cookie: person.cookie, origin: new URL(base).origin },
+  });
+  await response.text();
+  assert(response.status < 400, `Profile form returned ${response.status}`);
 }
 
 try {
@@ -150,6 +197,43 @@ try {
     true,
   );
   pass("a photograph stored by someone else is left alone");
+
+  const portrait = await result(
+    owner.client.storage
+      .from("avatars")
+      .upload(`${owner.id}/${randomUUID()}.png`, PIXEL, {
+        contentType: "image/png",
+      }),
+  );
+  const portraitUrl = owner.client.storage
+    .from("avatars")
+    .getPublicUrl(portrait.path).data.publicUrl;
+  await result(
+    owner.client
+      .from("profiles")
+      .update({ avatar_url: portraitUrl })
+      .eq("id", owner.id),
+  );
+
+  await submitProfile(owner, { "remove-avatar": "on" });
+
+  assert.equal(
+    (
+      await result(
+        admin.from("profiles").select("avatar_url").eq("id", owner.id).single(),
+      )
+    ).avatar_url,
+    null,
+  );
+  pass("removing a profile photograph clears it from the profile");
+
+  assert.equal(
+    (await result(admin.storage.from("avatars").list(owner.id))).some(
+      (object) => portrait.path.endsWith(object.name),
+    ),
+    false,
+  );
+  pass("and takes the stored photograph with it");
 
   summary("image removal checks passed");
 } finally {

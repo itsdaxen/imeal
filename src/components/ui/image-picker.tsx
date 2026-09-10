@@ -10,6 +10,12 @@ type ImagePickerProps = {
   help: string;
   label: string;
   name: string;
+  /**
+   * Choosing and removing are React state, not typing into a field, so neither
+   * reaches a form listening for `change`. A form that gates its save button on
+   * having been edited has to be told.
+   */
+  onChange?: () => void;
   shape?: "avatar" | "landscape";
 };
 
@@ -20,6 +26,7 @@ export function ImagePicker({
   help,
   label,
   name,
+  onChange,
   shape = "landscape",
 }: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,6 +45,7 @@ export function ImagePicker({
     if (chosenUrl) URL.revokeObjectURL(chosenUrl);
     setChosenUrl(file ? URL.createObjectURL(file) : null);
     if (file) setRemoved(false);
+    onChange?.();
   }
 
   function remove() {
@@ -45,6 +53,7 @@ export function ImagePicker({
     setChosenUrl(null);
     setRemoved(true);
     if (inputRef.current) inputRef.current.value = "";
+    onChange?.();
   }
 
   return (

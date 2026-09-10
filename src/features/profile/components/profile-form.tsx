@@ -52,6 +52,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           help="JPEG, PNG, WebP or AVIF · 2MB max"
           label="Profile photograph"
           name="avatar"
+          onChange={() => setIsDirty(true)}
           shape="avatar"
         />
 
