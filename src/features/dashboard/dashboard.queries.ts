@@ -100,14 +100,15 @@ export async function getDashboardData(
   const upcoming = selectNextMeal(plan.meals, todayIndex);
 
   // The old app's home screen answered one question first: what am I cooking today.
-  const todaySlots = plan.day.map((slot, slotIndex) => {
+  const todayShape = plan.days[Math.max(todayIndex, 0)] ?? [];
+  const todaySlots = todayShape.map((slot, slotIndex) => {
     const meal = plan.meals.find(
       (planned) =>
         planned.dayIndex === todayIndex && planned.slotIndex === slotIndex,
     );
 
     return {
-      label: mealLabel(plan.day, slotIndex),
+      label: mealLabel(todayShape, slotIndex),
       slot,
       meal: meal
         ? {
@@ -126,7 +127,7 @@ export async function getDashboardData(
       label: formatWeekLabel(weekStart),
       plannedMeals: plan.meals.length,
       approvedMeals: plan.meals.filter((meal) => meal.approved).length,
-      totalSlots: plan.day.length * days.length,
+      totalSlots: plan.days.reduce((total, shape) => total + shape.length, 0),
       days: days.map((day) => ({
         label: day.label,
         shortLabel: day.shortLabel,

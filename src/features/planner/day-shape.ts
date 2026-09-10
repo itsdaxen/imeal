@@ -74,3 +74,36 @@ export function buildDay(
 
   return day;
 }
+
+/** Seven days, each with its own run of meals. */
+export type WeekShape = MealSlot[][];
+
+/**
+ * Reads the seven day shapes out of the column that stores them.
+ *
+ * Stored as JSON because it is seven lists rather than one, so it arrives untyped and
+ * has to be checked rather than trusted — a malformed row should fall back to a sane
+ * week instead of rendering nothing.
+ */
+export function toWeekShape(value: unknown): WeekShape {
+  const week = Array.isArray(value) ? value : [];
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = week[index];
+
+    if (!Array.isArray(day)) {
+      return [...DEFAULT_DAY];
+    }
+
+    const slots = day.filter((slot): slot is MealSlot =>
+      MEAL_SLOTS.includes(slot as MealSlot),
+    );
+
+    return slots.length > 0 ? slots : [...DEFAULT_DAY];
+  });
+}
+
+/** The same run of meals every day, which is how a week starts out. */
+export function sameEveryDay(day: readonly MealSlot[]): WeekShape {
+  return Array.from({ length: 7 }, () => [...day]);
+}

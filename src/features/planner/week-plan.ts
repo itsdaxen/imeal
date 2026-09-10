@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseServerClient } from "@/lib/supabase/server";
 
-import { DEFAULT_DAY } from "./day-shape";
+import { DEFAULT_DAY, sameEveryDay } from "./day-shape";
 
 /**
  * A person's own plan for a week, or nothing.
@@ -57,9 +57,11 @@ export async function openWeek(
     .from("meal_plans")
     .upsert(
       {
-        enabled_slots: profile?.default_enabled_slots?.length
-          ? profile.default_enabled_slots
-          : DEFAULT_DAY,
+        day_slots: sameEveryDay(
+          profile?.default_enabled_slots?.length
+            ? profile.default_enabled_slots
+            : DEFAULT_DAY,
+        ),
         user_id: userId,
         week_start: weekStart,
       },

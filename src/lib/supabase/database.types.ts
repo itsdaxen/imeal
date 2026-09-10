@@ -211,7 +211,7 @@ export type Database = {
       meal_plans: {
         Row: {
           created_at: string;
-          enabled_slots: Database["public"]["Enums"]["meal_slot"][];
+          day_slots: Json;
           id: string;
           target_list_id: string | null;
           title: string | null;
@@ -221,7 +221,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
-          enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
+          day_slots?: Json;
           id?: string;
           target_list_id?: string | null;
           title?: string | null;
@@ -231,7 +231,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
-          enabled_slots?: Database["public"]["Enums"]["meal_slot"][];
+          day_slots?: Json;
           id?: string;
           target_list_id?: string | null;
           title?: string | null;

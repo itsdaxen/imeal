@@ -62,7 +62,8 @@ try {
       .insert({
         user_id: probe.id,
         week_start: weekStart,
-        enabled_slots: ["breakfast", "dinner"],
+        // Seven days, each the same short run of meals.
+        day_slots: Array.from({ length: 7 }, () => ["breakfast", "dinner"]),
       })
       .select("id")
       .single(),

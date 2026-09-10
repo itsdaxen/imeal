@@ -124,8 +124,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <div className="flex flex-wrap items-center gap-3">
             {isOwner || isCatalogRecipe ? (
               <PlanRecipeDialog
-                day={week.day}
                 days={weekDays(currentWeekStart())}
+                shapes={week.days}
                 recipeId={recipe.id}
                 slots={recipe.meal_tags}
                 weekStart={currentWeekStart()}

@@ -20,7 +20,7 @@ import { findWeekPlan, openWeek } from "./week-plan";
 import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
 import { namesToAdd } from "@/lib/names";
 import { firstIssue } from "@/lib/form-errors";
-import { buildDay, MAX_MEALS_PER_DAY } from "./day-shape";
+import { buildDay, MAX_MEALS_PER_DAY, toWeekShape } from "./day-shape";
 
 export type PlannerFormState = {
   error?: string;
@@ -459,8 +459,13 @@ export async function deleteWeekPlan(formData: FormData) {
  */
 export async function addMealToDay(formData: FormData) {
   const parsed = z
-    .object({ slot: z.enum(MEAL_SLOTS), weekStart: z.iso.date() })
+    .object({
+      dayIndex: z.coerce.number().int().min(0).max(6),
+      slot: z.enum(MEAL_SLOTS),
+      weekStart: z.iso.date(),
+    })
     .safeParse({
+      dayIndex: formData.get("dayIndex"),
       slot: formData.get("slot"),
       weekStart: formData.get("weekStart"),
     });
@@ -470,22 +475,31 @@ export async function addMealToDay(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
-  const { slot, weekStart } = parsed.data;
+  const { dayIndex, slot, weekStart } = parsed.data;
 
   const opened = await openWeek(supabase, userId, weekStart);
   const { data: plan } = await supabase
     .from("meal_plans")
-    .select("enabled_slots")
+    .select("day_slots")
     .eq("id", opened.id)
     .single();
 
-  if (!plan || plan.enabled_slots.length >= MAX_MEALS_PER_DAY) {
+  if (!plan) {
     return;
   }
 
+  const week = toWeekShape(plan.day_slots);
+
+  if (week[dayIndex].length >= MAX_MEALS_PER_DAY) {
+    return;
+  }
+
+  // Only this day grows. The others are written back exactly as they were.
+  week[dayIndex] = [...week[dayIndex], slot];
+
   await supabase
     .from("meal_plans")
-    .update({ enabled_slots: [...plan.enabled_slots, slot] })
+    .update({ day_slots: week })
     .eq("id", opened.id);
 
   revalidatePath("/planner");

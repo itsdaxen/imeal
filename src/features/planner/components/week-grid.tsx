@@ -81,11 +81,11 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
 
         <Card.Content>
           <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            {plan.day.map((slot, slotIndex) => (
+            {(plan.days[day.index] ?? []).map((slot, slotIndex) => (
               <SlotCell
                 dayIndex={day.index}
                 key={String(slotIndex)}
-                label={mealLabel(plan.day, slotIndex)}
+                label={mealLabel(plan.days[day.index] ?? [], slotIndex)}
                 meal={mealAt(meals, day.index, slotIndex)}
                 onMealChange={runMealChange}
                 slot={slot}
@@ -96,9 +96,9 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
           </div>
 
           {/* After the last meal, because that is where another one goes. */}
-          {plan.day.length < MAX_MEALS_PER_DAY ? (
+          {(plan.days[day.index] ?? []).length < MAX_MEALS_PER_DAY ? (
             <div className="pt-3">
-              <AddMealButton weekStart={weekStart} />
+              <AddMealButton dayIndex={day.index} weekStart={weekStart} />
             </div>
           ) : null}
         </Card.Content>

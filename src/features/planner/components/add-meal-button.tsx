@@ -19,13 +19,23 @@ const TITLE: Record<MealSlot, string> = {
 };
 
 /**
- * One more meal than the day currently holds.
+ * One more meal on this day.
+ *
+ * Only this day. A shape belonging to the week would give every other day a lunch
+ * the moment Monday gained one, and a Sunday with a long lunch is not a claim about
+ * Tuesday.
  *
  * The kind is asked for rather than assumed, because an extra meal is usually a second
  * dinner or a second lunch and never a second breakfast — but that is a guess, and the
  * recipes a slot can hold depend on getting it right.
  */
-export function AddMealButton({ weekStart }: { weekStart: string }) {
+export function AddMealButton({
+  dayIndex,
+  weekStart,
+}: {
+  dayIndex: number;
+  weekStart: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [slot, setSlot] = useState<MealSlot>("dinner");
 
@@ -41,7 +51,7 @@ export function AddMealButton({ weekStart }: { weekStart: string }) {
       </ActionButton>
 
       <AppDialog
-        heading="Add a meal to every day"
+        heading="Add a meal to this day"
         isOpen={isOpen}
         onOpenChange={setIsOpen}
       >
@@ -50,6 +60,7 @@ export function AddMealButton({ weekStart }: { weekStart: string }) {
           className="flex flex-col gap-5"
         >
           <input name="weekStart" type="hidden" value={weekStart} />
+          <input name="dayIndex" type="hidden" value={dayIndex} />
           <input name="slot" type="hidden" value={slot} />
 
           <SelectField

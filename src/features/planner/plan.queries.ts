@@ -1,7 +1,12 @@
 import { optionalUserId } from "@/lib/supabase/session-user";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
-import { DEFAULT_DAY } from "./day-shape";
+import {
+  DEFAULT_DAY,
+  sameEveryDay,
+  toWeekShape,
+  type WeekShape,
+} from "./day-shape";
 
 export type PlannedMeal = {
   id: string;
@@ -20,8 +25,8 @@ export type PlannedMeal = {
 
 export type WeekPlan = {
   planId: string | null;
-  /** The shape of every day this week: its meal types in order, repeats included. */
-  day: MealSlot[];
+  /** Seven days, each with its own run of meals. */
+  days: WeekShape;
   meals: PlannedMeal[];
 };
 
@@ -50,7 +55,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   const { supabase, userId } = await optionalUserId();
 
   if (!userId) {
-    return { day: DEFAULT_DAY, meals: [], planId: null };
+    return { days: sameEveryDay(DEFAULT_DAY), meals: [], planId: null };
   }
 
   // Scoped to this user explicitly: a week someone shares with you is readable
@@ -58,7 +63,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   // and the single-row read fails the moment anyone shares a week.
   const { data: plan, error: planError } = await supabase
     .from("meal_plans")
-    .select("id, enabled_slots")
+    .select("id, day_slots")
     .eq("user_id", userId)
     .eq("week_start", weekStart)
     .maybeSingle();
@@ -68,7 +73,11 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   }
 
   if (!plan) {
-    return { day: await defaultDay(supabase, userId), meals: [], planId: null };
+    return {
+      days: sameEveryDay(await defaultDay(supabase, userId)),
+      meals: [],
+      planId: null,
+    };
   }
 
   const { data: items, error: itemsError } = await supabase
@@ -100,11 +109,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
       },
     }));
 
-  return {
-    day: plan.enabled_slots.length > 0 ? plan.enabled_slots : DEFAULT_DAY,
-    meals,
-    planId: plan.id,
-  };
+  return { days: toWeekShape(plan.day_slots), meals, planId: plan.id };
 }
 
 export function mealAt(plan: WeekPlan, dayIndex: number, slotIndex: number) {

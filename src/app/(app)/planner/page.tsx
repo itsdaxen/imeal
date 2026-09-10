@@ -69,7 +69,7 @@ export default async function PlannerPage({
       <div className="flex flex-wrap items-center justify-center gap-3">
         <FillWeekForm
           compact
-          day={plan.day}
+          day={plan.days[0]}
           lists={lists}
           targetListId={destination.listId}
           weekStart={weekStart}
@@ -100,7 +100,7 @@ export default async function PlannerPage({
           <Disclosure.Content>
             <Disclosure.Body className="border-t border-separator px-5 py-5 sm:px-6">
               <FillWeekForm
-                day={plan.day}
+                day={plan.days[0]}
                 lists={lists}
                 targetListId={destination.listId}
                 weekStart={weekStart}
