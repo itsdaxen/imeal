@@ -716,6 +716,10 @@ export type Database = {
         Args: { p_note?: string; p_suggestion_id: string };
         Returns: undefined;
       };
+      set_default_shopping_list: {
+        Args: { p_list: string };
+        Returns: undefined;
+      };
       share_meal_plan: {
         Args: { p_meal_plan_id: string; p_recipient: string };
         Returns: undefined;

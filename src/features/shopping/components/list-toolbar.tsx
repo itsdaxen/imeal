@@ -17,6 +17,7 @@ import {
   deleteShoppingList,
   removeListMember,
   renameShoppingList,
+  setDefaultList,
 } from "../shopping.actions";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
 import { useServerAction } from "@/lib/use-server-action";
@@ -29,6 +30,7 @@ type ListToolbarProps = {
   currentUserId: string;
   friends: Person[];
   hasStaples: boolean;
+  isDefault: boolean;
   isOwn: boolean;
   listId: string;
   listName: string;
@@ -42,6 +44,7 @@ export function ListToolbar({
   currentUserId,
   friends,
   hasStaples,
+  isDefault,
   isOwn,
   listId,
   listName,
@@ -97,6 +100,20 @@ export function ListToolbar({
                 {staplesToAdd === 0
                   ? "Staples already on this list"
                   : `Add ${staplesToAdd} ${staplesToAdd === 1 ? "staple" : "staples"}`}
+              </Dropdown.Item>
+            ) : null}
+
+            {/* Only your own list can be the one everything falls back to, and only
+                when it is not already. */}
+            {isOwn && !isDefault ? (
+              <Dropdown.Item
+                id="default"
+                onAction={() => {
+                  run(setDefaultList, { listId });
+                }}
+                textValue="Make this the default list"
+              >
+                Make this the default
               </Dropdown.Item>
             ) : null}
 

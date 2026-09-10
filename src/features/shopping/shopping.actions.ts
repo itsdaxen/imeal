@@ -555,3 +555,29 @@ export async function toggleStaple(formData: FormData) {
 
   revalidatePath("/shopping/staples");
 }
+
+/**
+ * Makes one list the one everything falls back to.
+ *
+ * Through a database function because the swap is two writes under a unique index
+ * that permits a single default: clearing the old one and setting the new one have to
+ * succeed or fail together, or a slip leaves you with no default list at all.
+ */
+export async function setDefaultList(formData: FormData) {
+  const parsed = listSchema.safeParse({ listId: formData.get("listId") });
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const { supabase } = await requireUserId();
+  const { error } = await supabase.rpc("set_default_shopping_list", {
+    p_list: parsed.data.listId,
+  });
+
+  if (error) {
+    throw new Error("Could not make that the default list.");
+  }
+
+  revalidatePath("/shopping");
+}

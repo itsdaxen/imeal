@@ -79,6 +79,7 @@ export default async function ShoppingPage({
             <ListToolbar
               currentUserId={user?.id ?? ""}
               friends={friends}
+              isDefault={open?.isDefault ?? false}
               isOwn={open?.isOwn ?? false}
               hasStaples={activeStaples.length > 0}
               listId={list.listId}
