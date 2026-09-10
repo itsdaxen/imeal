@@ -41,12 +41,10 @@ export function RecipeCard({
 
       <Card.Header className="gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <TagList label="Meals this suits" tags={recipe.meal_tags} />
-            {recipe.collection_tags.length > 0 ? (
-              <TagList label="Collections" tags={recipe.collection_tags} />
-            ) : null}
-          </div>
+          <TagList label="Meals this suits" tags={recipe.meal_tags} />
+          {recipe.collection_tags.length > 0 ? (
+            <TagList label="Collections" tags={recipe.collection_tags} />
+          ) : null}
         </div>
         <Card.Title className="text-base">
           <LinkCard.Target href={href ?? `/recipes/${recipe.id}`}>

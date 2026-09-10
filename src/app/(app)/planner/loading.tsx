@@ -8,21 +8,52 @@ export default function PlannerLoading() {
   return (
     <PageShell as="div">
       <PageHeadingSkeleton />
-      <Skeleton className="h-16 w-full" />
 
-      <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-7 xl:gap-3">
+      <div className="flex items-center justify-center gap-3">
+        <Skeleton className="h-11 w-32" />
+        <Skeleton className="h-11 w-44" />
+      </div>
+
+      <ContentCard className="w-full" density="flush">
+        <Skeleton className="h-11 w-full" />
+      </ContentCard>
+
+      <div className="flex flex-col gap-4 xl:hidden">
+        <div className="grid grid-cols-7 gap-1">
+          {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+            <Skeleton className="h-14 w-full" key={day} />
+          ))}
+        </div>
+        <DaySkeleton />
+      </div>
+
+      <div className="hidden grid-cols-7 items-start gap-3 xl:grid">
         {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-          <ContentCard className="h-full" density="compact" key={day}>
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-3.5 w-16" />
-            <div className="flex flex-col gap-3 xl:gap-2">
-              {[0, 1, 2].map((slot) => (
-                <Skeleton className="h-14 w-full" key={slot} />
-              ))}
-            </div>
-          </ContentCard>
+          <DaySkeleton key={day} />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-center gap-6">
+        {[0, 1, 2].map((item) => (
+          <Skeleton className="h-5 w-16" key={item} />
         ))}
       </div>
     </PageShell>
+  );
+}
+
+function DaySkeleton() {
+  return (
+    <ContentCard className="h-full" density="compact">
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-5 w-20" />
+        <Skeleton className="h-3.5 w-16" />
+      </div>
+      <div className="flex flex-col gap-3 xl:gap-2">
+        {[0, 1, 2].map((slot) => (
+          <Skeleton className="h-24 w-full xl:h-20" key={slot} />
+        ))}
+      </div>
+    </ContentCard>
   );
 }

@@ -10,8 +10,8 @@ import {
 /** Matches the authoring layout, which edit and create both render. */
 export function RecipeFormSkeleton() {
   return (
-    <PageShell as="div">
-      <PageHeadingSkeleton />
+    <PageShell as="div" width="wide">
+      <PageHeadingSkeleton description={false} />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="flex min-w-0 flex-col gap-6">

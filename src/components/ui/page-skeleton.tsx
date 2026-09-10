@@ -1,24 +1,62 @@
 import { Skeleton } from "@heroui/react";
 
+import { CardGrid } from "./card-grid";
 import { ContentCard } from "./content-card";
 
 /**
  * A loading screen is a promise about the page that follows, so these pieces exist
  * to be arranged into the real geometry rather than to stand in for any page.
  */
-export function PageHeadingSkeleton({ action = true }: { action?: boolean }) {
+export function PageHeadingSkeleton({
+  action = true,
+  actionCount,
+  back = false,
+  description = true,
+}: {
+  action?: boolean;
+  actionCount?: number;
+  back?: boolean;
+  description?: boolean;
+}) {
+  const actions = actionCount ?? (action ? 1 : 0);
+
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex flex-col gap-2">
+    <header
+      className={`flex gap-4 ${actions > 0 ? "flex-wrap items-end justify-between" : "flex-col"}`}
+    >
+      <div className="flex max-w-2xl flex-col gap-2">
+        {back ? <Skeleton className="h-5 w-28" /> : null}
         <Skeleton className="h-9 w-56" />
-        <Skeleton className="h-4 w-72 max-w-full" />
+        {description ? <Skeleton className="h-4 w-72 max-w-full" /> : null}
       </div>
-      {action ? <Skeleton className="h-11 w-36" /> : null}
+      {actions > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {Array.from({ length: actions }, (_, index) => (
+            <Skeleton className="h-11 w-32" key={index} />
+          ))}
+        </div>
+      ) : null}
     </header>
   );
 }
 
-export function CardSkeleton({
+/** The search field and collapsed filter trigger shared by recipe collections. */
+export function SearchFiltersSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-11 w-full" />
+      </div>
+      <div className="flex min-h-11 items-center justify-between px-3">
+        <Skeleton className="h-5 w-16" />
+        <Skeleton className="size-4" />
+      </div>
+    </div>
+  );
+}
+
+function CardSkeleton({
   className,
   lines = 3,
   media,
@@ -37,6 +75,18 @@ export function CardSkeleton({
         ))}
       </div>
     </ContentCard>
+  );
+}
+
+export function RecipeGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <CardGrid>
+      {Array.from({ length: count }, (_, index) => (
+        <li key={index}>
+          <CardSkeleton className="h-full" media />
+        </li>
+      ))}
+    </CardGrid>
   );
 }
 
