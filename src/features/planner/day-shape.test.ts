@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDay, mealLabel } from "./day-shape";
+import type { MealSlot } from "@/features/recipes/recipe.schema";
+
+import { buildDay, mealLabel, reshapeWeek, sameEveryDay } from "./day-shape";
 
 describe("buildDay", () => {
   it("is the chosen types in the order they are cooked", () => {
@@ -56,5 +58,37 @@ describe("mealLabel", () => {
 
     expect(mealLabel(day, 1)).toBe("Lunch 1");
     expect(mealLabel(day, 3)).toBe("Lunch 2");
+  });
+});
+
+describe("reshapeWeek", () => {
+  const oldDay: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
+  const newDay: MealSlot[] = ["lunch", "snack", "dinner", "lunch"];
+
+  it("moves the days that still follow the old default", () => {
+    expect(reshapeWeek(sameEveryDay(oldDay), oldDay, newDay)).toEqual(
+      sameEveryDay(newDay),
+    );
+  });
+
+  it("leaves a day that was given a meal of its own", () => {
+    const week = sameEveryDay(oldDay);
+    week[2] = [...oldDay, "dinner"];
+
+    const reshaped = reshapeWeek(week, oldDay, newDay);
+
+    expect(reshaped[2]).toEqual([...oldDay, "dinner"]);
+    expect(reshaped[0]).toEqual(newDay);
+  });
+
+  it("treats a reordered day as one you shaped yourself", () => {
+    const week = sameEveryDay(["lunch", "breakfast", "snack", "dinner"]);
+
+    expect(reshapeWeek(week, oldDay, newDay)[0]).toEqual([
+      "lunch",
+      "breakfast",
+      "snack",
+      "dinner",
+    ]);
   });
 });

@@ -16,10 +16,9 @@ const TITLE: Record<MealSlot, string> = {
 /**
  * A day is an ordered list of meal types, and the same type may appear twice.
  *
- * The position in that list is a meal's identity — what used to be the job of `slot`,
- * which could only say "the dinner" and so could only ever be one of them. A second
- * dinner is a second entry, and its index is what the planner and the database both
- * key on.
+ * The position in that list is a meal's identity. Naming the meal instead — "the
+ * dinner" — allows only one of them. A second dinner is a second entry, and its
+ * index is what the planner and the database both key on.
  */
 export function mealLabel(day: readonly MealSlot[], index: number): string {
   const slot = day[index];
@@ -106,4 +105,31 @@ export function toWeekShape(value: unknown): WeekShape {
 /** The same run of meals every day, which is how a week starts out. */
 export function sameEveryDay(day: readonly MealSlot[]): WeekShape {
   return Array.from({ length: 7 }, () => [...day]);
+}
+
+/** Whether two days hold the same run of meals, in the same order. */
+export function sameDay(
+  left: readonly MealSlot[],
+  right: readonly MealSlot[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((slot, index) => slot === right[index])
+  );
+}
+
+/**
+ * A week restated against a new default day.
+ *
+ * Settings describe the day you usually eat, but a single day can be given an extra
+ * meal of its own, and that is a deliberate act which a change of settings has no
+ * business undoing. So only the days still shaped exactly like the old default follow
+ * the new one; anything you shaped yourself is left as you left it.
+ */
+export function reshapeWeek(
+  week: WeekShape,
+  from: readonly MealSlot[],
+  to: readonly MealSlot[],
+): WeekShape {
+  return week.map((day) => (sameDay(day, from) ? [...to] : day));
 }

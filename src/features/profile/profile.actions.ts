@@ -15,7 +15,8 @@ import {
 
 import { parseDeleteAccountForm, parseProfileForm } from "./profile.schema";
 import { firstIssue } from "@/lib/form-errors";
-import { buildDay } from "@/features/planner/day-shape";
+import { buildDay, DEFAULT_DAY } from "@/features/planner/day-shape";
+import { applyDefaultDay } from "@/features/planner/week-plan";
 
 export type ProfileFormState = {
   error?: string;
@@ -164,9 +165,16 @@ export async function updateProfile(
 
   const { data: existing } = await supabase
     .from("profiles")
-    .select("avatar_url")
+    .select("avatar_url, default_enabled_slots")
     .eq("id", user.id)
     .single();
+
+  // Stored as the day itself rather than as a count beside a list of types, so there
+  // is only one answer to "how many meals is a day".
+  const day = buildDay(
+    parsed.data.defaultMealTypes,
+    parsed.data.defaultMealsPerDay,
+  );
 
   const { error } = await supabase
     .from("profiles")
@@ -178,18 +186,20 @@ export async function updateProfile(
           : {}),
       display_name: parsed.data.displayName,
       friend_discoverable: parsed.data.discoverable,
-      // Stored as the day itself rather than as a count beside a list of types,
-      // so there is only one answer to "how many meals is a day".
-      default_enabled_slots: buildDay(
-        parsed.data.defaultMealTypes,
-        parsed.data.defaultMealsPerDay,
-      ),
+      default_enabled_slots: day,
     })
     .eq("id", user.id);
 
   if (error) {
     return { error: "Could not save your profile. Try again." };
   }
+
+  await applyDefaultDay(
+    supabase,
+    user.id,
+    existing?.default_enabled_slots ?? DEFAULT_DAY,
+    day,
+  );
 
   if ((avatarUrl || removeAvatar) && existing?.avatar_url) {
     await removeStoredImage({

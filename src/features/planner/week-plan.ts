@@ -2,7 +2,15 @@ import "server-only";
 
 import type { SupabaseServerClient } from "@/lib/supabase/server";
 
-import { DEFAULT_DAY, sameEveryDay } from "./day-shape";
+import {
+  DEFAULT_DAY,
+  reshapeWeek,
+  sameDay,
+  sameEveryDay,
+  toWeekShape,
+} from "./day-shape";
+import type { MealSlot } from "@/features/recipes/recipe.schema";
+import { currentWeekStart } from "./week";
 
 /**
  * A person's own plan for a week, or nothing.
@@ -75,4 +83,59 @@ export async function openWeek(
   }
 
   return data;
+}
+
+/**
+ * Carries a change of default day into the weeks it should still affect.
+ *
+ * A week gets a row of its own the first time anything is done to it, and that row
+ * froze the shape of its days: changing the setting afterwards reached every week you
+ * had not touched yet and pointedly not the one you were looking at. Past weeks keep
+ * their shape — they are a record of what you ate, not a plan — and so does any day
+ * you shaped by hand.
+ */
+export async function applyDefaultDay(
+  supabase: SupabaseServerClient,
+  userId: string,
+  from: readonly MealSlot[],
+  to: readonly MealSlot[],
+) {
+  if (sameDay(from, to)) {
+    return;
+  }
+
+  const { data: plans } = await supabase
+    .from("meal_plans")
+    .select("id, day_slots")
+    .eq("user_id", userId)
+    .gte("week_start", currentWeekStart());
+
+  for (const plan of plans ?? []) {
+    const week = toWeekShape(plan.day_slots);
+    const reshaped = reshapeWeek(week, from, to);
+
+    if (reshaped.every((day, index) => sameDay(day, week[index]))) {
+      continue;
+    }
+
+    await supabase
+      .from("meal_plans")
+      .update({ day_slots: reshaped })
+      .eq("id", plan.id);
+
+    // A meal sitting past the end of a shortened day would be invisible in the planner
+    // and still quietly land in the shopping list, which reads every planned meal.
+    for (const [dayIndex, day] of reshaped.entries()) {
+      if (day.length >= week[dayIndex].length) {
+        continue;
+      }
+
+      await supabase
+        .from("meal_plan_items")
+        .delete()
+        .eq("meal_plan_id", plan.id)
+        .eq("day_index", dayIndex)
+        .gte("slot_index", day.length);
+    }
+  }
 }
