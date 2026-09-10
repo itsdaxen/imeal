@@ -205,13 +205,25 @@ describe("independent shopping", () => {
     expect(from).not.toHaveBeenCalledWith("meal_plans");
   });
 
-  it("refuses generation when the saved destination differs from the form", async () => {
+  it("points the week at the list the planner offered, then builds it", async () => {
+    const plan = query({ id: "plan" });
     from
-      .mockReturnValueOnce(query({ id: "plan", target_list_id: defaultList }))
-      .mockReturnValueOnce(query({ id: defaultList }));
+      .mockReturnValueOnce(query({ id: partyList }))
+      .mockReturnValueOnce(plan);
     await expect(
       generateShoppingList(form({ listId: partyList, weekStart })),
-    ).rejects.toThrow("destination changed");
+    ).rejects.toThrow(`redirect:/shopping?week=${weekStart}&list=${partyList}`);
+    expect(plan.update).toHaveBeenCalledWith({ target_list_id: partyList });
+    expect(rpc).toHaveBeenCalledWith("sync_generated_shopping_items", {
+      p_week_start: weekStart,
+    });
+  });
+
+  it("refuses generation onto a list that is no longer reachable", async () => {
+    from.mockReturnValueOnce(query(null));
+    await expect(
+      generateShoppingList(form({ listId: partyList, weekStart })),
+    ).rejects.toThrow("no longer available");
     expect(rpc).not.toHaveBeenCalled();
   });
 

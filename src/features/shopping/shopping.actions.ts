@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { requireUserId } from "@/lib/supabase/session-user";
 
-import { resolveWeekList } from "./shopping.queries";
 import { listSchema } from "./shopping.schema";
 import { namesToAdd } from "@/lib/names";
 import { firstIssue } from "@/lib/form-errors";
@@ -40,12 +39,33 @@ export async function generateShoppingList(formData: FormData) {
     throw new Error("That week is not valid.");
   }
 
-  const { supabase } = await requireUserId();
-  const { listId, planId } = await resolveWeekList(parsed.data.weekStart);
+  const { supabase, userId } = await requireUserId();
+  const { data: list } = await supabase
+    .from("shopping_lists")
+    .select("id")
+    .eq("id", parsed.data.listId)
+    .maybeSingle();
 
-  if (!planId || listId !== parsed.data.listId) {
+  if (!list) {
+    throw new Error("That shopping list is no longer available.");
+  }
+
+  // The week is pointed at the chosen list before its items are built, because the
+  // items are written against the week's destination rather than against whatever the
+  // button sent. Without this the planner could name one list and fill another: it
+  // used to refuse the whole thing when the two disagreed, when the honest reading is
+  // that the list you are looking at is the one you meant.
+  const { data: plan, error: planError } = await supabase
+    .from("meal_plans")
+    .update({ target_list_id: parsed.data.listId })
+    .eq("user_id", userId)
+    .eq("week_start", parsed.data.weekStart)
+    .select("id")
+    .maybeSingle();
+
+  if (planError || !plan) {
     throw new Error(
-      "The plan's destination changed. Refresh before building the list.",
+      "Could not build the list. Check that this week still has a plan.",
     );
   }
 
@@ -57,8 +77,11 @@ export async function generateShoppingList(formData: FormData) {
     throw new Error(`Could not build the list: ${error.message}`);
   }
 
+  revalidatePath("/planner");
   revalidatePath("/shopping");
-  redirect(`/shopping?week=${parsed.data.weekStart}&list=${listId}`);
+  redirect(
+    `/shopping?week=${parsed.data.weekStart}&list=${parsed.data.listId}`,
+  );
 }
 
 export async function addPlannedMealToShoppingList(formData: FormData) {

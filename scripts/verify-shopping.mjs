@@ -15,8 +15,8 @@ import {
 } from "./lib/harness.mjs";
 
 const week = "2026-09-07";
-async function page(user, listId) {
-  const path = `/shopping?week=${week}${listId ? `&list=${listId}` : ""}`;
+async function page(user, listId, at) {
+  const path = at ?? `/shopping?week=${week}${listId ? `&list=${listId}` : ""}`;
   const response = await fetch(`${base}${path}`, {
     headers: { cookie: user.cookie },
   });
@@ -43,7 +43,7 @@ async function submit(user, rendered, selectForm, values = {}) {
   });
   await response.text();
   assert(response.status < 400, `Form returned ${response.status}`);
-  return response;
+  return data;
 }
 
 const button = (label) => (form) =>
@@ -190,6 +190,89 @@ try {
     1,
   );
   pass("deleting a named list returns to shopping and preserves the default");
+  // The planner names a destination in two places — the button and the selector under
+  // More options — and a week often points at a list nothing chose on purpose. This is
+  // the case where the two used to disagree and the items went somewhere else.
+  const cook = await account({ label: "planner", name: "Rosa Planner" });
+  const plannerWeek = "2026-09-07";
+  const [seeded] = await result(
+    cook.client.from("shopping_lists").select("id").eq("owner_id", cook.id),
+  );
+  await result(
+    cook.client
+      .from("shopping_lists")
+      .update({ is_default: false })
+      .eq("id", seeded.id),
+  );
+  const market = await result(
+    cook.client
+      .from("shopping_lists")
+      .insert({ name: "Market", owner_id: cook.id, is_default: true })
+      .select("id")
+      .single(),
+  );
+  await result(
+    cook.client
+      .from("shopping_list_members")
+      .insert({ list_id: market.id, user_id: cook.id }),
+  );
+  const soup = await result(
+    cook.client
+      .from("recipes")
+      .insert({
+        title: "Lentil soup",
+        owner_id: cook.id,
+        ingredients: ["Lentils", "Cumin"],
+        meal_tags: ["dinner"],
+      })
+      .select("id")
+      .single(),
+  );
+  const stalePlan = await result(
+    cook.client
+      .from("meal_plans")
+      .insert({
+        user_id: cook.id,
+        week_start: plannerWeek,
+        target_list_id: seeded.id,
+      })
+      .select("id")
+      .single(),
+  );
+  const plannedMeal = await result(
+    cook.client
+      .from("meal_plan_items")
+      .insert({
+        meal_plan_id: stalePlan.id,
+        recipe_id: soup.id,
+        day_index: 0,
+        slot: "dinner",
+        slot_index: 0,
+        approved: false,
+      })
+      .select("id")
+      .single(),
+  );
+
+  const planner = await page(cook, null, `/planner?week=${plannerWeek}`);
+  const offered = await submit(cook, planner, button("Add to shopping list"));
+  assert.equal(offered.get("listId"), market.id);
+  assert(
+    (await items(cook, market.id)).some((item) =>
+      item.name.toLowerCase().includes("lentils"),
+    ),
+  );
+  assert.equal((await items(cook, seeded.id)).length, 0);
+  const approvedMeal = await result(
+    cook.client
+      .from("meal_plan_items")
+      .select("approved")
+      .eq("id", plannedMeal.id)
+      .single(),
+  );
+  assert.equal(approvedMeal.approved, true);
+  pass("the planner fills the list it says it will and approves every meal");
+
   summary("shopping checks passed");
 } finally {
   await cleanUp("Disposable shopping accounts and their data removed.", (id) =>

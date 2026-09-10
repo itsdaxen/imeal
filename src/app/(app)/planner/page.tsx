@@ -47,6 +47,13 @@ export default async function PlannerPage({
       resolveWeekList(weekStart),
     ]);
 
+  // One answer for "which list", used by the button and by the selector beneath it.
+  // They used to compute it separately and could name different lists, which is how
+  // pressing Add to shopping list filled something other than what the page showed.
+  const destinationId =
+    lists.find((list) => list.isDefault && list.isOwn)?.id ??
+    destination.listId;
+
   return (
     <PageShell>
       <PageHeader
@@ -71,16 +78,16 @@ export default async function PlannerPage({
           compact
           day={plan.days[0]}
           lists={lists}
-          targetListId={destination.listId}
+          targetListId={destinationId}
           weekStart={weekStart}
         />
 
         <form action={generateShoppingList}>
           <input name="weekStart" type="hidden" value={weekStart} />
-          <input name="listId" type="hidden" value={destination.listId ?? ""} />
+          <input name="listId" type="hidden" value={destinationId ?? ""} />
           <PendingButton
             className="min-h-11"
-            isDisabled={plan.meals.length === 0 || !destination.listId}
+            isDisabled={plan.meals.length === 0 || !destinationId}
             variant="tertiary"
           >
             Add to shopping list
@@ -102,7 +109,7 @@ export default async function PlannerPage({
               <FillWeekForm
                 day={plan.days[0]}
                 lists={lists}
-                targetListId={destination.listId}
+                targetListId={destinationId}
                 weekStart={weekStart}
               />
             </Disclosure.Body>
