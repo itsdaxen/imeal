@@ -25,7 +25,7 @@ export function FriendsTabs({
   waiting,
 }: {
   children: ReactNode;
-  waiting: number;
+  waiting: ReactNode;
 }) {
   const { isPending, open, selected } = useRouteTabs(TABS);
 
@@ -50,9 +50,7 @@ export function FriendsTabs({
                   onClick={open(tab)}
                 >
                   {tab.label}
-                  {tab.id === "invites" && waiting > 0 ? (
-                    <CountBadge count={waiting} />
-                  ) : null}
+                  {tab.id === "invites" ? waiting : null}
                 </NextLink>
               </li>
             );
