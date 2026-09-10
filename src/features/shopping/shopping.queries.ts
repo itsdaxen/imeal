@@ -55,11 +55,19 @@ export async function listShoppingLists(): Promise<ShoppingListSummary[]> {
 }
 
 /** The list a week fills: whatever it points at, or the default. */
+/**
+ * Which list a week points at, and which list is yours by default.
+ *
+ * Both, because they answer different questions: the week's target is where its
+ * generated items went, while the default is the list you mean when you have not said
+ * otherwise. Treating one as the other is how opening Shopping showed a list you had
+ * not chosen and had not marked as your default.
+ */
 export async function resolveWeekList(weekStart: string) {
   const { supabase, userId } = await optionalUserId();
 
   if (!userId) {
-    return { planId: null, listId: null };
+    return { defaultListId: null, listId: null, planId: null };
   }
 
   const { data: plan, error: planError } = await supabase
@@ -75,10 +83,6 @@ export async function resolveWeekList(weekStart: string) {
     );
   }
 
-  if (plan?.target_list_id) {
-    return { planId: plan.id, listId: plan.target_list_id };
-  }
-
   const { data: fallback, error: fallbackError } = await supabase
     .from("shopping_lists")
     .select("id")
@@ -92,7 +96,11 @@ export async function resolveWeekList(weekStart: string) {
     );
   }
 
-  return { planId: plan?.id ?? null, listId: fallback?.id ?? null };
+  return {
+    defaultListId: fallback?.id ?? null,
+    listId: plan?.target_list_id ?? fallback?.id ?? null,
+    planId: plan?.id ?? null,
+  };
 }
 
 export async function getShoppingList(
@@ -100,9 +108,15 @@ export async function getShoppingList(
   requestedListId?: string,
 ): Promise<ShoppingList> {
   const supabase = await createSupabaseServerClient();
-  const { planId, listId: targetListId } = await resolveWeekList(weekStart);
+  const {
+    defaultListId,
+    listId: targetListId,
+    planId,
+  } = await resolveWeekList(weekStart);
+  // Your default unless the address bar says otherwise: the week's target is where
+  // generated items landed, which is not a reason to open that list every time.
   const selected = listSchema.safeParse({
-    listId: requestedListId ?? targetListId,
+    listId: requestedListId ?? defaultListId ?? targetListId,
   });
   const listId = selected.success ? selected.data.listId : null;
   const empty: ShoppingList = {

@@ -21,7 +21,12 @@ const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
 type FillWeekFormProps = {
   compact?: boolean;
   day: ReadonlyArray<MealSlot>;
-  lists: ReadonlyArray<{ id: string; name: string }>;
+  lists: ReadonlyArray<{
+    id: string;
+    isDefault: boolean;
+    isOwn: boolean;
+    name: string;
+  }>;
   targetListId: string | null;
   weekStart: string;
 };
@@ -33,6 +38,10 @@ export function FillWeekForm({
   targetListId,
   weekStart,
 }: FillWeekFormProps) {
+  // Your own default, ahead of whatever this week already points at: the week's target
+  // is often something nothing ever chose on purpose, and `is_default` belongs to a
+  // list's owner, so a list shared with you can carry someone else's.
+  const yourDefault = lists.find((list) => list.isDefault && list.isOwn);
   const [state, formAction, isPending] = useActionState<
     PlannerFormState,
     FormData
@@ -120,10 +129,16 @@ export function FillWeekForm({
       {lists.length > 0 ? (
         <div className="flex max-w-sm flex-col gap-1">
           <SelectField
-            defaultSelectedKey={targetListId ?? lists[0]?.id}
+            defaultSelectedKey={yourDefault?.id ?? targetListId ?? lists[0]?.id}
             label="Shopping list"
             name="listId"
-            options={lists.map((list) => ({ id: list.id, label: list.name }))}
+            options={lists.map((list) => ({
+              id: list.id,
+              label:
+                list.isDefault && list.isOwn
+                  ? `${list.name} · default`
+                  : list.name,
+            }))}
           />
         </div>
       ) : null}

@@ -162,6 +162,27 @@ button:disabled,
 }
 
 /*
+ * A dialog's close is a glyph, not a filled control.
+ *
+ * HeroUI gives it the default surface, which puts a grey square in the corner next to
+ * the dialog's real actions and reads as a third button. Unlayered on purpose: the
+ * rule it is overriding is unlayered too, and a layered one would lose to it whatever
+ * its specificity.
+ */
+.modal__close-trigger,
+.modal__close-trigger:hover,
+.modal__close-trigger[data-hovered="true"],
+.modal__close-trigger:active,
+.modal__close-trigger[data-pressed="true"] {
+  background-color: transparent;
+}
+
+.modal__close-trigger:hover,
+.modal__close-trigger[data-hovered="true"] {
+  color: var(--foreground);
+}
+
+/*
  * A badge beside a word, rather than hanging off the corner of an icon.
  *
  * HeroUI's badge is an overlay: it is absolutely positioned and nudged out past its

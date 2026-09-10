@@ -89,9 +89,24 @@ describe("independent shopping", () => {
     expect(plan.update).not.toHaveBeenCalled();
   });
 
-  it("keeps week links working when no explicit list was selected", async () => {
+  it("opens your default list rather than wherever the week pointed", async () => {
     from
       .mockReturnValueOnce(query({ id: "plan", target_list_id: partyList }))
+      .mockReturnValueOnce(query({ id: defaultList }))
+      .mockReturnValueOnce(query({ name: "Shopping" }))
+      .mockReturnValueOnce(query([]));
+    // The week still remembers where its generated items went; that is not a reason
+    // to open that list every time you visit Shopping.
+    expect(await getShoppingList(weekStart)).toMatchObject({
+      listId: defaultList,
+      targetListId: partyList,
+    });
+  });
+
+  it("falls back to the week's list when nothing is marked as default", async () => {
+    from
+      .mockReturnValueOnce(query({ id: "plan", target_list_id: partyList }))
+      .mockReturnValueOnce(query(null))
       .mockReturnValueOnce(query({ name: "Party" }))
       .mockReturnValueOnce(query([]));
     expect(await getShoppingList(weekStart)).toMatchObject({
@@ -103,6 +118,7 @@ describe("independent shopping", () => {
   it("does not substitute the default for a deleted or inaccessible explicit list", async () => {
     from
       .mockReturnValueOnce(query({ id: "plan", target_list_id: defaultList }))
+      .mockReturnValueOnce(query({ id: defaultList }))
       .mockReturnValueOnce(query(null))
       .mockReturnValueOnce(query([]));
     expect(await getShoppingList(weekStart, partyList)).toMatchObject({
@@ -190,9 +206,9 @@ describe("independent shopping", () => {
   });
 
   it("refuses generation when the saved destination differs from the form", async () => {
-    from.mockReturnValueOnce(
-      query({ id: "plan", target_list_id: defaultList }),
-    );
+    from
+      .mockReturnValueOnce(query({ id: "plan", target_list_id: defaultList }))
+      .mockReturnValueOnce(query({ id: defaultList }));
     await expect(
       generateShoppingList(form({ listId: partyList, weekStart })),
     ).rejects.toThrow("destination changed");

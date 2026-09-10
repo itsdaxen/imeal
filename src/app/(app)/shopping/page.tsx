@@ -114,6 +114,7 @@ export default async function ShoppingPage({
           <ListTabs
             lists={lists.map((entry) => ({
               id: entry.id,
+              isDefault: entry.isDefault,
               isOwn: entry.isOwn,
               name: entry.name,
             }))}
