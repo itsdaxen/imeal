@@ -32,6 +32,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect("/sign-in");
   }
 
+  if (!user.onboardingComplete) {
+    redirect("/onboarding");
+  }
+
   return (
     <div className="min-h-screen">
       <StickyHeader>

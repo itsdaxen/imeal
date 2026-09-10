@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Input, Label, TextField, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
-import { CheckChip } from "@/components/ui/check-chip";
 import {
   buildDay,
   MAX_MEALS_PER_DAY,
   mealLabel,
 } from "@/features/planner/day-shape";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
+import { MealsPerDayField, MealTypeChoices } from "./planning-default-fields";
 
 /**
  * How many meals a day holds, and which kinds.
@@ -42,40 +42,16 @@ export function PlanningDefaults({ day }: { day: MealSlot[] }) {
   return (
     <>
       <div className="grid items-start gap-5 sm:grid-cols-[12rem_1fr]">
-        <TextField
-          isRequired
-          name="defaultMealsPerDay"
+        <MealsPerDayField
           onChange={(value) => {
-            const wanted = Number(value);
-
             setExtras(
-              Number.isFinite(wanted) ? Math.max(wanted - types.length, 0) : 0,
+              Number.isFinite(value) ? Math.max(value - types.length, 0) : 0,
             );
           }}
-          type="number"
-          value={String(mealsPerDay)}
-        >
-          <Label>Meals per day</Label>
-          <Input max={MAX_MEALS_PER_DAY} min={1} />
-        </TextField>
+          value={mealsPerDay}
+        />
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm font-medium text-foreground">
-            Kinds of meal
-          </legend>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {MEAL_SLOTS.map((slot) => (
-              <CheckChip
-                checked={types.includes(slot)}
-                key={slot}
-                label={slot}
-                name="defaultMealTypes"
-                onChange={(on) => toggle(slot, on)}
-                value={slot}
-              />
-            ))}
-          </div>
-        </fieldset>
+        <MealTypeChoices onChange={toggle} types={types} />
       </div>
 
       {/* Asking for more meals than kinds repeats the later ones, which is worth

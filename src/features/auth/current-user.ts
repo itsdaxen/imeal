@@ -6,6 +6,7 @@ export type CurrentUser = {
   id: string;
   displayName: string;
   initials: string;
+  onboardingComplete: boolean;
 };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -20,7 +21,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, avatar_url")
+    .select("display_name, avatar_url, onboarding_completed_at")
     .eq("id", user.id)
     .single();
 
@@ -33,5 +34,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     id: user.id,
     displayName,
     initials: initialsOf(displayName),
+    onboardingComplete: Boolean(profile?.onboarding_completed_at),
   };
 }

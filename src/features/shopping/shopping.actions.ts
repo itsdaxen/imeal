@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { requireUserId } from "@/lib/supabase/session-user";
 
-import { listSchema } from "./shopping.schema";
+import { listSchema, stapleNameSchema } from "./shopping.schema";
 import { namesToAdd } from "@/lib/names";
 import { firstIssue } from "@/lib/form-errors";
 
@@ -512,9 +512,7 @@ export async function removeListMember(formData: FormData) {
 }
 
 export async function addStaple(formData: FormData) {
-  const parsed = z
-    .object({ name: z.string().trim().min(1, "Name the staple.").max(120) })
-    .safeParse({ name: formData.get("name") });
+  const parsed = stapleNameSchema.safeParse(formData.get("name"));
 
   if (!parsed.success) {
     return;
@@ -526,7 +524,7 @@ export async function addStaple(formData: FormData) {
   await supabase
     .from("staples")
     .upsert(
-      { user_id: userId, name: parsed.data.name },
+      { user_id: userId, name: parsed.data },
       { onConflict: "user_id,name" },
     );
 
