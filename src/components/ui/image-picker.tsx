@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 import { Button, Typography } from "@heroui/react";
 
 type ImagePickerProps = {
   accept: string;
   currentUrl?: string | null;
+  /** Shown in place of the image when there is none, if something better than an
+   *  icon exists — a person still has a face in the app without a photograph. */
+  empty?: ReactNode;
   help: string;
   label: string;
   name: string;
@@ -23,6 +26,7 @@ type ImagePickerProps = {
 export function ImagePicker({
   accept,
   currentUrl,
+  empty,
   help,
   label,
   name,
@@ -77,7 +81,9 @@ export function ImagePicker({
             src={visibleUrl}
           />
         ) : (
-          <ImagePlus aria-hidden="true" className="size-8 text-muted" />
+          (empty ?? (
+            <ImagePlus aria-hidden="true" className="size-8 text-muted" />
+          ))
         )}
       </div>
 

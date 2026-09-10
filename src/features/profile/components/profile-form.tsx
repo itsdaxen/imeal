@@ -6,6 +6,7 @@ import { Button, Card, Input, Label, TextField } from "@heroui/react";
 import { FormMessage } from "@/components/ui/form-message";
 import { ContentCard } from "@/components/ui/content-card";
 import { ImagePicker } from "@/components/ui/image-picker";
+import { PersonAvatar } from "@/components/ui/person-avatar";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { IMAGE_TYPES } from "@/features/images/image";
 
@@ -49,6 +50,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         <ImagePicker
           accept={IMAGE_TYPES.join(",")}
           currentUrl={profile.avatarUrl}
+          empty={<PersonAvatar name={profile.displayName} size="fill" />}
           help="JPEG, PNG, WebP or AVIF · 2MB max"
           label="Profile photograph"
           name="avatar"
