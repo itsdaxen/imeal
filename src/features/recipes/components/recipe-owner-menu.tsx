@@ -42,10 +42,8 @@ export function RecipeOwnerMenu({
 }) {
   const router = useRouter();
   const { run } = useServerAction();
-  const [, deleteAction, isDeleting] = useActionState<RecipeFormState>(
-    deleteRecipe.bind(null, id),
-    {},
-  );
+  const [deleteState, deleteAction, isDeleting] =
+    useActionState<RecipeFormState>(deleteRecipe.bind(null, id), {});
   const [isDeletingOpen, setIsDeletingOpen] = useState(false);
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
   const [isSharingOpen, setIsSharingOpen] = useState(false);
@@ -159,10 +157,10 @@ export function RecipeOwnerMenu({
         heading="Delete this recipe?"
         isOpen={isDeletingOpen}
         isPending={isDeleting}
-        onConfirm={() => {
-          setIsDeletingOpen(false);
-          deleteForm.current?.requestSubmit();
-        }}
+        error={deleteState.error}
+        // Left open on purpose: a delete that succeeds redirects away from this page,
+        // so closing first only ever hides the reason one that failed did not.
+        onConfirm={() => deleteForm.current?.requestSubmit()}
         onOpenChange={setIsDeletingOpen}
       />
     </div>

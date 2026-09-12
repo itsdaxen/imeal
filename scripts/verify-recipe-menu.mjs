@@ -3,12 +3,15 @@
 // Run with: node --env-file=.env.local scripts/verify-recipe-menu.mjs
 import assert from "node:assert/strict";
 
+import { JSDOM } from "jsdom";
+
 import {
   account,
   admin,
   base,
   cleanUp,
   pass,
+  result,
   summary,
 } from "./lib/harness.mjs";
 
@@ -70,6 +73,71 @@ try {
   pass("a pending suggestion still shows its status on the recipe");
 
   await admin.from("recipes").delete().eq("id", recipe.id);
+  // A planned meal must not keep a recipe alive: deleting it empties the slot rather
+  // than refusing, which is what the planner shows for a meal nobody has chosen.
+  const { data: planned } = await admin
+    .from("recipes")
+    .insert({
+      owner_id: owner.id,
+      title: "Planned dish",
+      ingredients: ["X"],
+      steps: ["Y"],
+      prep_minutes: 10,
+      servings: 1,
+      meal_tags: ["dinner"],
+    })
+    .select("id")
+    .single();
+  const { data: plan } = await admin
+    .from("meal_plans")
+    .insert({ user_id: owner.id, week_start: "2026-09-07" })
+    .select("id")
+    .single();
+  await admin.from("meal_plan_items").insert({
+    meal_plan_id: plan.id,
+    recipe_id: planned.id,
+    day_index: 6,
+    slot: "dinner",
+    slot_index: 0,
+    approved: true,
+  });
+
+  const path = `/recipes/${planned.id}`;
+  const document = new JSDOM(await get(path, owner.cookie)).window.document;
+  const form = [...document.forms].find((entry) =>
+    entry.className.includes("hidden"),
+  );
+  assert(form, "the delete form is on the recipe");
+  const data = new FormData();
+  for (const input of form.querySelectorAll("input[name]")) {
+    data.set(input.name, input.value);
+  }
+  assert(
+    [...data.keys()].some((name) => name.startsWith("$ACTION_")),
+    "Server action is wired into the delete form",
+  );
+  const deletion = await fetch(`${base}${path}`, {
+    method: "POST",
+    body: data,
+    redirect: "manual",
+    headers: { cookie: owner.cookie, origin: new URL(base).origin },
+  });
+  await deletion.body.cancel();
+
+  assert.deepEqual(
+    await result(admin.from("recipes").select("id").eq("id", planned.id)),
+    [],
+  );
+  pass("a planned recipe can still be deleted");
+
+  assert.deepEqual(
+    await result(
+      admin.from("meal_plan_items").select("id").eq("recipe_id", planned.id),
+    ),
+    [],
+  );
+  pass("and the slot it filled goes back to empty");
+
   summary("recipe menu checks passed");
 } finally {
   await cleanUp("Disposable recipe-menu accounts and their data removed.");

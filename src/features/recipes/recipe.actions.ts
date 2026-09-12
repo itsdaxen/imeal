@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -166,32 +167,30 @@ export async function updateRecipe(
   redirect(`/recipes/${id}`);
 }
 
-const FOREIGN_KEY_VIOLATION = "23503";
-
 export async function deleteRecipe(
   id: string,
   _previous: RecipeFormState,
 ): Promise<RecipeFormState> {
   const { supabase, userId } = await requireUserId();
 
-  const { error } = await supabase
+  // Asking for the deleted row back, because a delete that matches nothing is not an
+  // error: without this, a recipe somebody else owns would report success and send
+  // you to a library still holding it.
+  const { data: deleted, error } = await supabase
     .from("recipes")
     .delete()
     .eq("id", id)
-    .eq("owner_id", userId);
+    .eq("owner_id", userId)
+    .select("id");
 
-  if (error?.code === FOREIGN_KEY_VIOLATION) {
-    // meal_plan_items references recipes with `on delete restrict`.
-    return {
-      error: "This recipe is in a meal plan. Remove it from the plan first.",
-    };
-  }
-
-  if (error) {
+  if (error || deleted.length === 0) {
     return { error: "Could not delete the recipe. Try again." };
   }
 
+  // Deleting takes any planned meal with it, so the weeks that held it are stale.
   revalidatePath("/recipes");
+  revalidatePath("/planner");
+  revalidatePath("/", "layout");
   redirect("/recipes");
 }
 

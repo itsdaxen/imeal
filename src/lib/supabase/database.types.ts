@@ -389,6 +389,7 @@ export type Database = {
       };
       recipes: {
         Row: {
+          catalog_seed_key: string | null;
           collection_tags: string[];
           created_at: string;
           id: string;
@@ -407,6 +408,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["recipe_visibility"];
         };
         Insert: {
+          catalog_seed_key?: string | null;
           collection_tags?: string[];
           created_at?: string;
           id?: string;
@@ -425,6 +427,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["recipe_visibility"];
         };
         Update: {
+          catalog_seed_key?: string | null;
           collection_tags?: string[];
           created_at?: string;
           id?: string;
