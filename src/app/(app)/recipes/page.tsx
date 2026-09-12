@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
 
 import { Typography } from "@heroui/react";
-
-import { RecipeCard } from "@/features/recipes/components/recipe-card";
-import { RecipeSearch } from "@/features/recipes/components/recipe-search";
-import {
-  listOwnedCollections,
-  listOwnedRecipes,
-} from "@/features/recipes/recipe.queries";
-import { restoreRecipe } from "@/features/recipes/recipe.actions";
 import { BookOpen, SearchX } from "lucide-react";
 
 import { ActionLink } from "@/components/ui/action";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PendingButton } from "@/components/ui/pending-button";
-import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { PageShell } from "@/components/ui/page-shell";
-import { CardGrid } from "@/components/ui/card-grid";
+import { InfiniteRecipeGrid } from "@/features/recipes/components/infinite-recipe-grid";
+import { RecipeSearch } from "@/features/recipes/components/recipe-search";
+import { loadOwnedRecipePage } from "@/features/recipes/recipe-pagination.actions";
+import {
+  listOwnedCollections,
+  listOwnedRecipePage,
+} from "@/features/recipes/recipe.queries";
+import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 export const metadata: Metadata = { title: "Recipes" };
 
@@ -42,8 +39,8 @@ export default async function RecipesPage({
     archived: showArchived,
     collection,
   };
-  const [recipes, collections] = await Promise.all([
-    listOwnedRecipes(filters),
+  const [recipePage, collections] = await Promise.all([
+    listOwnedRecipePage(filters),
     listOwnedCollections(),
   ]);
   const isFiltered = Boolean(filters.search || filters.mealTag || collection);
@@ -79,7 +76,7 @@ export default async function RecipesPage({
         search={filters.search}
       />
 
-      {recipes.length === 0 ? (
+      {recipePage.recipes.length === 0 ? (
         <EmptyState
           actions={
             isFiltered ? (
@@ -101,12 +98,14 @@ export default async function RecipesPage({
               </>
             )
           }
+          // An empty cookbook says so in the heading, and the two buttons below say
+          // what to do about it. A sentence between them only delays reading either.
           description={
             showArchived
               ? "Recipes you archive are kept here, out of the way but not deleted."
               : isFiltered
                 ? "Nothing in your collection matches that search yet."
-                : "Start with something you already cook often. You can paste it in rather than typing it out."
+                : undefined
           }
           icon={
             isFiltered ? (
@@ -124,22 +123,12 @@ export default async function RecipesPage({
           }
         />
       ) : (
-        <CardGrid>
-          {recipes.map((recipe) => (
-            <li className="flex flex-col gap-2" key={recipe.id}>
-              <RecipeCard recipe={recipe} />
-
-              {showArchived ? (
-                <form action={restoreRecipe}>
-                  <input name="recipeId" type="hidden" value={recipe.id} />
-                  <PendingButton className="min-h-11" variant="tertiary">
-                    Restore
-                  </PendingButton>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </CardGrid>
+        <InfiniteRecipeGrid
+          initialPage={recipePage}
+          key={JSON.stringify(filters)}
+          loadPage={loadOwnedRecipePage.bind(null, filters)}
+          restoreArchived={showArchived}
+        />
       )}
     </PageShell>
   );

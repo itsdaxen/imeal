@@ -6,6 +6,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 import {
+  RECIPE_PAGE_SIZE,
+  type RecipePage,
   type RecipeSummary,
   SUMMARY_COLUMNS,
 } from "@/features/recipes/recipe.queries";
@@ -64,13 +66,25 @@ export async function listCatalog(
     collection?: string;
   } = {},
 ): Promise<RecipeSummary[]> {
+  return catalogRecipes(filters);
+}
+
+async function catalogRecipes(
+  filters: {
+    search?: string;
+    mealTag?: MealSlot;
+    collection?: string;
+  },
+  offset?: number,
+): Promise<RecipeSummary[]> {
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("recipes")
     .select(SUMMARY_COLUMNS)
     .eq("visibility", "public")
     .eq("status", "active")
-    .order("title", { ascending: true });
+    .order("title", { ascending: true })
+    .order("id", { ascending: true });
 
   const term = filters.search?.trim();
 
@@ -83,6 +97,10 @@ export async function listCatalog(
     query = query.contains("collection_tags", [filters.collection.trim()]);
   }
 
+  if (offset !== undefined) {
+    query = query.range(offset, offset + RECIPE_PAGE_SIZE);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -90,6 +108,22 @@ export async function listCatalog(
   }
 
   return data;
+}
+
+export async function listCatalogPage(
+  filters: {
+    search?: string;
+    mealTag?: MealSlot;
+    collection?: string;
+  } = {},
+  offset = 0,
+): Promise<RecipePage> {
+  const data = await catalogRecipes(filters, offset);
+
+  return {
+    recipes: data.slice(0, RECIPE_PAGE_SIZE),
+    hasMore: data.length > RECIPE_PAGE_SIZE,
+  };
 }
 
 function toSuggestion(row: {

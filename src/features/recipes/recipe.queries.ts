@@ -26,6 +26,13 @@ export type RecipeSummary = {
   image_url: string | null;
 };
 
+export const RECIPE_PAGE_SIZE = 15;
+
+export type RecipePage = {
+  recipes: RecipeSummary[];
+  hasMore: boolean;
+};
+
 /**
  * The collections a person has actually used. Free text only works if you can see
  * what already exists — otherwise "asian" and "Asian food" become two collections.
@@ -50,7 +57,10 @@ export async function listOwnedCollections(): Promise<string[]> {
   return [...new Set(data.flatMap((row) => row.collection_tags))].sort();
 }
 
-export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
+async function ownedRecipes(
+  filters: RecipeListFilters,
+  offset?: number,
+): Promise<RecipeSummary[]> {
   const { supabase, userId } = await optionalUserId();
 
   if (!userId) {
@@ -64,7 +74,8 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
     .select(SUMMARY_COLUMNS)
     .eq("owner_id", userId)
     .eq("status", filters.archived ? "archived" : "active")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
 
   const search = filters.search?.trim();
 
@@ -80,6 +91,10 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
     query = query.contains("collection_tags", [filters.collection.trim()]);
   }
 
+  if (offset !== undefined) {
+    query = query.range(offset, offset + RECIPE_PAGE_SIZE);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -87,6 +102,22 @@ export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
   }
 
   return data;
+}
+
+export async function listOwnedRecipes(filters: RecipeListFilters = {}) {
+  return ownedRecipes(filters);
+}
+
+export async function listOwnedRecipePage(
+  filters: RecipeListFilters,
+  offset = 0,
+): Promise<RecipePage> {
+  const rows = await ownedRecipes(filters, offset);
+
+  return {
+    recipes: rows.slice(0, RECIPE_PAGE_SIZE),
+    hasMore: rows.length > RECIPE_PAGE_SIZE,
+  };
 }
 
 export async function getRecipe(id: string) {

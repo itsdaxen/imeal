@@ -8,19 +8,19 @@ import { ActionLink } from "@/components/ui/action";
 import { ContentCard } from "@/components/ui/content-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { withdrawSuggestion } from "@/features/catalog/catalog.actions";
-import { RecipeCard } from "@/features/recipes/components/recipe-card";
+import { InfiniteRecipeGrid } from "@/features/recipes/components/infinite-recipe-grid";
 import { PendingButton } from "@/components/ui/pending-button";
 import { CatalogSearch } from "@/features/catalog/components/catalog-search";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 import { PageShell } from "@/components/ui/page-shell";
 import {
-  listCatalog,
+  listCatalogPage,
   listCatalogCollections,
   listMySuggestions,
 } from "@/features/catalog/catalog.queries";
 import { PageHeader } from "@/components/ui/page-header";
 import { RecipeImage } from "@/components/ui/recipe-image";
-import { CardGrid } from "@/components/ui/card-grid";
+import { loadCatalogRecipePage } from "@/features/recipes/recipe-pagination.actions";
 
 export const metadata: Metadata = { title: "Catalog" };
 
@@ -45,8 +45,9 @@ export default async function CatalogPage({
 }) {
   const { search, mealTag, collection } = await searchParams;
   const selectedMeal = toMealTag(mealTag);
-  const [recipes, suggestions, collections] = await Promise.all([
-    listCatalog({ search, mealTag: selectedMeal, collection }),
+  const filters = { search, mealTag: selectedMeal, collection };
+  const [recipePage, suggestions, collections] = await Promise.all([
+    listCatalogPage(filters),
     listMySuggestions(),
     listCatalogCollections(),
   ]);
@@ -70,7 +71,7 @@ export default async function CatalogPage({
         search={search}
       />
 
-      {recipes.length === 0 ? (
+      {recipePage.recipes.length === 0 ? (
         <EmptyState
           actions={
             search ? (
@@ -94,13 +95,12 @@ export default async function CatalogPage({
           title={search ? "Nothing matches" : "The catalog is still empty"}
         />
       ) : (
-        <CardGrid>
-          {recipes.map((recipe) => (
-            <li key={recipe.id}>
-              <RecipeCard href={`/catalog/${recipe.id}`} recipe={recipe} />
-            </li>
-          ))}
-        </CardGrid>
+        <InfiniteRecipeGrid
+          hrefBase="/catalog"
+          initialPage={recipePage}
+          key={JSON.stringify(filters)}
+          loadPage={loadCatalogRecipePage.bind(null, filters)}
+        />
       )}
 
       {suggestions.length > 0 ? (
