@@ -165,8 +165,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
         <ContentCard density="spacious">
           <SectionTitle>Ingredients</SectionTitle>
           <ul className="flex list-disc flex-col gap-1.5 pl-5 marker:text-muted">
-            {recipe.ingredients.map((ingredient) => (
-              <li key={ingredient}>{ingredient}</li>
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={`${index}-${ingredient}`}>{ingredient}</li>
             ))}
           </ul>
         </ContentCard>

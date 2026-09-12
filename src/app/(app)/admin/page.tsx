@@ -99,16 +99,20 @@ export default async function AdminPage() {
                       <section>
                         <h3 className="font-semibold">Ingredients</h3>
                         <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-muted">
-                          {suggestion.recipe.ingredients.map((ingredient) => (
-                            <li key={ingredient}>{ingredient}</li>
-                          ))}
+                          {suggestion.recipe.ingredients.map(
+                            (ingredient, index) => (
+                              <li key={`${index}-${ingredient}`}>
+                                {ingredient}
+                              </li>
+                            ),
+                          )}
                         </ul>
                       </section>
                       <section>
                         <h3 className="font-semibold">Method</h3>
                         <ol className="mt-2 flex list-decimal flex-col gap-1 pl-5 text-sm text-muted">
-                          {suggestion.recipe.steps.map((step) => (
-                            <li key={step}>{step}</li>
+                          {suggestion.recipe.steps.map((step, index) => (
+                            <li key={`${index}-${step}`}>{step}</li>
                           ))}
                         </ol>
                       </section>
