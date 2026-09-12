@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { optionalUserId } from "@/lib/supabase/session-user";
 import { escapeLikePattern } from "@/lib/text";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -32,12 +34,12 @@ export type ModerationSuggestion = {
   };
 };
 
-export async function isCurrentUserAdmin(): Promise<boolean> {
+export const isCurrentUserAdmin = cache(async (): Promise<boolean> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("is_admin");
 
   return !error && Boolean(data);
-}
+});
 
 /** The collections in use across the published catalog. */
 export async function listCatalogCollections(): Promise<string[]> {

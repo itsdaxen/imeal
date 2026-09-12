@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
+
 import { Card, Input, Label, TextField, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
@@ -26,8 +27,10 @@ import { RecipeImage } from "@/components/ui/recipe-image";
 export const metadata: Metadata = { title: "Moderation" };
 
 export default async function AdminPage() {
-  // The functions behind these actions check is_admin() themselves; this only
-  // keeps the page from existing for everyone else.
+  // The layout has refused already, and refuses early enough to make the reply a 404.
+  // This second look is not the same check twice: a layout that throws does not stop
+  // this component from rendering, so without it the refusal still carries the page's
+  // heading and description in its payload. The lookup itself happens once.
   if (!(await isCurrentUserAdmin())) {
     notFound();
   }
@@ -109,7 +112,7 @@ export default async function AdminPage() {
                         </ul>
                       </section>
                       <section>
-                        <h3 className="font-semibold">Method</h3>
+                        <h3 className="font-semibold">Steps</h3>
                         <ol className="mt-2 flex list-decimal flex-col gap-1 pl-5 text-sm text-muted">
                           {suggestion.recipe.steps.map((step, index) => (
                             <li key={`${index}-${step}`}>{step}</li>

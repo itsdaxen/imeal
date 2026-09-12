@@ -18,6 +18,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:rls": "node scripts/verify-rls.mjs",
+    "verify:moderation": "node scripts/verify-moderation.mjs",
     "verify:planning": "node scripts/verify-planning-defaults.mjs",
     "verify:routes": "node scripts/verify-routes.mjs",
     "verify:shopping": "node scripts/verify-shopping.mjs",
