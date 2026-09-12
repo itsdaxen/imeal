@@ -21,6 +21,7 @@
     "verify:planning": "node scripts/verify-planning-defaults.mjs",
     "verify:routes": "node scripts/verify-routes.mjs",
     "verify:shopping": "node scripts/verify-shopping.mjs",
+    "seed:catalog": "node --env-file=.env.local scripts/seed-catalog.mjs",
     "security:audit": "pnpm audit --audit-level high",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm security:audit && pnpm build"
   },
