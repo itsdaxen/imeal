@@ -2,39 +2,23 @@
 // catalog, and the per-recipe collections menu.
 // Run with: node --env-file=.env.local scripts/verify-collections.mjs
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
 
-import { sessionCookie } from "./lib/harness.mjs";
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
-  key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  service = process.env.SUPABASE_SERVICE_KEY;
-const o = { auth: { autoRefreshToken: false, persistSession: false } };
-const admin = createClient(url, service, o);
-const r = async (q) => {
-  const { data, error } = await q;
-  if (error) throw new Error(error.message);
-  return data;
-};
-const email = `coll-${randomUUID()}@example.test`,
-  password = "Collections-Probe-123!";
-const { user } = await r(
-  admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { display_name: "Collections Probe" },
-  }),
-);
+// This script used to build its own account and session by hand, which is how it came
+// to be the one verifier that never learned about first-run setup and reported the
+// onboarding page as a missing recipe.
+import { account, admin, cleanUp, result as r } from "./lib/harness.mjs";
+
+const user = await account({
+  label: "coll",
+  name: "Collections Probe",
+});
 let pass = 0;
 const ok = (l) => {
   pass++;
   console.log("PASS", l);
 };
 try {
-  const c = createClient(url, key, o);
-  const { session } = await r(c.auth.signInWithPassword({ email, password }));
-  const cookie = sessionCookie(session);
+  const cookie = user.cookie;
 
   // a public catalog recipe carrying collections
   const pub = await r(
@@ -127,7 +111,7 @@ try {
   assert.match(detail.text, /asian favorites/);
   ok("existing collections reach the client for the dialog");
 
-  const upd = await c
+  const upd = await user.client
     .from("recipes")
     .update({ collection_tags: ["asian favorites", "weeknight"] })
     .eq("id", own.id)
@@ -148,5 +132,5 @@ try {
 
   console.log(`\n${pass}/${pass} collection checks passed.`);
 } finally {
-  await admin.auth.admin.deleteUser(user.id);
+  await cleanUp("Disposable collections account removed.");
 }

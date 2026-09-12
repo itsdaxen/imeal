@@ -1,10 +1,9 @@
 // Shared plumbing for the verify-* scripts: everything that is about *running* a
 // check rather than about what is being checked.
 //
-// Nine of the ten scripts had copied the session-cookie encoding below, and two of
-// them had copied it differently — the same rule written twice, which is how a
-// verifier ends up passing for the wrong reason. Supabase's cookie format is the
-// most fragile thing in this directory and now lives in exactly one place.
+// Supabase's cookie format is the most fragile thing in this directory, so it lives
+// in exactly one place. A verifier that encodes its own session can pass for the
+// wrong reason — agreeing with itself rather than with the app.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { createInterface } from "node:readline/promises";
@@ -74,7 +73,7 @@ const created = [];
  * Every id is remembered so `cleanUp` can remove them all, including after a failed
  * assertion — a verifier that leaves accounts behind poisons the next run.
  */
-export async function account({ label, name }) {
+export async function account({ label, name, onboarded = true }) {
   const email = `${label}-${randomUUID()}@example.test`;
   const password = `${name.replace(/\s+/g, "-")}-123!`;
   const { user } = await result(
@@ -87,6 +86,18 @@ export async function account({ label, name }) {
   );
 
   created.push(user.id);
+
+  // Signing up now lands in first-run setup, and every app route redirects there until
+  // it is done. A verifier is almost never asking about a cook's first five minutes,
+  // so accounts arrive past it unless a script says otherwise.
+  if (onboarded) {
+    await result(
+      admin
+        .from("profiles")
+        .update({ onboarding_completed_at: new Date().toISOString() })
+        .eq("id", user.id),
+    );
+  }
 
   const client = createClient(url, key, options);
   const { session } = await result(

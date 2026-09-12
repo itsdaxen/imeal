@@ -8,9 +8,7 @@
 //   pnpm dev &
 //   set -a; . ./.env.local; set +a && pnpm verify:routes
 
-import { createClient } from "@supabase/supabase-js";
-
-import { sessionCookie } from "./lib/harness.mjs";
+import { account, cleanUp } from "./lib/harness.mjs";
 
 const BASE = process.env.VERIFY_BASE_URL ?? "http://localhost:3000";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -62,10 +60,6 @@ const SIGNED_IN = [
   ["/terms", 200],
 ];
 
-const admin = createClient(url, service, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
-
 async function reachable() {
   try {
     await fetch(`${BASE}/sign-in`, { redirect: "manual" });
@@ -82,36 +76,15 @@ if (!(await reachable())) {
   process.exit(1);
 }
 
-const email = `routes-${Date.now()}@example.test`;
-const password = "Test-Password-123!";
-const { data: created, error: createError } = await admin.auth.admin.createUser(
-  {
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { display_name: "Route Probe" },
-  },
-);
-
-if (createError) {
-  console.error(`Could not create the probe user: ${createError.message}`);
-  process.exit(1);
-}
+// The shared helper, rather than a hand-rolled account: it is the one place that
+// knows a new sign-up now lands in first-run setup, and a probe that does not know
+// reports every app route as a redirect.
+const probeUser = await account({ label: "routes", name: "Route Probe" });
 
 const results = [];
 
 try {
-  const client = createClient(url, anon, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data: session, error: signInError } =
-    await client.auth.signInWithPassword({ email, password });
-
-  if (signInError) {
-    throw new Error(`Could not sign in the probe user: ${signInError.message}`);
-  }
-
-  const cookie = sessionCookie(session.session);
+  const cookie = probeUser.cookie;
 
   const probe = async (path, expected, headers) => {
     const response = await fetch(`${BASE}${path}`, {
@@ -145,7 +118,7 @@ try {
     await probe(path, expected, { cookie });
   }
 } finally {
-  await admin.auth.admin.deleteUser(created.user.id);
+  await cleanUp("Disposable route probe removed.");
 }
 
 let failed = 0;
