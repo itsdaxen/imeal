@@ -18,19 +18,19 @@ export default function PlannerLoading() {
         <Skeleton className="h-11 w-full" />
       </ContentCard>
 
-      <div className="flex flex-col gap-4 xl:hidden">
+      {/* A day at a time, at every width, because that is what the planner opens as.
+          Showing seven columns here would flash a week that then collapses to one. */}
+      <div className="hidden justify-end xl:flex">
+        <Skeleton className="h-9 w-40" />
+      </div>
+
+      <div className="flex flex-col gap-4">
         <div className="grid grid-cols-7 gap-1">
           {[0, 1, 2, 3, 4, 5, 6].map((day) => (
             <Skeleton className="h-14 w-full" key={day} />
           ))}
         </div>
         <DaySkeleton />
-      </div>
-
-      <div className="hidden grid-cols-7 items-start gap-3 xl:grid">
-        {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-          <DaySkeleton key={day} />
-        ))}
       </div>
 
       <div className="flex items-center justify-center gap-6">
@@ -49,9 +49,9 @@ function DaySkeleton() {
         <Skeleton className="h-5 w-20" />
         <Skeleton className="h-3.5 w-16" />
       </div>
-      <div className="flex flex-col gap-3 xl:gap-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[0, 1, 2].map((slot) => (
-          <Skeleton className="h-24 w-full xl:h-20" key={slot} />
+          <Skeleton className="h-24 w-full" key={slot} />
         ))}
       </div>
     </ContentCard>

@@ -1,7 +1,14 @@
 "use client";
 
 import { useOptimistic, useState } from "react";
-import { Card, Typography } from "@heroui/react";
+import { useSearchParams } from "next/navigation";
+import {
+  Card,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@heroui/react";
+import { CalendarDays, CalendarRange } from "lucide-react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ContentCard } from "@/components/ui/content-card";
@@ -14,7 +21,11 @@ import { MAX_MEALS_PER_DAY, mealLabel } from "../day-shape";
 import { AddMealButton } from "./add-meal-button";
 
 type WeekGridProps = {
+  /** Which day to open on, straight from the address bar. */
+  day?: string;
   plan: WeekPlan;
+  /** Whether a wide screen shows the whole week or one day of it. */
+  view: "day" | "week";
   weekStart: string;
 };
 
@@ -49,19 +60,53 @@ function applyChange(meals: PlannedMeal[], change: MealChange) {
   );
 }
 
+/** A day asked for by number, if it is one of this week's. */
+function askedFor(value: string | undefined): number | undefined {
+  const index = Number.parseInt(value ?? "", 10);
+
+  return index >= 0 && index <= 6 ? index : undefined;
+}
+
 function mealAt(meals: PlannedMeal[], dayIndex: number, slotIndex: number) {
   return meals.find(
     (meal) => meal.dayIndex === dayIndex && meal.slotIndex === slotIndex,
   );
 }
 
-export function WeekGrid({ plan, weekStart }: WeekGridProps) {
+export function WeekGrid({ day, plan, view, weekStart }: WeekGridProps) {
   const days = weekDays(weekStart);
-  const firstPlannedDay = days.find((day) =>
-    plan.meals.some((meal) => meal.dayIndex === day.index),
+  const firstPlannedDay = days.find((entry) =>
+    plan.meals.some((meal) => meal.dayIndex === entry.index),
   );
-  const [selectedDay, setSelectedDay] = useState(firstPlannedDay?.index ?? 0);
+  const searchParams = useSearchParams();
+  const [selectedDay, setSelectedDay] = useState(
+    askedFor(day) ?? firstPlannedDay?.index ?? 0,
+  );
+  const [shownAs, setShownAs] = useState(view);
   const { run: send } = useServerAction();
+
+  /**
+   * Writes the choice into the address without asking the server for the page again.
+   *
+   * Which day you are looking at is worth putting in a link, but it is not worth a
+   * round trip: the week is already here and the switch should land the moment it is
+   * pressed. The History API keeps the two in step, so a reload, a shared link and
+   * the back button all arrive where you were.
+   */
+  function remember(changes: Record<string, string>) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    for (const [name, value] of Object.entries(changes)) {
+      params.set(name, value);
+    }
+
+    window.history.replaceState(null, "", `?${params}`);
+  }
+
+  function showDay(index: number) {
+    setSelectedDay(index);
+    remember({ day: String(index) });
+  }
   const [meals, applyMeal] = useOptimistic(plan.meals, applyChange);
 
   // The optimistic update has to happen inside the same transition as the write, so
@@ -70,7 +115,14 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
     send(action, fields, () => applyMeal(change));
   };
 
-  function dayCard(day: (typeof days)[number]) {
+  /**
+   * One day's meals.
+   *
+   * `asColumn` is the difference between the two layouts: in the week grid a day is
+   * one narrow column of seven, so its meals stack; on its own it has the whole width
+   * and a single file of cards down the middle of a wide screen looks abandoned.
+   */
+  function dayCard(day: (typeof days)[number], asColumn = false) {
     return (
       <ContentCard density="compact" key={day.date}>
         <Card.Header>
@@ -81,7 +133,11 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
         </Card.Header>
 
         <Card.Content>
-          <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div
+            className={`grid grid-cols-1 items-start gap-3 sm:grid-cols-2 ${
+              asColumn ? "xl:grid-cols-1" : "xl:grid-cols-4"
+            }`}
+          >
             {(plan.days[day.index] ?? []).map((slot, slotIndex) => (
               <SlotCell
                 dayIndex={day.index}
@@ -91,6 +147,7 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
                 onMealChange={runMealChange}
                 slot={slot}
                 slotIndex={slotIndex}
+                view={shownAs}
                 weekStart={weekStart}
               />
             ))}
@@ -107,16 +164,44 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
     );
   }
 
+  const wholeWeek = shownAs === "week";
+
   return (
     <>
+      {/* Only where seven columns fit. Narrower than this a week is unreadable, so
+          there is no choice to offer. */}
+      <div className="hidden justify-end xl:flex">
+        <ToggleButtonGroup
+          aria-label="How much of the week to show"
+          disallowEmptySelection
+          onSelectionChange={(keys) => {
+            const chosen = [...keys][0] === "week" ? "week" : "day";
+            setShownAs(chosen);
+            remember({ view: chosen });
+          }}
+          selectedKeys={new Set([shownAs])}
+          selectionMode="single"
+          size="sm"
+        >
+          <ToggleButton className="min-h-9 gap-2 px-3" id="day">
+            <CalendarDays aria-hidden="true" className="size-4" />
+            Day
+          </ToggleButton>
+          <ToggleButton className="min-h-9 gap-2 px-3" id="week">
+            <CalendarRange aria-hidden="true" className="size-4" />
+            Week
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+
       <section
-        className="flex flex-col gap-4 xl:hidden"
         aria-label="Week by day"
+        className={`flex flex-col gap-4 ${wholeWeek ? "xl:hidden" : ""}`}
       >
         <div
-          className="grid grid-cols-7 gap-1"
-          role="tablist"
           aria-label="Choose a day"
+          className="relative z-10 grid grid-cols-7 gap-1"
+          role="tablist"
         >
           {days.map((day) => {
             const hasMeal = meals.some((meal) => meal.dayIndex === day.index);
@@ -127,7 +212,7 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
                 aria-selected={selected}
                 className={`flex min-h-14 flex-col items-center justify-center rounded-xl px-1 text-xs transition-colors ${selected ? "bg-foreground text-background" : "bg-surface text-foreground"}`}
                 key={day.date}
-                onClick={() => setSelectedDay(day.index)}
+                onClick={() => showDay(day.index)}
                 role="tab"
                 type="button"
               >
@@ -150,9 +235,11 @@ export function WeekGrid({ plan, weekStart }: WeekGridProps) {
         </div>
       </section>
 
-      <div className="hidden grid-cols-7 items-start gap-3 xl:grid">
-        {days.map((day) => dayCard(day))}
-      </div>
+      {wholeWeek ? (
+        <div className="hidden grid-cols-7 items-start gap-3 xl:grid">
+          {days.map((entry) => dayCard(entry, true))}
+        </div>
+      ) : null}
     </>
   );
 }

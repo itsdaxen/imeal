@@ -33,9 +33,9 @@ export const metadata: Metadata = { title: "Planner" };
 export default async function PlannerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string }>;
+  searchParams: Promise<{ day?: string; view?: string; week?: string }>;
 }) {
-  const { week } = await searchParams;
+  const { day, view, week } = await searchParams;
   const weekStart = resolveWeekStart(week);
   const [plan, sharedWithMe, friends, recipientIds, lists, destination] =
     await Promise.all([
@@ -121,7 +121,12 @@ export default async function PlannerPage({
         nextHref={`/planner?week=${addWeeks(weekStart, 1)}`}
         previousHref={`/planner?week=${addWeeks(weekStart, -1)}`}
       >
-        <WeekGrid plan={plan} weekStart={weekStart} />
+        <WeekGrid
+          day={day}
+          plan={plan}
+          view={view === "week" ? "week" : "day"}
+          weekStart={weekStart}
+        />
       </WeekSwitcher>
     </PageShell>
   );
