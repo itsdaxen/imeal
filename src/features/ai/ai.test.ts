@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readRecipe, readTidy } from "./ai";
+import { readRecipe } from "./ai";
 import { MAX_PASTED_CHARACTERS } from "./draft-recipe";
 
 const RECIPE = `Roast chicken
@@ -32,19 +32,5 @@ describe("readRecipe", () => {
       ok: false,
       reason: "unreadable",
     });
-  });
-});
-
-describe("readTidy", () => {
-  it("proposes changes for a list", () => {
-    const result = readTidy([
-      { id: "a", name: "Milk", quantity: 1, checked: false, category: null },
-    ]);
-
-    expect(result.ok && result.value).toHaveLength(1);
-  });
-
-  it("says so when the list is empty", () => {
-    expect(readTidy([])).toEqual({ ok: false, reason: "nothing-to-do" });
   });
 });

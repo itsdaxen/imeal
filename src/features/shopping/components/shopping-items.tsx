@@ -9,7 +9,6 @@ import {
   Tags,
 } from "lucide-react";
 import {
-  Chip,
   Dropdown,
   Input,
   Label,
@@ -45,6 +44,14 @@ const UNCATEGORISED = "Uncategorised";
 
 function categoryOf(item: ShoppingItem) {
   return item.category?.trim() || UNCATEGORISED;
+}
+
+export function itemAmount(item: Pick<ShoppingItem, "quantity" | "unit">) {
+  if (item.unit) {
+    return ` · ${item.quantity} ${item.unit}`;
+  }
+
+  return item.quantity > 1 ? ` × ${item.quantity}` : "";
 }
 
 function sortItems(items: ShoppingItem[], mode: SortMode) {
@@ -152,15 +159,8 @@ export function ShoppingItems({ items }: { items: ShoppingItem[] }) {
             }`}
           >
             {item.name}
-            {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+            {itemAmount(item)}
           </span>
-
-          {/* Grouped by category the chip would repeat the heading on every row. */}
-          {item.category && sort !== "category" ? (
-            <Chip className="hidden sm:inline-flex" size="sm" variant="soft">
-              {item.category}
-            </Chip>
-          ) : null}
 
           <span className="flex-1" />
 

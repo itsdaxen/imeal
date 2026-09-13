@@ -7,23 +7,35 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listSchema } from "@/features/shopping/shopping.schema";
 
-import { readRecipe, readTidy } from "./ai";
+import { readRecipe } from "./ai";
 import type { DraftRecipe } from "./draft-recipe";
-import type { TidyableItem, TidyChange } from "./tidy-list";
+import {
+  tidyProposalSchema,
+  validateTidyProposal,
+  type TidyableItem,
+  type TidyProposal,
+} from "./tidy-list";
 import { firstIssue } from "@/lib/form-errors";
+import { organizeShoppingList } from "./shopping-organizer";
 
 const pasteSchema = z.object({
   text: z.string().trim().min(1, "Paste a recipe first."),
 });
 
 export type RecipeDraftState = { error?: string; draft?: DraftRecipe };
-export type TidyState = { error?: string; changes?: TidyChange[] };
+export type TidyState = { error?: string; proposal?: TidyProposal };
 
 const MESSAGES = {
   "too-long": "That is longer than we can read. Trim it to the recipe itself.",
   unreadable:
     "No ingredients or steps in there. Check the paste and try again.",
   "nothing-to-do": "The list is empty, so there is nothing to tidy.",
+  "too-many-items": "This list is too large to organize in one pass.",
+  configuration: "The organizer is not configured correctly.",
+  busy: "The organizer is busy right now. Try again in a moment.",
+  timeout: "The organizer took too long. Try the list again.",
+  unavailable: "The organizer is unavailable right now. Try again shortly.",
+  invalid: "The organizer returned an unsafe proposal. Nothing was changed.",
 } as const;
 
 export async function draftRecipe(
@@ -59,7 +71,7 @@ async function currentListItems(list: string) {
 
   const { data, error } = await supabase
     .from("shopping_items")
-    .select("id, name, quantity, checked, category")
+    .select("id, name, quantity, unit, checked, category")
     .eq("list_id", list)
     .order("created_at", { ascending: true });
 
@@ -81,37 +93,50 @@ export async function proposeTidy(
   }
 
   const { items } = await currentListItems(parsed.data.listId);
-  const result = readTidy(items);
+  const result = await organizeShoppingList(items);
 
   if (!result.ok) {
     return { error: MESSAGES[result.reason] };
   }
 
-  return { changes: result.value };
+  return { proposal: result.value };
 }
 
-/**
- * The proposal is worked out again here rather than taken from the page, so what gets
- * applied is always derived from the list as it stands and cannot be dictated by the
- * form that was submitted.
- */
+/** Apply the exact proposal the person reviewed, after proving it still covers the
+ * current list exactly once. List members can already rename and merge these rows. */
 export async function applyTidy(formData: FormData) {
-  const parsed = listSchema.safeParse({ listId: formData.get("listId") });
+  const parsed = listSchema
+    .extend({ proposal: z.string().min(1).max(100_000) })
+    .safeParse({
+      listId: formData.get("listId"),
+      proposal: formData.get("proposal"),
+    });
 
   if (!parsed.success) {
     throw new Error("That list is not valid.");
   }
 
   const { supabase, list, items } = await currentListItems(parsed.data.listId);
-  const result = readTidy(items);
+  let decoded: unknown;
 
-  if (!list || !result.ok) {
-    return;
+  try {
+    decoded = JSON.parse(parsed.data.proposal);
+  } catch {
+    throw new Error("That organization proposal is not valid.");
+  }
+
+  const shaped = tidyProposalSchema.safeParse(decoded);
+  const proposal = shaped.success
+    ? validateTidyProposal(items, shaped.data)
+    : null;
+
+  if (!list || !proposal) {
+    throw new Error("The list changed. Organize it again before applying.");
   }
 
   const { error } = await supabase.rpc("apply_shopping_tidy", {
     p_list: list,
-    p_changes: result.value,
+    p_changes: proposal.items,
   });
 
   if (error) {

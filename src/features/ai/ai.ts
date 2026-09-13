@@ -3,7 +3,6 @@ import {
   MAX_PASTED_CHARACTERS,
   type DraftRecipe,
 } from "./draft-recipe";
-import { tidyList, type TidyableItem, type TidyChange } from "./tidy-list";
 
 export type AiMode = "local" | "model";
 
@@ -28,14 +27,4 @@ export function readRecipe(text: string): AiResult<DraftRecipe> {
   }
 
   return { ok: true, mode: "local", value: draft };
-}
-
-export function readTidy(
-  items: ReadonlyArray<TidyableItem>,
-): AiResult<TidyChange[]> {
-  if (items.length === 0) {
-    return { ok: false, reason: "nothing-to-do" };
-  }
-
-  return { ok: true, mode: "local", value: tidyList(items) };
 }

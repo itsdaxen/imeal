@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { applyTidy, proposeTidy } from "@/features/ai/ai.actions";
+import { organizeShoppingList } from "@/features/ai/shopping-organizer";
 import {
   addManualItem,
   addPlannedMealToShoppingList,
@@ -14,6 +15,9 @@ import { getShoppingList } from "./shopping.queries";
 
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: vi.fn(),
+}));
+vi.mock("@/features/ai/shopping-organizer", () => ({
+  organizeShoppingList: vi.fn(),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -59,6 +63,21 @@ beforeEach(() => {
   vi.resetAllMocks();
   getUser.mockResolvedValue({ data: { user: { id: userId } } });
   rpc.mockResolvedValue({ data: null, error: null });
+  vi.mocked(organizeShoppingList).mockResolvedValue({
+    ok: true,
+    value: {
+      items: [
+        {
+          sourceIds: [userId],
+          name: "Milk",
+          quantity: 1,
+          unit: "carton",
+          category: "dairy",
+          explanation: "Normalized milk to a practical purchase unit.",
+        },
+      ],
+    },
+  });
   vi.mocked(createSupabaseServerClient).mockResolvedValue({
     auth: { getUser },
     from,
@@ -190,13 +209,24 @@ describe("independent shopping", () => {
 
   it("previews and applies tidy to the same explicit list", async () => {
     const items = query([
-      { id: userId, name: "milk", quantity: 1, checked: false, category: null },
+      {
+        id: userId,
+        name: "milk",
+        quantity: 1,
+        unit: null,
+        checked: false,
+        category: null,
+      },
     ]);
     from.mockReturnValue(items);
-    expect(await proposeTidy({}, form({ listId: partyList }))).toHaveProperty(
-      "changes",
+    const proposed = await proposeTidy({}, form({ listId: partyList }));
+    expect(proposed).toHaveProperty("proposal");
+    await applyTidy(
+      form({
+        listId: partyList,
+        proposal: JSON.stringify(proposed.proposal),
+      }),
     );
-    await applyTidy(form({ listId: partyList }));
     expect(items.eq).toHaveBeenCalledWith("list_id", partyList);
     expect(rpc).toHaveBeenCalledWith(
       "apply_shopping_tidy",

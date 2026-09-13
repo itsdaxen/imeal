@@ -13,9 +13,9 @@ brings them into one workflow:
 3. Generate and refine the shopping list for that plan.
 4. Keep the recipe accessible while preparing the meal.
 
-The core experience works without AI. AI-assisted recipe import and shopping list
-cleanup are planned as optional conveniences, with user review before they change
-saved data.
+The core planning experience works without AI. Shopping-list organization uses a
+model to normalize ingredients, combine compatible requirements, choose practical
+purchase units, and assign categories, with user review before saved data changes.
 
 ## Features
 
@@ -33,8 +33,9 @@ saved data.
 - A public catalog that anyone can browse, an author-driven suggestion queue, and
   moderation for administrators.
 
-AI-assisted recipe import and shopping-list cleanup are the remaining planned
-features. They are deliberately optional: nothing above depends on them.
+Recipe import currently has a deterministic parser. Shopping-list organization uses
+strict structured model output and leaves the existing list untouched when the model
+is unavailable or its proposal fails validation.
 
 ## Stack
 
@@ -62,6 +63,8 @@ from the project's API settings:
 | `NEXT_PUBLIC_SUPABASE_URL`             | Project URL, used by browser and server code.                                 |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key; every request is still constrained by Row Level Security.    |
 | `SUPABASE_SERVICE_KEY`                 | Server-only. Bypasses Row Level Security, so it must never reach the browser. |
+| `OPENAI_API_KEY`                       | Server-only. Enables reviewed shopping-list organization.                     |
+| `OPENAI_ORGANIZER_MODEL`               | Optional model override; defaults to `gpt-5-nano`.                            |
 
 Apply the schema with the Supabase CLI, then start the app:
 
