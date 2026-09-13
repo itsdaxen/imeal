@@ -16,6 +16,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
+    "eval": "vitest run --config vitest.eval.config.mts",
     "test:watch": "vitest",
     "verify:rls": "node scripts/verify-rls.mjs",
     "verify:moderation": "node scripts/verify-moderation.mjs",
