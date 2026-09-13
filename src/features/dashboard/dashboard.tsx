@@ -8,10 +8,7 @@ import {
 } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
-import { CalendarPlus } from "lucide-react";
-
 import { ActionLink } from "@/components/ui/action";
-import { EmptyState } from "@/components/ui/empty-state";
 import { ContentCard } from "@/components/ui/content-card";
 import { PageGrid, span } from "@/components/ui/page-grid";
 import { PanelTitle } from "@/components/ui/panel-title";
@@ -24,6 +21,7 @@ import { PageShell } from "@/components/ui/page-shell";
 import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
 import { NextMealSlider } from "./components/next-meal-slider";
+import { DayFocusProvider } from "./components/day-focus";
 
 function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (
@@ -58,6 +56,7 @@ function WeekBand({ week }: Pick<DashboardData, "week">) {
           {week.days.map((day) => (
             <PlanningDay
               date={day.dayOfMonth}
+              dayIndex={day.index}
               hasMeal={day.hasMeal}
               isToday={day.isToday}
               key={day.label}
@@ -66,45 +65,6 @@ function WeekBand({ week }: Pick<DashboardData, "week">) {
           ))}
         </ol>
       </Card.Content>
-    </ContentCard>
-  );
-}
-
-function NextMealCard({
-  nextMeals,
-  weekStart,
-}: Pick<DashboardData, "nextMeals" | "weekStart">) {
-  if (nextMeals.length === 0) {
-    return (
-      // Empty, this is the biggest object on the page and the least informative, so
-      // it uses the same empty state as everywhere else rather than a bespoke one.
-      <ContentCard className={cn(span.wide, "justify-center")} id="next-meal">
-        <EmptyState
-          actions={
-            <ActionLink href={`/planner?week=${weekStart}`} tier="primary">
-              Plan the week
-            </ActionLink>
-          }
-          bare
-          description="Place a few recipes into the week and the next one shows up here."
-          icon={<CalendarPlus aria-hidden="true" className="size-6" />}
-          title="Nothing planned yet"
-        />
-      </ContentCard>
-    );
-  }
-
-  return (
-    <ContentCard
-      appearance="media"
-      className={cn(
-        span.wide,
-        "aspect-[3/2] sm:aspect-[2/1] lg:aspect-auto lg:min-h-88",
-      )}
-      density="flush"
-      id="next-meal"
-    >
-      <NextMealSlider meals={nextMeals} weekStart={weekStart} />
     </ContentCard>
   );
 }
@@ -292,8 +252,16 @@ export async function Dashboard() {
         <h2 className="sr-only">This week at a glance</h2>
 
         <PageGrid>
-          <WeekBand week={data.week} />
-          <NextMealCard nextMeals={data.nextMeals} weekStart={data.weekStart} />
+          {/* The week band and the hero are separate cards in this grid, and pressing
+              a day in one changes the other. The provider renders no element, so the
+              grid is laid out exactly as it was. */}
+          <DayFocusProvider initialDay={data.focusDay}>
+            <WeekBand week={data.week} />
+            <NextMealSlider
+              days={data.plannedDays}
+              weekStart={data.weekStart}
+            />
+          </DayFocusProvider>
           <TodayCard today={data.today} weekStart={data.weekStart} />
           <ShoppingBand shopping={data.shopping} weekStart={data.weekStart} />
 

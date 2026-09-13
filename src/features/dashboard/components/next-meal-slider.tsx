@@ -1,34 +1,77 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card } from "@heroui/react";
+import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Card, cn } from "@heroui/react";
 
 import { ActionLink } from "@/components/ui/action";
+import { ContentCard } from "@/components/ui/content-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { PanelTitle } from "@/components/ui/panel-title";
 import { RecipeImage } from "@/components/ui/recipe-image";
+import { span } from "@/components/ui/page-grid";
 import type { DashboardData } from "../dashboard.queries";
+import { useDayFocus } from "./day-focus";
 
-type Meal = DashboardData["nextMeals"][number];
+type Day = DashboardData["plannedDays"][number];
 
 /**
  * The day you are cooking next, one meal at a time.
  *
- * A day is usually more than one meal, and the hero used to show whichever came first
- * and hide the rest. Scroll snapping rather than a scripted carousel: a swipe on a
+ * A day is usually more than one meal, so the hero carries all of them rather than
+ * whichever comes first. Scroll snapping rather than a scripted carousel: a swipe on a
  * phone is then the browser's own gesture, with the arrows and dots only there for a
  * pointer that cannot swipe.
  */
 export function NextMealSlider({
-  meals,
+  days,
   weekStart,
 }: {
-  meals: Meal[];
+  days: Day[];
   weekStart: string;
 }) {
+  const { day } = useDayFocus();
   const track = useRef<HTMLUListElement>(null);
   const [shown, setShown] = useState(0);
+  const [shownFor, setShownFor] = useState(day);
+  const focused = days.find((entry) => entry.index === day);
+  const meals = focused?.meals ?? [];
+
+  // Adjusted during render rather than in an effect: a different day is not an event
+  // to react to, it is a new day that starts at its first meal. The track is keyed by
+  // the day as well, so the browser puts a fresh one back at the beginning and the
+  // scroll position never has to be reached for.
+  if (shownFor !== day) {
+    setShownFor(day);
+    setShown(0);
+  }
+
+  if (meals.length === 0) {
+    return (
+      // Empty, this is the biggest object on the page and the least informative, so it
+      // uses the same empty state as everywhere else rather than a bespoke one.
+      <ContentCard className={cn(span.wide, "justify-center")} id="next-meal">
+        <EmptyState
+          actions={
+            <ActionLink
+              href={`/planner?week=${weekStart}&day=${day}`}
+              tier="primary"
+            >
+              Plan {focused ? focused.label : "the week"}
+            </ActionLink>
+          }
+          bare
+          icon={<CalendarPlus aria-hidden="true" className="size-6" />}
+          title={
+            focused
+              ? `Nothing planned for ${focused.label}`
+              : "Nothing planned yet"
+          }
+        />
+      </ContentCard>
+    );
+  }
 
   /**
    * Moves the track by assignment, with the easing left to CSS.
@@ -53,9 +96,18 @@ export function NextMealSlider({
   }
 
   return (
-    <>
+    <ContentCard
+      appearance="media"
+      className={cn(
+        span.wide,
+        "aspect-[3/2] sm:aspect-[2/1] lg:aspect-auto lg:min-h-88",
+      )}
+      density="flush"
+      id="next-meal"
+    >
       <ul
         className="flex h-full snap-x snap-mandatory [scrollbar-width:none] list-none overflow-x-auto p-0 [&::-webkit-scrollbar]:hidden"
+        key={day}
         onScroll={(event) => {
           const element = event.currentTarget;
           setShown(Math.round(element.scrollLeft / element.clientWidth));
@@ -140,6 +192,6 @@ export function NextMealSlider({
           })}
         </div>
       ) : null}
-    </>
+    </ContentCard>
   );
 }

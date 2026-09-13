@@ -26,24 +26,32 @@ export type DashboardData = {
       label: string;
       shortLabel: string;
       dayOfMonth: number;
+      index: number;
       isToday: boolean;
       hasMeal: boolean;
     }>;
   };
   /**
-   * Everything planned for the next day that has anything, earliest slot first. More
-   * than one is normal — a day is usually a few meals, not one — so the hero carries
-   * the whole day rather than picking a single meal out of it.
+   * Each day of the week and everything planned for it, earliest slot first.
+   *
+   * More than one meal a day is normal, so the hero carries a whole day rather than
+   * picking a single meal out of it — and it carries whichever day you press in the
+   * week, so every day is here rather than only the next one with something in it.
    */
-  nextMeals: Array<{
-    approved: boolean;
-    dayLabel: string;
-    id: string;
-    imageUrl: string | null;
-    prepMinutes: number;
-    slot: MealSlot;
-    title: string;
+  plannedDays: Array<{
+    index: number;
+    label: string;
+    meals: Array<{
+      approved: boolean;
+      dayLabel: string;
+      id: string;
+      imageUrl: string | null;
+      prepMinutes: number;
+      slot: MealSlot;
+      title: string;
+    }>;
   }>;
+  focusDay: number;
   today: {
     label: string;
     slots: Array<{
@@ -129,6 +137,7 @@ export async function getDashboardData(
       approvedMeals: plan.meals.filter((meal) => meal.approved).length,
       totalSlots: plan.days.reduce((total, shape) => total + shape.length, 0),
       days: days.map((day) => ({
+        index: day.index,
         label: day.label,
         shortLabel: day.shortLabel,
         dayOfMonth: day.dayOfMonth,
@@ -136,20 +145,26 @@ export async function getDashboardData(
         hasMeal: plan.meals.some((meal) => meal.dayIndex === day.index),
       })),
     },
-    nextMeals: upcoming
-      ? plan.meals
-          .filter((meal) => meal.dayIndex === upcoming.dayIndex)
-          .sort((a, b) => slotRank(a.slot) - slotRank(b.slot))
-          .map((meal) => ({
-            approved: meal.approved,
-            dayLabel: days[meal.dayIndex].label,
-            id: meal.recipe.id,
-            imageUrl: meal.recipe.imageUrl,
-            prepMinutes: meal.recipe.prepMinutes,
-            slot: meal.slot,
-            title: meal.recipe.title,
-          }))
-      : [],
+    // Every day, not only the next one with something in it: the hero follows the day
+    // you pick out of the week, and a day you have not planned yet has an answer too.
+    plannedDays: days.map((day) => ({
+      index: day.index,
+      label: day.label,
+      meals: plan.meals
+        .filter((meal) => meal.dayIndex === day.index)
+        .sort((a, b) => slotRank(a.slot) - slotRank(b.slot))
+        .map((meal) => ({
+          approved: meal.approved,
+          dayLabel: day.label,
+          id: meal.recipe.id,
+          imageUrl: meal.recipe.imageUrl,
+          prepMinutes: meal.recipe.prepMinutes,
+          slot: meal.slot,
+          title: meal.recipe.title,
+        })),
+    })),
+    /** Where the hero starts: the next day with a meal, or today if none has one. */
+    focusDay: upcoming?.dayIndex ?? (todayIndex === -1 ? 0 : todayIndex),
     today: {
       label: todayIndex === -1 ? "Today" : days[todayIndex].label,
       slots: todaySlots,
