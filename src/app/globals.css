@@ -218,6 +218,18 @@ button:disabled,
 }
 
 /**
+ * The raised edge reads as lift only with room around it. Sitting directly above
+ * another control — the planner's picker is right on top of the day selector — it
+ * reads instead as a seam between the two, so a group can ask to stay flat.
+ *
+ * Unlayered, because the rule it overrides is: a `shadow-none` utility would lose.
+ */
+[data-slot="toggle-button-group"][data-flat]
+  [data-slot="toggle-button"][data-selected="true"] {
+  box-shadow: none;
+}
+
+/**
  * Where every field in a form is required, the asterisk distinguishes nothing and is
  * only noise stacked on a label. The field keeps `isRequired`, so validation and the
  * accessible name are unchanged — this hides the marker, not the meaning.

@@ -173,6 +173,7 @@ export function WeekGrid({ day, plan, view, weekStart }: WeekGridProps) {
       <div className="hidden justify-end xl:flex">
         <ToggleButtonGroup
           aria-label="How much of the week to show"
+          data-flat
           disallowEmptySelection
           onSelectionChange={(keys) => {
             const chosen = [...keys][0] === "week" ? "week" : "day";
@@ -200,7 +201,7 @@ export function WeekGrid({ day, plan, view, weekStart }: WeekGridProps) {
       >
         <div
           aria-label="Choose a day"
-          className="relative z-10 grid grid-cols-7 gap-1"
+          className="grid grid-cols-7 gap-1"
           role="tablist"
         >
           {days.map((day) => {
