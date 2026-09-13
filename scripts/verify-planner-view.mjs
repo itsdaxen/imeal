@@ -28,6 +28,9 @@ async function open(user, query) {
   );
 
   return {
+    links: [...document.querySelectorAll("a")].map((link) =>
+      link.getAttribute("href"),
+    ),
     day: tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true"),
     // Counted by the day names on show rather than by the shape of the container:
     // the route's skeleton carries a seven-column grid of its own.
@@ -98,6 +101,42 @@ try {
 
   assert.equal((await open(cook, "&view=week&day=5")).day, 5);
   pass("and still remembers which day you were on");
+
+  // Filling a slot takes you out of the planner and back into it. Both directions
+  // carry the day, or you return to whichever day the planner opens on rather than
+  // the one you were filling.
+  for (const [view, day] of [
+    ["day", 4],
+    ["week", 2],
+  ]) {
+    const asked = `&day=${day}${view === "week" ? "&view=week" : ""}`;
+    const planner = await open(cook, asked);
+    const toChooser = planner.links.find(
+      (href) =>
+        href?.includes("/planner/assign") &&
+        href.includes(`day=${day}`) &&
+        href.includes("slot=dinner"),
+    );
+    assert(toChooser, `the ${view} view offers an empty dinner on day ${day}`);
+    assert.match(toChooser, new RegExp(`view=${view}`));
+
+    const chooser = new JSDOM(
+      await (
+        await fetch(`${base}${toChooser}`, { headers: { cookie: cook.cookie } })
+      ).text(),
+    ).window.document;
+    const back = [...chooser.querySelectorAll("a")].find((link) =>
+      /Back to the week/.test(link.textContent),
+    );
+    assert(back, "the chooser offers a way back");
+    // Spelled out rather than built with the app's own helper: a verifier that shares
+    // the code under test agrees with it even when both are wrong.
+    assert.equal(
+      back.getAttribute("href"),
+      `/planner?week=${week}&day=${day}${view === "week" ? "&view=week" : ""}`,
+    );
+  }
+  pass("the way to the meal chooser and back keeps its place in the week");
 
   summary("planner view checks passed");
 } finally {

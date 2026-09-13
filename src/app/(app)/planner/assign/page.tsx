@@ -11,7 +11,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { AssignmentBrowser } from "@/features/planner/components/assignment-browser";
 import { getWeekPlan } from "@/features/planner/plan.queries";
 import { slotTargetSchema } from "@/features/planner/plan.schema";
-import { resolveWeekStart, weekDays } from "@/features/planner/week";
+import {
+  plannerHref,
+  resolveWeekStart,
+  weekDays,
+} from "@/features/planner/week";
 import { listOwnedRecipes } from "@/features/recipes/recipe.queries";
 import { PageShell } from "@/components/ui/page-shell";
 
@@ -24,10 +28,11 @@ export default async function AssignPage({
     day?: string;
     index?: string;
     slot?: string;
+    view?: string;
     week?: string;
   }>;
 }) {
-  const { day, index, slot, week } = await searchParams;
+  const { day, index, slot, view, week } = await searchParams;
   const target = slotTargetSchema.safeParse({
     weekStart: resolveWeekStart(week),
     dayIndex: day,
@@ -52,7 +57,7 @@ export default async function AssignPage({
   return (
     <PageShell width="wide">
       <header className="flex flex-col gap-3">
-        <BackLink href={`/planner?week=${weekStart}`}>
+        <BackLink href={plannerHref(weekStart, dayIndex, view)}>
           Back to the week
         </BackLink>
         <Typography type="h1" weight="semibold">
@@ -101,6 +106,7 @@ export default async function AssignPage({
           dayIndex={dayIndex}
           mealSlot={mealSlot}
           recipes={recipes}
+          view={view}
           weekStart={weekStart}
         />
       )}

@@ -1,4 +1,4 @@
-export const DAY_LABELS = [
+const DAY_LABELS = [
   "Monday",
   "Tuesday",
   "Wednesday",
@@ -107,4 +107,31 @@ export function formatWeekLabel(weekStart: string) {
       : `${month.format(last)} ${dayNumber.format(last)}`;
 
   return `${start} – ${end}`;
+}
+
+/**
+ * The planner, showing a particular day of a particular week.
+ *
+ * Three places send you back to the planner — the link out of the meal chooser, the
+ * redirect after choosing one, and the dashboard — and each built the address itself,
+ * so each could forget a part of it. Forgetting the day is not a small thing: you
+ * return to whichever day the planner opens on rather than the one you were filling.
+ */
+export function plannerHref(
+  weekStart: string,
+  dayIndex?: number,
+  view?: string,
+) {
+  const params = new URLSearchParams({ week: weekStart });
+
+  if (dayIndex !== undefined) {
+    params.set("day", String(dayIndex));
+  }
+
+  // Only the choice that is not the default needs saying.
+  if (view === "week") {
+    params.set("view", "week");
+  }
+
+  return `/planner?${params}`;
 }

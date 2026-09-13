@@ -17,6 +17,7 @@ import {
   slotTargetSchema,
 } from "./plan.schema";
 import { findWeekPlan, openWeek } from "./week-plan";
+import { plannerHref } from "./week";
 import { MEAL_SLOTS } from "@/features/recipes/recipe.schema";
 import { namesToAdd } from "@/lib/names";
 import { firstIssue } from "@/lib/form-errors";
@@ -48,6 +49,7 @@ export async function assignRecipeToSlot(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
   const { weekStart, dayIndex, slotIndex, slot, recipeId } = parsed.data;
+  const view = formData.get("view");
 
   // An empty plan row is harmless if the item write fails, so these two writes
   // do not need a transaction.
@@ -69,7 +71,7 @@ export async function assignRecipeToSlot(formData: FormData) {
   }
 
   revalidatePath("/planner");
-  redirect(`/planner?week=${weekStart}`);
+  redirect(plannerHref(weekStart, dayIndex, String(view ?? "")));
 }
 
 export async function clearSlot(formData: FormData) {

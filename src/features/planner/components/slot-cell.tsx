@@ -16,6 +16,8 @@ type SlotCellProps = {
   onMealChange: RunMealChange;
   slot: MealSlot;
   slotIndex: number;
+  /** Carried into the chooser so that returning lands back on this view of the week. */
+  view: "day" | "week";
   weekStart: string;
 };
 
@@ -26,9 +28,10 @@ export function SlotCell({
   onMealChange,
   slot,
   slotIndex,
+  view,
   weekStart,
 }: SlotCellProps) {
-  const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}&index=${slotIndex}`;
+  const assignHref = `/planner/assign?week=${weekStart}&day=${dayIndex}&slot=${slot}&index=${slotIndex}&view=${view}`;
 
   return (
     <div
