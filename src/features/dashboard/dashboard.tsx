@@ -1,11 +1,4 @@
-import {
-  Card,
-  Chip,
-  cn,
-  Link,
-  ProgressCircle,
-  Typography,
-} from "@heroui/react";
+import { Card, cn, Link, ProgressCircle, Typography } from "@heroui/react";
 
 import { SectionTitle } from "@/components/ui/section-title";
 import { ActionLink } from "@/components/ui/action";
@@ -22,6 +15,7 @@ import { getDashboardData, type DashboardData } from "./dashboard.queries";
 import { PlanningDay } from "./components/planning-day";
 import { NextMealSlider } from "./components/next-meal-slider";
 import { DayFocusProvider } from "./components/day-focus";
+import { DayCard } from "./components/day-card";
 
 function WeekBand({ week }: Pick<DashboardData, "week">) {
   return (
@@ -64,70 +58,6 @@ function WeekBand({ week }: Pick<DashboardData, "week">) {
             />
           ))}
         </ol>
-      </Card.Content>
-    </ContentCard>
-  );
-}
-
-function TodayCard({
-  today,
-  weekStart,
-}: Pick<DashboardData, "today" | "weekStart">) {
-  const planned = today.slots.filter((entry) => entry.meal !== null).length;
-
-  return (
-    <ContentCard className={cn(span.narrow, "gap-5")} id="today">
-      <Card.Header className="gap-1">
-        <Eyebrow>Today</Eyebrow>
-        <PanelTitle>{today.label}</PanelTitle>
-        <Card.Description>
-          {planned === 0
-            ? "Nothing planned for today."
-            : `${planned} of ${today.slots.length} meals planned.`}
-        </Card.Description>
-      </Card.Header>
-
-      <Card.Content>
-        <ul className="flex list-none flex-col p-0">
-          {today.slots.map(({ meal, slot }) => (
-            <li
-              className="flex min-h-12 items-center justify-between gap-3 border-b border-separator last:border-b-0"
-              key={slot}
-            >
-              <span className="min-w-0">
-                <span className="block text-xs font-medium text-muted capitalize">
-                  {slot}
-                </span>
-                <span className="block truncate text-sm">
-                  {meal ? meal.title : "Not planned"}
-                </span>
-              </span>
-
-              <span className="flex shrink-0 items-center gap-2">
-                {meal ? (
-                  <Chip
-                    color={meal.approved ? "accent" : "default"}
-                    size="sm"
-                    variant="soft"
-                  >
-                    {meal.approved ? "Ready" : "Draft"}
-                  </Chip>
-                ) : null}
-                <ActionLink
-                  className="text-sm"
-                  href={
-                    meal?.approved
-                      ? `/cook/${meal.id}`
-                      : `/planner?week=${weekStart}`
-                  }
-                  tier="quiet"
-                >
-                  {meal ? (meal.approved ? "Cook" : "Review") : "Plan"}
-                </ActionLink>
-              </span>
-            </li>
-          ))}
-        </ul>
       </Card.Content>
     </ContentCard>
   );
@@ -252,17 +182,17 @@ export async function Dashboard() {
         <h2 className="sr-only">This week at a glance</h2>
 
         <PageGrid>
-          {/* The week band and the hero are separate cards in this grid, and pressing
-              a day in one changes the other. The provider renders no element, so the
-              grid is laid out exactly as it was. */}
+          {/* Three separate cards in this grid, and pressing a day in the first
+              changes the other two. The provider renders no element of its own, so
+              the grid is laid out exactly as it was. */}
           <DayFocusProvider initialDay={data.focusDay}>
             <WeekBand week={data.week} />
             <NextMealSlider
               days={data.plannedDays}
               weekStart={data.weekStart}
             />
+            <DayCard days={data.plannedDays} weekStart={data.weekStart} />
           </DayFocusProvider>
-          <TodayCard today={data.today} weekStart={data.weekStart} />
           <ShoppingBand shopping={data.shopping} weekStart={data.weekStart} />
 
           <section

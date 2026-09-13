@@ -41,6 +41,19 @@ export type DashboardData = {
   plannedDays: Array<{
     index: number;
     label: string;
+    dateLabel: string;
+    isToday: boolean;
+    /** Every slot the day holds, planned or not, in the order they are cooked. */
+    slots: Array<{
+      label: string;
+      slot: MealSlot;
+      meal: {
+        id: string;
+        title: string;
+        prepMinutes: number;
+        approved: boolean;
+      } | null;
+    }>;
     meals: Array<{
       approved: boolean;
       dayLabel: string;
@@ -52,18 +65,6 @@ export type DashboardData = {
     }>;
   }>;
   focusDay: number;
-  today: {
-    label: string;
-    slots: Array<{
-      slot: MealSlot;
-      meal: {
-        id: string;
-        title: string;
-        prepMinutes: number;
-        approved: boolean;
-      } | null;
-    }>;
-  };
   shopping: { completedItems: number; totalItems: number; nextItems: string[] };
   recentRecipes: RecipeSummary[];
 };
@@ -108,26 +109,31 @@ export async function getDashboardData(
   const upcoming = selectNextMeal(plan.meals, todayIndex);
 
   // The old app's home screen answered one question first: what am I cooking today.
-  const todayShape = plan.days[Math.max(todayIndex, 0)] ?? [];
-  const todaySlots = todayShape.map((slot, slotIndex) => {
-    const meal = plan.meals.find(
-      (planned) =>
-        planned.dayIndex === todayIndex && planned.slotIndex === slotIndex,
-    );
+  // It still opens on that answer, but every day can be asked the same question now,
+  // so the shape is built for all seven rather than for one.
+  const slotsOf = (dayIndex: number) => {
+    const shape = plan.days[dayIndex] ?? [];
 
-    return {
-      label: mealLabel(todayShape, slotIndex),
-      slot,
-      meal: meal
-        ? {
-            id: meal.recipe.id,
-            title: meal.recipe.title,
-            prepMinutes: meal.recipe.prepMinutes,
-            approved: meal.approved,
-          }
-        : null,
-    };
-  });
+    return shape.map((slot, slotIndex) => {
+      const meal = plan.meals.find(
+        (planned) =>
+          planned.dayIndex === dayIndex && planned.slotIndex === slotIndex,
+      );
+
+      return {
+        label: mealLabel(shape, slotIndex),
+        slot,
+        meal: meal
+          ? {
+              id: meal.recipe.id,
+              title: meal.recipe.title,
+              prepMinutes: meal.recipe.prepMinutes,
+              approved: meal.approved,
+            }
+          : null,
+      };
+    });
+  };
 
   return {
     weekStart,
@@ -150,6 +156,9 @@ export async function getDashboardData(
     plannedDays: days.map((day) => ({
       index: day.index,
       label: day.label,
+      dateLabel: day.dateLabel,
+      isToday: day.date === todayIso,
+      slots: slotsOf(day.index),
       meals: plan.meals
         .filter((meal) => meal.dayIndex === day.index)
         .sort((a, b) => slotRank(a.slot) - slotRank(b.slot))
@@ -165,10 +174,6 @@ export async function getDashboardData(
     })),
     /** Where the hero starts: the next day with a meal, or today if none has one. */
     focusDay: upcoming?.dayIndex ?? (todayIndex === -1 ? 0 : todayIndex),
-    today: {
-      label: todayIndex === -1 ? "Today" : days[todayIndex].label,
-      slots: todaySlots,
-    },
     shopping: {
       completedItems: shopping.items.filter((item) => item.checked).length,
       totalItems: shopping.items.length,
