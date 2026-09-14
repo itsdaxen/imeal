@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Button, Typography } from "@heroui/react";
 
@@ -22,6 +22,37 @@ type TidyPanelProps = {
   }>;
   listId: string;
 };
+
+type Progress = "idle" | "sending" | "organizing" | "done" | "error";
+
+const PROGRESS_LABEL: Record<Progress, string> = {
+  idle: "Organize list",
+  sending: "Sending to AI",
+  organizing: "AI is organizing",
+  done: "List organized",
+  error: "Try organizing again",
+};
+
+/**
+ * The wait, spelled out beside the label.
+ *
+ * An ellipsis says the same thing and says it motionless, which on a wait of twenty
+ * seconds to a minute reads as a button that has stopped rather than one that is
+ * working.
+ */
+function WorkingDots() {
+  return (
+    <span aria-hidden="true" className="inline-flex items-end gap-0.5 pb-0.5">
+      {[0, 1, 2].map((dot) => (
+        <span
+          className="size-1 [animation:tidy-dot_1.4s_ease-in-out_infinite] rounded-full bg-current motion-reduce:animate-none"
+          key={dot}
+          style={{ animationDelay: `${dot * 180}ms` }}
+        />
+      ))}
+    </span>
+  );
+}
 
 function describe(
   change: OrganizedItem,
@@ -66,6 +97,27 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
     {},
   );
   const [dismissed, setDismissed] = useState(false);
+  const [pendingProgress, setPendingProgress] = useState<Progress>("sending");
+
+  useEffect(() => {
+    if (!isPending) return;
+
+    const organizing = window.setTimeout(
+      () => setPendingProgress("organizing"),
+      500,
+    );
+
+    return () => window.clearTimeout(organizing);
+  }, [isPending]);
+
+  const progress: Progress = isPending
+    ? pendingProgress
+    : state.proposal
+      ? "done"
+      : state.error
+        ? "error"
+        : "idle";
+
   const before = new Map(items.map((item) => [item.id, item]));
   const proposed = (state.proposal?.items ?? [])
     .map((change) => ({ change, notes: describe(change, before) }))
@@ -75,24 +127,30 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
 
   return (
     <>
-      <form action={formAction} className="flex flex-wrap items-center gap-3">
+      <form
+        action={formAction}
+        onSubmit={() => {
+          setDismissed(false);
+          setPendingProgress("sending");
+        }}
+      >
         <input name="listId" type="hidden" value={listId} />
         <Button
-          className="min-h-11"
+          className="min-h-11 min-w-48"
           isPending={isPending}
           type="submit"
           variant="tertiary"
         >
           <Sparkles aria-hidden="true" className="size-4" />
-          Organize list
+          <span
+            aria-live="polite"
+            className="inline-flex [animation:tidy-status-in_180ms_ease-out] items-center gap-1 motion-reduce:animate-none"
+            key={progress}
+          >
+            {PROGRESS_LABEL[progress]}
+            {isPending ? <WorkingDots /> : null}
+          </span>
         </Button>
-        {/* Reading a full list takes between twenty seconds and a minute, measured.
-            A button that spins for that long with nothing said looks broken. */}
-        {isPending ? (
-          <Typography aria-live="polite" color="muted" type="body-sm">
-            Reading your list. This can take a minute.
-          </Typography>
-        ) : null}
       </form>
 
       {/* The proposal is a decision, so it interrupts rather than appending below. */}

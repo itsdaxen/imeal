@@ -24,9 +24,11 @@ const MAX_ITEMS = 200;
  * the list — so the differences were noise and the extra requests bought nothing.
  */
 const BATCH = 50;
-/** Keep the default at the least expensive model; deployments can trade cost for
- * more consistent duplicate detection with `OPENAI_ORGANIZER_MODEL=gpt-5-mini`. */
-const DEFAULT_MODEL = "gpt-5-nano";
+/**
+ * The old nano model took 11.7 seconds on the representative 12-row list. Luna
+ * without reasoning took 3.4–4.4 seconds and still found all three duplicate groups.
+ */
+const DEFAULT_MODEL = "gpt-5.6-luna";
 
 /**
  * Written as rules rather than prose.
@@ -182,18 +184,18 @@ async function requestOrganization(
         },
         body: JSON.stringify({
           model: process.env.OPENAI_ORGANIZER_MODEL || DEFAULT_MODEL,
-          // Minimal effort spends no reasoning tokens at all, and it showed: the
-          // model dropped rows out of the partition and added 500 ml to 1 l to get
-          // 2 l. Low is the cheapest setting that actually thinks about the list.
-          reasoning: { effort: "low" },
+          reasoning: {
+            effort: process.env.OPENAI_ORGANIZER_REASONING || "none",
+          },
           store: false,
-          max_output_tokens: 12_000,
+          max_output_tokens: 6_000,
           instructions: INSTRUCTIONS,
           input: JSON.stringify({
             categories: CATEGORIES,
             items: keyedItems,
           }),
           text: {
+            verbosity: "low",
             format: {
               type: "json_schema",
               name: "shopping_list_organization",
@@ -226,13 +228,17 @@ async function requestOrganization(
 
       return lastFailure;
     } catch (error) {
+      const timedOut =
+        error instanceof DOMException &&
+        (error.name === "TimeoutError" || error.name === "AbortError");
+
+      if (timedOut) {
+        return { ok: false as const, reason: "timeout" as const };
+      }
+
       lastFailure = {
         ok: false,
-        reason:
-          error instanceof DOMException &&
-          (error.name === "TimeoutError" || error.name === "AbortError")
-            ? "timeout"
-            : "unavailable",
+        reason: "unavailable",
       };
 
       if (attempt === 0) {
@@ -320,7 +326,7 @@ function inNameOrder(items: ReadonlyArray<TidyableItem>) {
  * multiplies that — so asking again is worth it, and costs nothing when it is not
  * needed.
  */
-const ATTEMPTS = 3;
+const ATTEMPTS = 2;
 
 async function organizeBatch(key: string, batch: ReadonlyArray<TidyableItem>) {
   let result = await attemptOrganization(key, batch);

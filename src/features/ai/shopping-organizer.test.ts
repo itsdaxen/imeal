@@ -74,7 +74,9 @@ describe("organizeShoppingList", () => {
     const request = JSON.parse(
       vi.mocked(fetch).mock.calls[0][1]?.body as string,
     );
-    expect(request.model).toBe("gpt-5-nano");
+    expect(request.model).toBe("gpt-5.6-luna");
+    expect(request.reasoning).toEqual({ effort: "none" });
+    expect(request.text.verbosity).toBe("low");
     expect(request.input).not.toContain(first);
     expect(request.input).toContain("item_1");
   });
@@ -113,6 +115,20 @@ describe("organizeShoppingList", () => {
       ok: false,
       reason: "unavailable",
     });
+  });
+
+  it("does not double the wait after a request has timed out", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "test-key");
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValue(new DOMException("Timed out", "TimeoutError"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(await organizeShoppingList(items)).toEqual({
+      ok: false,
+      reason: "timeout",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("reports a missing key as configuration rather than an outage", async () => {
