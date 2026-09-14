@@ -152,6 +152,77 @@ try {
   assert.deepEqual(untouched, { name: "Their milk", quantity: 1 });
   pass("a proposal cannot reach a row on somebody else's list");
 
+  // Building the list again deletes generated rows whose name no longer matches an
+  // ingredient — and organizing renames them. A manual row folded into a generated
+  // one used to vanish on the next build, along with the shopping it held.
+  const week = "2026-09-14";
+  const recipe = await result(
+    cook.client
+      .from("recipes")
+      .insert({
+        title: "Anchovy pasta",
+        owner_id: cook.id,
+        ingredients: ["Anchovies"],
+        steps: ["Cook."],
+        meal_tags: ["dinner"],
+      })
+      .select("id")
+      .single(),
+  );
+  const plan = await result(
+    cook.client
+      .from("meal_plans")
+      .insert({ user_id: cook.id, week_start: week, target_list_id: list })
+      .select("id")
+      .single(),
+  );
+  await result(
+    cook.client.from("meal_plan_items").insert({
+      meal_plan_id: plan.id,
+      recipe_id: recipe.id,
+      day_index: 0,
+      slot: "dinner",
+      slot_index: 3,
+      approved: true,
+    }),
+  );
+  await result(
+    cook.client.rpc("sync_generated_shopping_items", { p_week_start: week }),
+  );
+
+  const fromThePlan = (await rowsOf(cook, list)).find(
+    (row) => row.name === "Anchovies",
+  );
+  assert(fromThePlan, "the plan put its ingredient on the list");
+  const byHand = await add(cook, list, { name: "anchovy", quantity: 2 });
+
+  await result(
+    cook.client.rpc("apply_shopping_tidy", {
+      p_list: list,
+      p_changes: [
+        organized([fromThePlan.id, byHand.id], {
+          name: "salted anchovies",
+          quantity: 3,
+        }),
+      ],
+    }),
+  );
+  await result(
+    cook.client.rpc("sync_generated_shopping_items", { p_week_start: week }),
+  );
+
+  const survivors = await rowsOf(cook, list);
+  const merged = survivors.find((row) => row.name === "salted anchovies");
+  assert(merged, "building the list again threw away what was organized");
+  assert.equal(merged.quantity, 3);
+  pass("organizing a planned row keeps the shopping added by hand");
+
+  assert.equal(
+    survivors.filter((row) => row.name === "salted anchovies").length,
+    1,
+  );
+  pass("and does not leave two of it");
+
   summary("tidy apply checks passed");
 } finally {
   await cleanUp("Disposable tidy accounts and their lists removed.");
