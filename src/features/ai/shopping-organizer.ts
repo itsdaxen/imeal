@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   CATEGORIES,
+  separateCollected,
   totalQuantities,
   validateTidyProposal,
   type TidyableItem,
@@ -152,12 +153,15 @@ async function requestOrganization(
   key: string,
   items: ReadonlyArray<TidyableItem>,
 ) {
+  // The aisle a row currently sits in is deliberately not sent. It anchored: chicken
+  // thighs already filed under produce stayed under produce, twice in three tries.
+  // Nothing but this organizer ever sets a category, so the hint could only repeat
+  // its own last answer — and repeat its own last mistake.
   const keyedItems = items.map((item, index) => ({
     key: `item_${index + 1}`,
     name: item.name,
     quantity: item.quantity,
     unit: item.unit,
-    currentCategory: item.category,
   }));
   let lastFailure: RequestFailure = { ok: false, reason: "unavailable" };
 
@@ -263,8 +267,14 @@ async function attemptOrganization(
     };
 
     const proposal = validateTidyProposal(items, mapped);
+
+    // The model decides what belongs together; these decide what may be done about
+    // it, and then what it adds up to.
     return proposal
-      ? { ok: true, value: totalQuantities(items, proposal) }
+      ? {
+          ok: true,
+          value: totalQuantities(items, separateCollected(items, proposal)),
+        }
       : { ok: false, reason: "invalid" };
   } catch {
     return { ok: false, reason: "unavailable" };
@@ -278,15 +288,28 @@ function inNameOrder(items: ReadonlyArray<TidyableItem>) {
   );
 }
 
-async function organizeBatch(key: string, batch: ReadonlyArray<TidyableItem>) {
-  // About one proposal in twenty does not account for every row, and the guard throws
-  // it away. Asking a second time costs a moment and turns most of those into an
-  // answer, without loosening what is accepted.
-  const attempt = await attemptOrganization(key, batch);
+/**
+ * How many times a batch may be asked before its answer is taken as final.
+ *
+ * About one proposal in twenty does not account for every row, and the guard throws
+ * it away. A long list is several batches and fails if any one of them does, which
+ * multiplies that — so asking again is worth it, and costs nothing when it is not
+ * needed.
+ */
+const ATTEMPTS = 3;
 
-  return attempt.ok || attempt.reason !== "invalid"
-    ? attempt
-    : attemptOrganization(key, batch);
+async function organizeBatch(key: string, batch: ReadonlyArray<TidyableItem>) {
+  let result = await attemptOrganization(key, batch);
+
+  for (
+    let attempt = 1;
+    attempt < ATTEMPTS && !result.ok && result.reason === "invalid";
+    attempt += 1
+  ) {
+    result = await attemptOrganization(key, batch);
+  }
+
+  return result;
 }
 
 export async function organizeShoppingList(

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   countChanges,
+  separateCollected,
   totalQuantities,
   validateTidyProposal,
   type OrganizedItem,
@@ -171,6 +172,9 @@ describe("totalQuantities", () => {
     expect(split).toHaveLength(2);
     expect(split[0]).toMatchObject({ quantity: 500, unit: "ml" });
     expect(split[1]).toMatchObject({ quantity: 1, unit: "l" });
+    expect(split[0].explanation).toBe(
+      "Left as it was: no single amount covers both.",
+    );
   });
 
   it("answers in the largest unit that stays whole", () => {
@@ -239,5 +243,56 @@ describe("totalQuantities", () => {
     );
 
     expect(summed).toMatchObject({ quantity: 7 });
+  });
+});
+
+describe("separateCollected", () => {
+  const split = (items: TidyableItem[]) =>
+    separateCollected(items, {
+      items: [
+        result(
+          items.map((entry) => entry.id),
+          { quantity: 5 },
+        ),
+      ],
+    }).items;
+
+  it("explains the separation rather than the merge that did not happen", () => {
+    const parts = split([
+      item(1, { checked: true }),
+      item(2, { checked: false }),
+    ]);
+
+    expect(parts.map((part) => part.explanation)).toEqual([
+      "Kept apart from what is already in the trolley.",
+      "Kept apart from what is already in the trolley.",
+    ]);
+  });
+
+  it("keeps what is bought apart from what is not", () => {
+    const parts = split([
+      item(1, { quantity: 2, checked: true }),
+      item(2, { quantity: 3, checked: false }),
+    ]);
+
+    expect(parts).toHaveLength(2);
+    expect(parts[0].sourceIds).toEqual([id(2)]);
+    expect(parts[1].sourceIds).toEqual([id(1)]);
+  });
+
+  it("leaves a merge of things all still to buy", () => {
+    expect(
+      split([item(1, { checked: false }), item(2, { checked: false })]),
+    ).toHaveLength(1);
+  });
+
+  it("leaves a merge of things all already bought", () => {
+    expect(
+      split([item(1, { checked: true }), item(2, { checked: true })]),
+    ).toHaveLength(1);
+  });
+
+  it("leaves a row that was not merged with anything", () => {
+    expect(split([item(1, { checked: true })])).toHaveLength(1);
   });
 });

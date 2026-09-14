@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { organizeShoppingList } from "./shopping-organizer";
-import type { TidyableItem, TidyProposal } from "./tidy-list";
+import {
+  MAX_PROPOSAL,
+  type TidyableItem,
+  type TidyProposal,
+} from "./tidy-list";
 
 /**
  * What a good organized list looks like, measured against the real model.
@@ -247,6 +251,39 @@ describe("organizing a shopping list", () => {
     },
   );
 
+  // Whether a row is collected is never shown to the model, so this holds whatever
+  // it proposes: five to buy when two are already in the trolley is how you come home
+  // with seven.
+  const bought = { ...item("tomatoes", 2), checked: true };
+  const stillToBuy = item("Tomato", 3);
+  evaluate(
+    "never folds what is bought into what is not",
+    [bought, stillToBuy],
+    (proposal) => {
+      expect(together(proposal, bought, stillToBuy)).toBe(false);
+      expect(groupOf(proposal, bought).quantity).toBe(2);
+      expect(groupOf(proposal, stillToBuy).quantity).toBe(3);
+    },
+  );
+
+  // The request tells the model where each row currently sits, which is only worth
+  // sending if it is treated as a starting point rather than an answer.
+  const misfiled = [
+    { ...item("chicken thighs", 4), category: "produce" },
+    { ...item("washing up liquid", 1), category: "dairy" },
+    { ...item("bananas", 6), category: "frozen" },
+  ];
+  evaluate(
+    "corrects an aisle that is already wrong",
+    misfiled,
+    (proposal) => {
+      expect(groupOf(proposal, misfiled[0]!).category).toBe("meat and fish");
+      expect(groupOf(proposal, misfiled[1]!).category).toBe("household");
+      expect(groupOf(proposal, misfiled[2]!).category).toBe("produce");
+    },
+    { tolerate: 1 },
+  );
+
   const eggs = item("eggs", 12);
   const bread = item("sourdough loaf", 1);
   evaluate("leaves a tidy list alone", [eggs, bread], (proposal) => {
@@ -272,6 +309,11 @@ describe("organizing a shopping list", () => {
 
         expect(new Set(covered).size).toBe(crowd.length);
         expect(covered.length).toBe(crowd.length);
+
+        // The panel hands the proposal back through a hidden field, and applying
+        // refuses anything longer than this. A list that can be organized and then
+        // not applied would be the worst of both.
+        expect(JSON.stringify(result.value).length).toBeLessThan(MAX_PROPOSAL);
       }
     },
   );

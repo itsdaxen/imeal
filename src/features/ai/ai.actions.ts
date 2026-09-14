@@ -10,6 +10,7 @@ import { listSchema } from "@/features/shopping/shopping.schema";
 import { readRecipe } from "./ai";
 import type { DraftRecipe } from "./draft-recipe";
 import {
+  MAX_PROPOSAL,
   tidyProposalSchema,
   validateTidyProposal,
   type TidyableItem,
@@ -106,7 +107,7 @@ export async function proposeTidy(
  * current list exactly once. List members can already rename and merge these rows. */
 export async function applyTidy(formData: FormData) {
   const parsed = listSchema
-    .extend({ proposal: z.string().min(1).max(100_000) })
+    .extend({ proposal: z.string().min(1).max(MAX_PROPOSAL) })
     .safeParse({
       listId: formData.get("listId"),
       proposal: formData.get("proposal"),

@@ -18,6 +18,15 @@ export type Category = (typeof CATEGORIES)[number];
 /** The most a shopping row can hold, matching the check on the column itself. */
 export const MAX_QUANTITY = 999;
 
+/**
+ * The longest proposal that may be sent back to be applied.
+ *
+ * The reviewed proposal travels to the browser and returns in a hidden field, so it
+ * has to fit through a form. Being able to organize a list and then not apply it
+ * would be the worst of both, so the evals measure a full one against this.
+ */
+export const MAX_PROPOSAL = 100_000;
+
 export const organizedItemSchema = z.object({
   sourceIds: z.array(z.uuid()).min(1),
   name: z.string().trim().min(1).max(200),
@@ -172,6 +181,7 @@ export function totalQuantities(
           name: source.name,
           quantity: source.quantity,
           unit: source.unit,
+          explanation: "Left as it was: no single amount covers both.",
         }));
 
       // Rows that were measured stay measured. Answering "2 bottles" for half a litre
@@ -203,6 +213,54 @@ export function totalQuantities(
       }
 
       return { ...entry, quantity: total / measure.per, unit };
+    }),
+  };
+}
+
+/**
+ * Keeps what you have already bought out of what you still have to.
+ *
+ * Whether a row is collected is never shown to the model — it is not a fact about the
+ * shopping, it is a fact about the trip — so nothing up there stops it folding a
+ * ticked row into an unticked one. Applied, that turns two bought tomatoes and three
+ * unbought ones into five to buy, and you come home with seven.
+ */
+export function separateCollected(
+  current: ReadonlyArray<TidyableItem>,
+  proposal: TidyProposal,
+): TidyProposal {
+  const byId = new Map(current.map((item) => [item.id, item]));
+
+  return {
+    items: proposal.items.flatMap((entry) => {
+      const sources = entry.sourceIds.flatMap((id) => {
+        const source = byId.get(id);
+        return source ? [source] : [];
+      });
+
+      const collected = sources.filter((source) => source.checked);
+
+      if (sources.length < 2 || collected.length === 0) {
+        return entry;
+      }
+
+      const toBuy = sources.filter((source) => !source.checked);
+
+      if (toBuy.length === 0) {
+        return entry;
+      }
+
+      // The two halves keep the name and aisle the model chose; only the shopping is
+      // pulled apart, and the quantities are settled afterwards. The reason goes with
+      // them: the model's own words describe a combining that is no longer happening,
+      // and the review dialog shows them.
+      return [toBuy, collected].map((half) => ({
+        ...entry,
+        sourceIds: half.map((source) => source.id),
+        quantity: half[0]!.quantity,
+        unit: half[0]!.unit,
+        explanation: "Kept apart from what is already in the trolley.",
+      }));
     }),
   };
 }
