@@ -14,9 +14,14 @@ const MAX_ITEMS = 200;
 /**
  * How many rows the model is asked about at once.
  *
- * Sixty it handles. At a hundred and twenty it stops trying: the reply comes back
- * complete, in under a second of thinking, describing one row and ignoring the other
- * hundred and nineteen. So a long list is asked about in runs this size instead.
+ * At a hundred and twenty it stops trying: the reply comes back complete, in under a
+ * second of thinking, describing one row and ignoring the other hundred and nineteen.
+ * Fifty it handles.
+ *
+ * Smaller batches were tried, on the idea that a shorter list would be read more
+ * carefully. Fifty, twenty-five, twenty and ten all combine a plain duplicate about
+ * as often as each other — roughly one time in three once there is anything else on
+ * the list — so the differences were noise and the extra requests bought nothing.
  */
 const BATCH = 50;
 const DEFAULT_MODEL = "gpt-5-nano";

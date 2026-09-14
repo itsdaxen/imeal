@@ -144,6 +144,24 @@ describe("sortableName", () => {
     );
   });
 
+  it("puts a written-in amount beside the plain spelling, however long the list", () => {
+    const names = [
+      "2 aubergines",
+      "apples",
+      "bananas",
+      "carrots",
+      "rice",
+      "Aubergine",
+    ];
+    const sorted = [...names].sort((a, b) =>
+      sortableName(a).localeCompare(sortableName(b)),
+    );
+
+    expect(
+      Math.abs(sorted.indexOf("2 aubergines") - sorted.indexOf("Aubergine")),
+    ).toBe(1);
+  });
+
   it("leaves a plain name alone", () => {
     expect(sortableName("chicken thighs")).toBe("chicken thighs");
   });
