@@ -22,6 +22,7 @@
     "verify:moderation": "node scripts/verify-moderation.mjs",
     "verify:planner-view": "node scripts/verify-planner-view.mjs",
     "verify:planning": "node scripts/verify-planning-defaults.mjs",
+    "verify:tidy-flow": "node scripts/verify-tidy-flow.mjs",
     "verify:tidy": "node scripts/verify-tidy-apply.mjs",
     "verify:routes": "node scripts/verify-routes.mjs",
     "verify:shopping": "node scripts/verify-shopping.mjs",
