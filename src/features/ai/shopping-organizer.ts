@@ -9,6 +9,15 @@ import {
 } from "./tidy-list";
 
 const MAX_ITEMS = 200;
+
+/**
+ * How many rows the model is asked about at once.
+ *
+ * Sixty it handles. At a hundred and twenty it stops trying: the reply comes back
+ * complete, in under a second of thinking, describing one row and ignoring the other
+ * hundred and nineteen. So a long list is asked about in runs this size instead.
+ */
+const BATCH = 50;
 const DEFAULT_MODEL = "gpt-5-nano";
 
 /**
@@ -262,6 +271,24 @@ async function attemptOrganization(
   }
 }
 
+/** Rows that might belong together, next to each other, so a batch can see both. */
+function inNameOrder(items: ReadonlyArray<TidyableItem>) {
+  return [...items].sort((a, b) =>
+    a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()),
+  );
+}
+
+async function organizeBatch(key: string, batch: ReadonlyArray<TidyableItem>) {
+  // About one proposal in twenty does not account for every row, and the guard throws
+  // it away. Asking a second time costs a moment and turns most of those into an
+  // answer, without loosening what is accepted.
+  const attempt = await attemptOrganization(key, batch);
+
+  return attempt.ok || attempt.reason !== "invalid"
+    ? attempt
+    : attemptOrganization(key, batch);
+}
+
 export async function organizeShoppingList(
   items: ReadonlyArray<TidyableItem>,
 ): Promise<OrganizerResult> {
@@ -273,12 +300,29 @@ export async function organizeShoppingList(
   const key = process.env.OPENAI_API_KEY;
   if (!key) return { ok: false, reason: "configuration" };
 
-  // About one proposal in twenty does not account for every row, and the guard
-  // throws it away. Asking a second time costs a moment and turns most of those
-  // into an answer, without loosening what is accepted.
-  const attempt = await attemptOrganization(key, items);
+  const ordered = inNameOrder(items);
+  const batches = Array.from(
+    { length: Math.ceil(ordered.length / BATCH) },
+    (_, index) => ordered.slice(index * BATCH, (index + 1) * BATCH),
+  );
 
-  return attempt.ok || attempt.reason !== "invalid"
-    ? attempt
-    : attemptOrganization(key, items);
+  const organized = await Promise.all(
+    batches.map((batch) => organizeBatch(key, batch)),
+  );
+  const failed = organized.find((result) => !result.ok);
+
+  if (failed && !failed.ok) {
+    return failed;
+  }
+
+  // Each batch accounts for its own rows exactly once, so the batches together
+  // account for the list exactly once.
+  return {
+    ok: true,
+    value: {
+      items: organized.flatMap((result) =>
+        result.ok ? result.value.items : [],
+      ),
+    },
+  };
 }
