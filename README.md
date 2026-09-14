@@ -58,13 +58,13 @@ pnpm install
 Create a Supabase project, then copy `.env.example` to `.env.local` and fill it in
 from the project's API settings:
 
-| Variable                               | Purpose                                                                       |
-| -------------------------------------- | ----------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Project URL, used by browser and server code.                                 |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key; every request is still constrained by Row Level Security.    |
-| `SUPABASE_SERVICE_KEY`                 | Server-only. Bypasses Row Level Security, so it must never reach the browser. |
-| `OPENAI_API_KEY`                       | Server-only. Enables reviewed shopping-list organization.                     |
-| `OPENAI_ORGANIZER_MODEL`               | Optional model override; defaults to `gpt-5-nano`.                            |
+| Variable                               | Purpose                                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Project URL, used by browser and server code.                                                     |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key; every request is still constrained by Row Level Security.                        |
+| `SUPABASE_SERVICE_KEY`                 | Server-only. Bypasses Row Level Security, so it must never reach the browser.                     |
+| `OPENAI_API_KEY`                       | Server-only. Enables reviewed shopping-list organization.                                         |
+| `OPENAI_ORGANIZER_MODEL`               | Optional model override; defaults to `gpt-5-nano`; use `gpt-5-mini` for more consistent grouping. |
 
 Apply the schema with the Supabase CLI, then start the app:
 

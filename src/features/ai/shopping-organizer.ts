@@ -24,6 +24,8 @@ const MAX_ITEMS = 200;
  * the list — so the differences were noise and the extra requests bought nothing.
  */
 const BATCH = 50;
+/** Keep the default at the least expensive model; deployments can trade cost for
+ * more consistent duplicate detection with `OPENAI_ORGANIZER_MODEL=gpt-5-mini`. */
 const DEFAULT_MODEL = "gpt-5-nano";
 
 /**

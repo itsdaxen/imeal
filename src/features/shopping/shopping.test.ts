@@ -225,6 +225,7 @@ describe("independent shopping", () => {
       form({
         listId: partyList,
         proposal: JSON.stringify(proposed.proposal),
+        revision: proposed.revision!,
       }),
     );
     expect(items.eq).toHaveBeenCalledWith("list_id", partyList);
@@ -233,6 +234,43 @@ describe("independent shopping", () => {
       expect.objectContaining({ p_list: partyList }),
     );
     expect(from).not.toHaveBeenCalledWith("meal_plans");
+  });
+
+  it("refuses a tidy proposal after an existing row changes", async () => {
+    const before = query([
+      {
+        id: userId,
+        name: "milk",
+        quantity: 1,
+        unit: null,
+        checked: false,
+        category: null,
+      },
+    ]);
+    const after = query([
+      {
+        id: userId,
+        name: "oat milk",
+        quantity: 2,
+        unit: "carton",
+        checked: false,
+        category: "dairy",
+      },
+    ]);
+    from.mockReturnValueOnce(before).mockReturnValueOnce(after);
+
+    const proposed = await proposeTidy({}, form({ listId: partyList }));
+
+    await expect(
+      applyTidy(
+        form({
+          listId: partyList,
+          proposal: JSON.stringify(proposed.proposal),
+          revision: proposed.revision!,
+        }),
+      ),
+    ).rejects.toThrow("The list changed");
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("points the week at the list the planner offered, then builds it", async () => {

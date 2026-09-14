@@ -1,5 +1,7 @@
 "use server";
 
+import { createHash } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -24,7 +26,11 @@ const pasteSchema = z.object({
 });
 
 export type RecipeDraftState = { error?: string; draft?: DraftRecipe };
-export type TidyState = { error?: string; proposal?: TidyProposal };
+export type TidyState = {
+  error?: string;
+  proposal?: TidyProposal;
+  revision?: string;
+};
 
 const MESSAGES = {
   "too-long": "That is longer than we can read. Trim it to the recipe itself.",
@@ -83,6 +89,22 @@ async function currentListItems(list: string) {
   return { supabase, list, items: data satisfies TidyableItem[] };
 }
 
+/** Detects edits made while somebody is reviewing a proposal. */
+function listRevision(items: ReadonlyArray<TidyableItem>) {
+  const snapshot = [...items]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(({ id, name, quantity, unit, checked, category }) => ({
+      id,
+      name,
+      quantity,
+      unit,
+      checked,
+      category,
+    }));
+
+  return createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
+}
+
 export async function proposeTidy(
   _previous: TidyState,
   formData: FormData,
@@ -100,17 +122,21 @@ export async function proposeTidy(
     return { error: MESSAGES[result.reason] };
   }
 
-  return { proposal: result.value };
+  return { proposal: result.value, revision: listRevision(items) };
 }
 
 /** Apply the exact proposal the person reviewed, after proving it still covers the
  * current list exactly once. List members can already rename and merge these rows. */
 export async function applyTidy(formData: FormData) {
   const parsed = listSchema
-    .extend({ proposal: z.string().min(1).max(MAX_PROPOSAL) })
+    .extend({
+      proposal: z.string().min(1).max(MAX_PROPOSAL),
+      revision: z.string().length(64),
+    })
     .safeParse({
       listId: formData.get("listId"),
       proposal: formData.get("proposal"),
+      revision: formData.get("revision"),
     });
 
   if (!parsed.success) {
@@ -118,6 +144,10 @@ export async function applyTidy(formData: FormData) {
   }
 
   const { supabase, list, items } = await currentListItems(parsed.data.listId);
+
+  if (listRevision(items) !== parsed.data.revision) {
+    throw new Error("The list changed. Organize it again before applying.");
+  }
   let decoded: unknown;
 
   try {

@@ -136,6 +136,7 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
 
             <form action={closing(applyTidy, () => setDismissed(true))}>
               <input name="listId" type="hidden" value={listId} />
+              <input name="revision" type="hidden" value={state.revision} />
               <input
                 name="proposal"
                 type="hidden"
