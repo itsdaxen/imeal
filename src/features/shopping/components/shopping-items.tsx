@@ -48,6 +48,15 @@ function categoryOf(item: ShoppingItem) {
 
 export function itemAmount(item: Pick<ShoppingItem, "quantity" | "unit">) {
   if (item.unit) {
+    // Older organizer proposals could put an amount into the unit as well. Do not
+    // render `1 1 tbsp`; preserve the stored meaning until organizing it again
+    // rewrites the row under the stricter contract.
+    if (/^\s*(?:\d|[¼½¾⅓⅔⅛⅜⅝⅞])/u.test(item.unit)) {
+      return item.quantity === 1
+        ? ` · ${item.unit.trim()}`
+        : ` · ${item.quantity} × ${item.unit.trim()}`;
+    }
+
     return ` · ${item.quantity} ${item.unit}`;
   }
 

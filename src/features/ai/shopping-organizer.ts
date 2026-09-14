@@ -4,6 +4,7 @@ import {
   CATEGORIES,
   separateCollected,
   totalQuantities,
+  UNIT_PATTERN,
   validateTidyProposal,
   type TidyableItem,
   type TidyProposal,
@@ -47,7 +48,7 @@ Together, the sourceKeys of your results must contain every input key exactly on
 2. quantity is a whole number, so when a total is not whole in the larger unit, answer in the smaller one: 500 ml plus 1 l is 1500 ml, not 2 l and not 1 l.
 3. Never combine different forms or different products. Fresh and dried herbs are different. A meat and a stock made from it are different. Frozen and fresh are different.
 4. A row you did not combine keeps its quantity and unit.
-5. Name each result the way it is sold, and give it the unit it is sold in. Use null for things that are simply counted.
+5. Name each result the way it is sold. unit contains only the unit name, such as "tbsp", "g", "bottle", or "bunch"—never put a number or amount in unit. Use null for things that are simply counted.
 6. Put each result in the aisle it is bought from, choosing from the given categories.
 7. Explain in a few words what you did with it.`;
 
@@ -59,7 +60,13 @@ const modelProposalSchema = z.object({
         name: z.string().trim().min(1).max(200),
         category: z.enum(CATEGORIES),
         quantity: z.number().int().min(1).max(999),
-        unit: z.string().trim().min(1).max(30).nullable(),
+        unit: z
+          .string()
+          .trim()
+          .min(1)
+          .max(30)
+          .regex(new RegExp(UNIT_PATTERN))
+          .nullable(),
         explanation: z.string().trim().min(1).max(240),
       }),
     )
@@ -97,7 +104,12 @@ function outputSchema(sourceKeys: string[]) {
             quantity: { type: "integer", minimum: 1, maximum: 999 },
             unit: {
               anyOf: [
-                { type: "string", minLength: 1, maxLength: 30 },
+                {
+                  type: "string",
+                  minLength: 1,
+                  maxLength: 30,
+                  pattern: UNIT_PATTERN,
+                },
                 { type: "null" },
               ],
             },

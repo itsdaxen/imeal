@@ -27,12 +27,21 @@ export const MAX_QUANTITY = 999;
  */
 export const MAX_PROPOSAL = 100_000;
 
+/** A unit describes the measure (`tbsp`), never another amount (`1 tbsp`). */
+export const UNIT_PATTERN = "^[^\\s0-9¼½¾⅓⅔⅛⅜⅝⅞]";
+const unitSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(30)
+  .regex(new RegExp(UNIT_PATTERN), "Unit must not include a leading amount.");
+
 export const organizedItemSchema = z.object({
   sourceIds: z.array(z.uuid()).min(1),
   name: z.string().trim().min(1).max(200),
   category: z.enum(CATEGORIES),
   quantity: z.number().int().min(1).max(MAX_QUANTITY),
-  unit: z.string().trim().min(1).max(30).nullable(),
+  unit: unitSchema.nullable(),
   explanation: z.string().trim().min(1).max(240),
 });
 

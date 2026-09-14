@@ -84,6 +84,14 @@ describe("validateTidyProposal", () => {
       }),
     ).toBeNull();
   });
+
+  it("rejects an amount repeated inside the unit", () => {
+    expect(
+      validateTidyProposal([item(1)], {
+        items: [result([id(1)], { quantity: 1, unit: "1 tbsp" })],
+      }),
+    ).toBeNull();
+  });
 });
 
 describe("countChanges", () => {
