@@ -168,6 +168,25 @@ describe("organizing a shopping list", () => {
     { tolerate: 1 },
   );
 
+  // How people actually write a list: a quantity in the name, and the same thing
+  // under the name on the packet.
+  const someOnions = item("2 onions", 2);
+  const anOnion = item("Onion", 1);
+  evaluate(
+    "sees past how a row happens to be written",
+    [someOnions, anOnion],
+    (proposal) => {
+      expect(together(proposal, someOnions, anOnion)).toBe(true);
+      expect(groupOf(proposal, someOnions).quantity).toBe(3);
+    },
+    { tolerate: 1 },
+  );
+
+  // "parmesan" and "Parmigiano Reggiano" are deliberately not expected to combine.
+  // One is a specific cheese and the other is often something cheaper, and the model
+  // declines on every run — which is the rule about different products doing its job.
+  // A wrong merge costs you an item; a missed one costs you a second line.
+
   const fresh = item("fresh basil", 1, "bunch");
   const dried = item("dried basil", 1, "jar");
   evaluate("keeps fresh and dried apart", [fresh, dried], (proposal) => {

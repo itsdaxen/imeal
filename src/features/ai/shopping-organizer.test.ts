@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { organizeShoppingList } from "./shopping-organizer";
+import { organizeShoppingList, sortableName } from "./shopping-organizer";
 import type { TidyableItem } from "./tidy-list";
 
 const first = "00000001-0000-4000-8000-000000000000";
@@ -122,5 +122,29 @@ describe("organizeShoppingList", () => {
       ok: false,
       reason: "configuration",
     });
+  });
+});
+
+describe("sortableName", () => {
+  it("takes a written-in amount off the front", () => {
+    expect(sortableName("2 onions")).toBe("onions");
+    expect(sortableName("500 g flour")).toBe("flour");
+    expect(sortableName("1/2 cucumber")).toBe("cucumber");
+  });
+
+  it("puts a row next to the same thing written plainly", () => {
+    expect(sortableName("2 onions").startsWith(sortableName("Onion"))).toBe(
+      true,
+    );
+  });
+
+  it("ignores case and punctuation", () => {
+    expect(sortableName("Tomatoes, chopped (tinned)")).toBe(
+      "tomatoes  chopped  tinned",
+    );
+  });
+
+  it("leaves a plain name alone", () => {
+    expect(sortableName("chicken thighs")).toBe("chicken thighs");
   });
 });

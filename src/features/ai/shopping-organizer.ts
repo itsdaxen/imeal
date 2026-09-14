@@ -281,10 +281,27 @@ async function attemptOrganization(
   }
 }
 
+/**
+ * What a row is called, with the way it was written taken off the front.
+ *
+ * People put the amount in the name: "2 onions" sits under the digit and "Onion"
+ * under the letter, which is the whole alphabet apart. On a list long enough to be
+ * split, the two would go into different batches and could never be combined — so
+ * the sorting is done on the thing rather than on the spelling.
+ */
+export function sortableName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/^[\s\d.,/x×-]+/, "")
+    .replace(/^(?:kg|g|ml|l|tbsp|tsp|x)\b\s*/, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .trim();
+}
+
 /** Rows that might belong together, next to each other, so a batch can see both. */
 function inNameOrder(items: ReadonlyArray<TidyableItem>) {
   return [...items].sort((a, b) =>
-    a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()),
+    sortableName(a.name).localeCompare(sortableName(b.name)),
   );
 }
 
