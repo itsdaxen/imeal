@@ -45,6 +45,19 @@ const MESSAGES = {
   invalid: "The organizer returned an unsafe proposal. Nothing was changed.",
 } as const;
 
+const RECIPE_MESSAGES = {
+  "too-long": "That is longer than we can read. Trim it to the recipe itself.",
+  unreadable:
+    "No ingredients or steps in there. Check the paste and try again.",
+  "nothing-to-do": "There is no recipe to import.",
+  configuration: "Recipe import is not configured correctly.",
+  busy: "Recipe import is busy right now. Try again in a moment.",
+  timeout: "Reading that recipe took too long. Try again.",
+  unavailable: "Recipe import is unavailable right now. Try again shortly.",
+  invalid:
+    "The recipe could not be read safely. Check the paste and try again.",
+} as const;
+
 export async function draftRecipe(
   _previous: RecipeDraftState,
   formData: FormData,
@@ -57,10 +70,10 @@ export async function draftRecipe(
     };
   }
 
-  const result = readRecipe(parsed.data.text);
+  const result = await readRecipe(parsed.data.text);
 
   if (!result.ok) {
-    return { error: MESSAGES[result.reason] };
+    return { error: RECIPE_MESSAGES[result.reason] };
   }
 
   return { draft: result.value };
