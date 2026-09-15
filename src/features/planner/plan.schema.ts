@@ -39,7 +39,6 @@ export const generationSchema = z.object({
   slots: z
     .array(z.enum(MEAL_SLOTS))
     .min(1, "Choose at least one kind of meal."),
-  mealsPerDay: z.coerce.number().int().min(1).max(MAX_MEALS_PER_DAY).optional(),
   listId: z.uuid().optional(),
 });
 

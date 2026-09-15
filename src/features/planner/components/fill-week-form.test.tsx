@@ -34,5 +34,6 @@ describe("FillWeekForm", () => {
 
     expect(submittedSlots).toEqual(["breakfast", "lunch", "snack"]);
     expect(submittedSlots).not.toContain("dinner");
+    expect(new FormData(compactForm!).has("mealsPerDay")).toBe(false);
   });
 });

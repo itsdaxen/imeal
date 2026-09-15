@@ -124,7 +124,6 @@ export function FillWeekForm({
         {settings.slots.map((slot) => (
           <input key={slot} name="slots" type="hidden" value={slot} />
         ))}
-        <input name="mealsPerDay" type="hidden" value={day.length} />
         {settings.listId ? (
           <input name="listId" type="hidden" value={settings.listId} />
         ) : null}
@@ -167,10 +166,6 @@ export function FillWeekForm({
             ))}
           </div>
         </fieldset>
-
-        {/* The checkboxes carry the kinds; this carries how many meals a day holds,
-            which the kinds alone cannot say once a day repeats one of them. */}
-        <input name="mealsPerDay" type="hidden" value={day.length} />
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-foreground">
