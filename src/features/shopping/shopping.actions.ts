@@ -410,6 +410,9 @@ export async function renameShoppingList(formData: FormData) {
   revalidatePath("/shopping");
 }
 
+/** Postgres `restrict_violation`, which the last-list trigger raises. */
+const LAST_LIST = "23001";
+
 export async function deleteShoppingList(formData: FormData) {
   const parsed = listSchema.safeParse({ listId: formData.get("listId") });
 
@@ -419,15 +422,19 @@ export async function deleteShoppingList(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
-  // The default list is what everything falls back to, so it stays.
+  // Any list of yours can go, the default included — a trigger hands that standing
+  // to another list. The last one cannot, and the trigger that refuses it says so.
   const { data: deleted, error } = await supabase
     .from("shopping_lists")
     .delete()
     .eq("id", parsed.data.listId)
     .eq("owner_id", userId)
-    .eq("is_default", false)
     .select("id")
     .maybeSingle();
+
+  if (error?.code === LAST_LIST) {
+    throw new Error("This is your only list, so it has to stay.");
+  }
 
   if (error || !deleted) {
     throw new Error("Could not delete the list.");

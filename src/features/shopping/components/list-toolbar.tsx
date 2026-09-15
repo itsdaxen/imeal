@@ -72,7 +72,7 @@ export function ListToolbar({
             >
               Share list
             </Dropdown.Item>
-            {isOwn && !isDefault ? (
+            {isOwn ? (
               <Dropdown.Item
                 id="rename"
                 onAction={() => setOpen("rename")}
@@ -137,7 +137,10 @@ export function ListToolbar({
             >
               Clear list
             </Dropdown.Item>
-            {isOwn ? (
+            {/* Everything falls back to the default list, so it has no delete: the
+                server refuses one anyway, and a menu item that only ever produces an
+                error is worse than no menu item. */}
+            {isOwn && !isDefault ? (
               <Dropdown.Item
                 id="delete"
                 onAction={() => {

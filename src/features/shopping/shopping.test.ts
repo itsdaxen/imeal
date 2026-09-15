@@ -32,10 +32,14 @@ const partyList = "00000000-0000-4000-8000-000000000002";
 const userId = "00000000-0000-4000-8000-000000000003";
 const weekStart = "2026-08-24";
 const mealId = "00000000-0000-4000-8000-000000000004";
-type Result = { data: unknown; error: { message: string } | null };
+type Failure = { code?: string; message: string };
+type Result = { data: unknown; error: Failure | null };
 
-function query(data: unknown, error: string | null = null) {
-  const result: Result = { data, error: error ? { message: error } : null };
+function query(data: unknown, error: string | Failure | null = null) {
+  const result: Result = {
+    data,
+    error: typeof error === "string" ? { message: error } : error,
+  };
   return {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -208,22 +212,26 @@ describe("independent shopping", () => {
     expect(from).not.toHaveBeenCalledWith("meal_plans");
   });
 
-  it("deletes an owned non-default list", async () => {
-    const deletion = query({ id: partyList });
+  it("deletes a list you own, whether or not it is the default", async () => {
+    const deletion = query({ id: defaultList });
     from.mockReturnValue(deletion);
 
     await expect(
-      deleteShoppingList(form({ listId: partyList })),
+      deleteShoppingList(form({ listId: defaultList })),
     ).rejects.toThrow("redirect:/shopping");
-    expect(deletion.eq).toHaveBeenCalledWith("is_default", false);
+    expect(deletion.eq).toHaveBeenCalledWith("owner_id", userId);
+    // Which list is the default is settled by a trigger, not by filtering it out.
+    expect(deletion.eq).not.toHaveBeenCalledWith("is_default", false);
   });
 
-  it("refuses to delete the default list", async () => {
-    from.mockReturnValue(query(null));
+  it("says so when the list is the only one left", async () => {
+    from.mockReturnValue(
+      query(null, { code: "23001", message: "the last one cannot be deleted" }),
+    );
 
     await expect(
       deleteShoppingList(form({ listId: defaultList })),
-    ).rejects.toThrow("Could not delete the list");
+    ).rejects.toThrow("only list");
   });
 
   it("previews and applies tidy to the same explicit list", async () => {
