@@ -16,7 +16,7 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 
 /** The most a shopping row can hold, matching the check on the column itself. */
-export const MAX_QUANTITY = 999;
+const MAX_QUANTITY = 999;
 
 /**
  * The longest proposal that may be sent back to be applied.
@@ -28,7 +28,7 @@ export const MAX_QUANTITY = 999;
 export const MAX_PROPOSAL = 100_000;
 
 /** A unit describes the measure (`tbsp`), never another amount (`1 tbsp`). */
-export const UNIT_PATTERN = "^[^\\s0-9¼½¾⅓⅔⅛⅜⅝⅞/][^/]*$";
+const UNIT_PATTERN = "^[^\\s0-9¼½¾⅓⅔⅛⅜⅝⅞/][^/]*$";
 const unitSchema = z
   .string()
   .trim()
@@ -36,7 +36,7 @@ const unitSchema = z
   .max(30)
   .regex(new RegExp(UNIT_PATTERN), "Unit must not include a leading amount.");
 
-export const organizedItemSchema = z.object({
+const organizedItemSchema = z.object({
   sourceIds: z.array(z.uuid()).min(1),
   name: z.string().trim().min(1).max(200),
   category: z.enum(CATEGORIES),
@@ -45,7 +45,7 @@ export const organizedItemSchema = z.object({
   explanation: z.string().trim().min(1).max(240),
 });
 
-export const omittedItemSchema = z.object({
+const omittedItemSchema = z.object({
   sourceIds: z.array(z.uuid()).min(1),
   explanation: z.string().trim().min(1).max(240),
 });
@@ -103,6 +103,48 @@ export function validateTidyProposal(
   }
 
   return seen.size === expected.size ? parsed.data : null;
+}
+
+/**
+ * The short list of things a recipe asks for that no shop sells.
+ *
+ * Deliberately tiny and literal. Deciding what is purchasable is not the model's
+ * job — asked to judge, it throws away bananas. A fixed list, matched whole. Matching
+ * on a part of the name would take coconut water, rose water and sparkling water with
+ * it, which are all things you buy.
+ */
+const NOT_PURCHASABLE = new Set([
+  "water",
+  "cold water",
+  "cool water",
+  "warm water",
+  "hot water",
+  "boiling water",
+  "tap water",
+  "filtered water",
+  "cooking water",
+  "pasta water",
+  "reserved pasta water",
+  "ice",
+  "ice cubes",
+]);
+
+/**
+ * Whether a row is one of those, and came from a recipe rather than from you.
+ *
+ * Something you typed yourself stays whatever you meant by it: a row reading "water"
+ * that you added by hand is a bottle of water, and not ours to remove.
+ */
+export function isNotPurchasable(item: TidyableItem) {
+  if (item.source !== "generated") return false;
+
+  return NOT_PURCHASABLE.has(
+    item.name
+      .toLowerCase()
+      .replace(/[.,;:]+$/, "")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
 }
 
 /** What the reviewed proposal would actually alter. */
