@@ -14,8 +14,10 @@ vi.mock("../shopping.actions", () => ({
   setDefaultList: vi.fn(),
 }));
 
+const run = vi.fn();
+
 vi.mock("@/lib/use-server-action", () => ({
-  useServerAction: () => ({ isPending: false, run: vi.fn() }),
+  useServerAction: () => ({ isPending: false, run }),
 }));
 
 async function openMenu(over: { isDefault?: boolean; isOwn?: boolean } = {}) {
@@ -44,15 +46,15 @@ describe("the list menu", () => {
     expect(screen.getByRole("menuitem", { name: "Delete list" })).toBeVisible();
   });
 
-  // Everything falls back to the default list and the server refuses to delete it,
-  // so offering the option only ever produced an error.
-  it("does not offer to delete the default list", async () => {
+  // Which list is the default is a detail the app keeps straight by itself, so it is
+  // no reason to refuse to throw a list away.
+  it("offers to delete the default list too", async () => {
     await openMenu({ isDefault: true });
 
-    expect(screen.queryByRole("menuitem", { name: "Delete list" })).toBeNull();
+    expect(screen.getByRole("menuitem", { name: "Delete list" })).toBeVisible();
   });
 
-  it("still lets the default list be renamed", async () => {
+  it("lets any list of yours be renamed", async () => {
     await openMenu({ isDefault: true });
 
     expect(screen.getByRole("menuitem", { name: "Rename list" })).toBeVisible();
@@ -63,5 +65,55 @@ describe("the list menu", () => {
 
     expect(screen.queryByRole("menuitem", { name: "Delete list" })).toBeNull();
     expect(screen.queryByRole("menuitem", { name: "Rename list" })).toBeNull();
+  });
+});
+
+describe("deleting a list", () => {
+  it("asks before it does it", async () => {
+    run.mockClear();
+    await openMenu();
+
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Delete list" }),
+    );
+
+    expect(screen.getByRole("alertdialog")).toBeVisible();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("says the default moves on, when it is the default", async () => {
+    await openMenu({ isDefault: true });
+
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Delete list" }),
+    );
+
+    expect(
+      screen.getByText(/your next list becomes the default/i),
+    ).toBeVisible();
+  });
+
+  it("does nothing if you change your mind", async () => {
+    run.mockClear();
+    await openMenu();
+
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Delete list" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: /keep it/i }));
+
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("deletes once it is confirmed", async () => {
+    run.mockClear();
+    await openMenu();
+
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Delete list" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Delete list" }));
+
+    expect(run).toHaveBeenCalledWith(expect.anything(), { listId: "list" });
   });
 });

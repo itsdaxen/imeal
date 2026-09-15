@@ -20,6 +20,7 @@ import {
   setDefaultList,
 } from "../shopping.actions";
 import { AppDialog, closing } from "@/components/ui/app-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useServerAction } from "@/lib/use-server-action";
 
 type Member = { displayName: string; id: string };
@@ -51,8 +52,10 @@ export function ListToolbar({
   members,
   staplesToAdd,
 }: ListToolbarProps) {
-  const { run } = useServerAction();
-  const [open, setOpen] = useState<"none" | "rename" | "share">("none");
+  const { isPending, run } = useServerAction();
+  const [open, setOpen] = useState<"none" | "delete" | "rename" | "share">(
+    "none",
+  );
   const memberIds = new Set(members.map((member) => member.id));
 
   return (
@@ -137,15 +140,10 @@ export function ListToolbar({
             >
               Clear list
             </Dropdown.Item>
-            {/* Everything falls back to the default list, so it has no delete: the
-                server refuses one anyway, and a menu item that only ever produces an
-                error is worse than no menu item. */}
-            {isOwn && !isDefault ? (
+            {isOwn ? (
               <Dropdown.Item
                 id="delete"
-                onAction={() => {
-                  run(deleteShoppingList, { listId });
-                }}
+                onAction={() => setOpen("delete")}
                 className="text-danger"
                 textValue="Delete list"
                 variant="danger"
@@ -156,6 +154,25 @@ export function ListToolbar({
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
+
+      {/* Deleting takes the list and everything on it, and there is no undo, so it
+          is asked rather than done. */}
+      <ConfirmDialog
+        confirmLabel="Delete list"
+        description={
+          isDefault
+            ? `${listName} and everything on it go for good, and your next list becomes the default.`
+            : `${listName} and everything on it go for good.`
+        }
+        heading={`Delete ${listName}?`}
+        isOpen={open === "delete"}
+        isPending={isPending}
+        onConfirm={() => {
+          setOpen("none");
+          run(deleteShoppingList, { listId });
+        }}
+        onOpenChange={() => setOpen("none")}
+      />
 
       <AppDialog
         bodyClassName="flex flex-col gap-2"
