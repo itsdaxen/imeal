@@ -67,14 +67,17 @@ try {
   const applied = await result(
     cook.client.rpc("apply_shopping_tidy", {
       p_list: list,
-      p_changes: [
-        organized([one.id, two.id]),
-        organized([milk.id], {
-          name: "milk",
-          category: "dairy",
-          quantity: 1,
-        }),
-      ],
+      p_changes: {
+        items: [
+          organized([one.id, two.id]),
+          organized([milk.id], {
+            name: "milk",
+            category: "dairy",
+            quantity: 1,
+          }),
+        ],
+        omitted: [],
+      },
     }),
   );
   assert.equal(applied, 2);
@@ -117,13 +120,16 @@ try {
   await result(
     cook.client.rpc("apply_shopping_tidy", {
       p_list: list,
-      p_changes: [
-        organized([got.id, notYet.id], {
-          name: "butter",
-          category: "dairy",
-          quantity: 2,
-        }),
-      ],
+      p_changes: {
+        items: [
+          organized([got.id, notYet.id], {
+            name: "butter",
+            category: "dairy",
+            quantity: 2,
+          }),
+        ],
+        omitted: [],
+      },
     }),
   );
   const butter = (await rowsOf(cook, list)).find(
@@ -140,7 +146,10 @@ try {
 
   await cook.client.rpc("apply_shopping_tidy", {
     p_list: list,
-    p_changes: [organized([theirs.id], { name: "stolen" })],
+    p_changes: {
+      items: [organized([theirs.id], { name: "stolen" })],
+      omitted: [],
+    },
   });
   const untouched = await result(
     admin
@@ -199,12 +208,15 @@ try {
   await result(
     cook.client.rpc("apply_shopping_tidy", {
       p_list: list,
-      p_changes: [
-        organized([fromThePlan.id, byHand.id], {
-          name: "salted anchovies",
-          quantity: 3,
-        }),
-      ],
+      p_changes: {
+        items: [
+          organized([fromThePlan.id, byHand.id], {
+            name: "salted anchovies",
+            quantity: 3,
+          }),
+        ],
+        omitted: [],
+      },
     }),
   );
   await result(

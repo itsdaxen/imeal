@@ -122,6 +122,7 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
   const proposed = (state.proposal?.items ?? [])
     .map((change) => ({ change, notes: describe(change, before) }))
     .filter(({ notes }) => notes.length > 0);
+  const omitted = state.proposal?.omitted ?? [];
 
   const answered = state.proposal !== undefined || state.error !== undefined;
 
@@ -171,10 +172,11 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
           </Typography>
         ) : null}
 
-        {proposed.length > 0 ? (
+        {proposed.length + omitted.length > 0 ? (
           <>
             <Typography type="body-sm" weight="medium">
-              {proposed.length} {proposed.length === 1 ? "change" : "changes"}{" "}
+              {proposed.length + omitted.length}{" "}
+              {proposed.length + omitted.length === 1 ? "change" : "changes"}{" "}
               proposed
             </Typography>
 
@@ -187,6 +189,20 @@ export function TidyPanel({ items, listId }: TidyPanelProps) {
                   </Typography>
                   <Typography color="muted" type="body-xs">
                     {[...notes, change.explanation].join(" · ")}
+                  </Typography>
+                </li>
+              ))}
+              {omitted.map((change) => (
+                <li className="flex flex-col" key={change.sourceIds.join(":")}>
+                  <Typography type="body-sm">
+                    Remove{" "}
+                    {change.sourceIds
+                      .map((id) => before.get(id)?.name)
+                      .filter(Boolean)
+                      .join(", ")}
+                  </Typography>
+                  <Typography color="muted" type="body-xs">
+                    {change.explanation}
                   </Typography>
                 </li>
               ))}

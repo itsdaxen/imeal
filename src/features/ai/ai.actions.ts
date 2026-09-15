@@ -180,7 +180,7 @@ export async function applyTidy(formData: FormData) {
 
   const { error } = await supabase.rpc("apply_shopping_tidy", {
     p_list: list,
-    p_changes: proposal.items,
+    p_changes: proposal,
   });
 
   if (error) {
