@@ -8,6 +8,7 @@ import {
   addPlannedMealToShoppingList,
   addStaplesToList,
   clearShoppingList,
+  deleteShoppingList,
   generateShoppingList,
   setWeekList,
 } from "./shopping.actions";
@@ -205,6 +206,24 @@ describe("independent shopping", () => {
     expect(items.delete).toHaveBeenCalled();
     expect(items.eq).toHaveBeenCalledWith("list_id", partyList);
     expect(from).not.toHaveBeenCalledWith("meal_plans");
+  });
+
+  it("deletes an owned non-default list", async () => {
+    const deletion = query({ id: partyList });
+    from.mockReturnValue(deletion);
+
+    await expect(
+      deleteShoppingList(form({ listId: partyList })),
+    ).rejects.toThrow("redirect:/shopping");
+    expect(deletion.eq).toHaveBeenCalledWith("is_default", false);
+  });
+
+  it("refuses to delete the default list", async () => {
+    from.mockReturnValue(query(null));
+
+    await expect(
+      deleteShoppingList(form({ listId: defaultList })),
+    ).rejects.toThrow("Could not delete the list");
   });
 
   it("previews and applies tidy to the same explicit list", async () => {

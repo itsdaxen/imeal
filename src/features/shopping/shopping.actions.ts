@@ -420,14 +420,16 @@ export async function deleteShoppingList(formData: FormData) {
   const { supabase, userId } = await requireUserId();
 
   // The default list is what everything falls back to, so it stays.
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from("shopping_lists")
     .delete()
     .eq("id", parsed.data.listId)
     .eq("owner_id", userId)
-    .eq("is_default", false);
+    .eq("is_default", false)
+    .select("id")
+    .maybeSingle();
 
-  if (error) {
+  if (error || !deleted) {
     throw new Error("Could not delete the list.");
   }
 

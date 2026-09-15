@@ -72,7 +72,7 @@ export function ListToolbar({
             >
               Share list
             </Dropdown.Item>
-            {isOwn ? (
+            {isOwn && !isDefault ? (
               <Dropdown.Item
                 id="rename"
                 onAction={() => setOpen("rename")}
