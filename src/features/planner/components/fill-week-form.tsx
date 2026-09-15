@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useActionState,
+  useContext,
+  useState,
+} from "react";
 import { Typography } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
@@ -10,6 +16,7 @@ import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
 
 import { generateWeekPlan, type PlannerFormState } from "../plan.actions";
 import { GENERATION_SOURCES } from "../plan.schema";
+import type { GenerationSource } from "../plan.schema";
 import { SelectField } from "@/components/ui/select-field";
 
 const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
@@ -31,6 +38,71 @@ type FillWeekFormProps = {
   weekStart: string;
 };
 
+type GenerationSettings = {
+  listId: string | null;
+  setListId: (listId: string) => void;
+  setSource: (source: GenerationSource) => void;
+  setSlot: (slot: MealSlot, selected: boolean) => void;
+  slots: MealSlot[];
+  source: GenerationSource;
+};
+
+const GenerationSettingsContext = createContext<GenerationSettings | null>(
+  null,
+);
+
+export function PlanGenerationSettingsProvider({
+  children,
+  day,
+  targetListId,
+}: {
+  children: ReactNode;
+  day: ReadonlyArray<MealSlot>;
+  targetListId: string | null;
+}) {
+  const [source, setSource] = useState<GenerationSource>("both");
+  const [slots, setSlots] = useState<MealSlot[]>(() =>
+    MEAL_SLOTS.filter((slot) => day.includes(slot)),
+  );
+  const [listId, setListId] = useState(targetListId);
+
+  function setSlot(slot: MealSlot, selected: boolean) {
+    setSlots((current) =>
+      selected
+        ? MEAL_SLOTS.filter(
+            (candidate) => current.includes(candidate) || candidate === slot,
+          )
+        : current.filter((candidate) => candidate !== slot),
+    );
+  }
+
+  return (
+    <GenerationSettingsContext.Provider
+      value={{ listId, setListId, setSlot, setSource, slots, source }}
+    >
+      {children}
+    </GenerationSettingsContext.Provider>
+  );
+}
+
+function useGenerationSettings(
+  day: ReadonlyArray<MealSlot>,
+  listId: string | null,
+) {
+  const shared = useContext(GenerationSettingsContext);
+
+  return (
+    shared ?? {
+      listId,
+      setListId: () => undefined,
+      setSlot: () => undefined,
+      setSource: () => undefined,
+      slots: MEAL_SLOTS.filter((slot) => day.includes(slot)),
+      source: "both" as const,
+    }
+  );
+}
+
 export function FillWeekForm({
   compact = false,
   day,
@@ -42,18 +114,19 @@ export function FillWeekForm({
     PlannerFormState,
     FormData
   >(generateWeekPlan, {});
+  const settings = useGenerationSettings(day, targetListId);
 
   if (compact) {
     return (
       <form action={formAction}>
         <input name="weekStart" type="hidden" value={weekStart} />
-        <input name="source" type="hidden" value="both" />
-        {/* Keyed by position: the day repeats types, so the type is not unique. */}
-        {day.map((slot, slotIndex) => (
-          <input key={slotIndex} name="slots" type="hidden" value={slot} />
+        <input name="source" type="hidden" value={settings.source} />
+        {settings.slots.map((slot) => (
+          <input key={slot} name="slots" type="hidden" value={slot} />
         ))}
-        {targetListId ? (
-          <input name="listId" type="hidden" value={targetListId} />
+        <input name="mealsPerDay" type="hidden" value={day.length} />
+        {settings.listId ? (
+          <input name="listId" type="hidden" value={settings.listId} />
         ) : null}
         <ActionButton isPending={isPending} tier="primary" type="submit">
           {isPending ? "Generating…" : "Generate plan"}
@@ -83,8 +156,9 @@ export function FillWeekForm({
               >
                 <input
                   className="size-4 accent-accent"
-                  defaultChecked={source === "both"}
+                  checked={settings.source === source}
                   name="source"
+                  onChange={() => settings.setSource(source)}
                   type="radio"
                   value={source}
                 />
@@ -110,8 +184,11 @@ export function FillWeekForm({
               >
                 <input
                   className="size-4 accent-accent"
-                  defaultChecked={day.includes(slot)}
+                  checked={settings.slots.includes(slot)}
                   name="slots"
+                  onChange={(event) =>
+                    settings.setSlot(slot, event.currentTarget.checked)
+                  }
                   type="checkbox"
                   value={slot}
                 />
@@ -125,9 +202,9 @@ export function FillWeekForm({
       {lists.length > 0 ? (
         <div className="flex max-w-sm flex-col gap-1">
           <SelectField
-            defaultSelectedKey={targetListId ?? lists[0]?.id}
             label="Shopping list"
             name="listId"
+            onChange={settings.setListId}
             options={lists.map((list) => ({
               id: list.id,
               label:
@@ -135,6 +212,7 @@ export function FillWeekForm({
                   ? `${list.name} · default`
                   : list.name,
             }))}
+            selectedKey={settings.listId ?? lists[0]?.id}
           />
         </div>
       ) : null}

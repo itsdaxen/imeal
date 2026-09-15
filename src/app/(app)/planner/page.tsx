@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 
 import { Disclosure } from "@heroui/react";
 
-import { FillWeekForm } from "@/features/planner/components/fill-week-form";
+import {
+  FillWeekForm,
+  PlanGenerationSettingsProvider,
+} from "@/features/planner/components/fill-week-form";
 import { PlannerOptions } from "@/features/planner/components/planner-options";
 import { SharedWeekInbox } from "@/features/planner/components/shared-week-inbox";
 import { PendingButton } from "@/components/ui/pending-button";
@@ -48,8 +51,8 @@ export default async function PlannerPage({
     ]);
 
   // One answer for "which list", used by the button and by the selector beneath it.
-  // They used to compute it separately and could name different lists, which is how
-  // pressing Add to shopping list filled something other than what the page showed.
+  // Computed twice they can disagree, and Add to shopping list then fills something
+  // other than what the page shows.
   const destinationId =
     lists.find((list) => list.isDefault && list.isOwn)?.id ??
     destination.listId;
@@ -73,49 +76,55 @@ export default async function PlannerPage({
 
       <SharedWeekInbox plans={sharedWithMe} weekStart={weekStart} />
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <FillWeekForm
-          compact
-          day={plan.days[0]}
-          lists={lists}
-          targetListId={destinationId}
-          weekStart={weekStart}
-        />
+      <PlanGenerationSettingsProvider
+        day={plan.days[0]}
+        key={weekStart}
+        targetListId={destinationId}
+      >
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <FillWeekForm
+            compact
+            day={plan.days[0]}
+            lists={lists}
+            targetListId={destinationId}
+            weekStart={weekStart}
+          />
 
-        <form action={generateShoppingList}>
-          <input name="weekStart" type="hidden" value={weekStart} />
-          <input name="listId" type="hidden" value={destinationId ?? ""} />
-          <PendingButton
-            className="min-h-11"
-            isDisabled={plan.meals.length === 0 || !destinationId}
-            variant="tertiary"
-          >
-            Add to shopping list
-          </PendingButton>
-        </form>
-      </div>
+          <form action={generateShoppingList}>
+            <input name="weekStart" type="hidden" value={weekStart} />
+            <input name="listId" type="hidden" value={destinationId ?? ""} />
+            <PendingButton
+              className="min-h-11"
+              isDisabled={plan.meals.length === 0 || !destinationId}
+              variant="tertiary"
+            >
+              Add to shopping list
+            </PendingButton>
+          </form>
+        </div>
 
-      <ContentCard className="w-full" density="flush">
-        <Disclosure>
-          <Disclosure.Heading>
-            <Disclosure.Trigger className="flex min-h-11 w-full items-center gap-4 px-5 py-2 text-left sm:px-6">
-              <span className="font-semibold">More options</span>
-              <Disclosure.Indicator />
-            </Disclosure.Trigger>
-          </Disclosure.Heading>
+        <ContentCard className="w-full" density="flush">
+          <Disclosure>
+            <Disclosure.Heading>
+              <Disclosure.Trigger className="flex min-h-11 w-full items-center gap-4 px-5 py-2 text-left sm:px-6">
+                <span className="font-semibold">More options</span>
+                <Disclosure.Indicator />
+              </Disclosure.Trigger>
+            </Disclosure.Heading>
 
-          <Disclosure.Content>
-            <Disclosure.Body className="border-t border-separator px-5 py-5 sm:px-6">
-              <FillWeekForm
-                day={plan.days[0]}
-                lists={lists}
-                targetListId={destinationId}
-                weekStart={weekStart}
-              />
-            </Disclosure.Body>
-          </Disclosure.Content>
-        </Disclosure>
-      </ContentCard>
+            <Disclosure.Content>
+              <Disclosure.Body className="border-t border-separator px-5 py-5 sm:px-6">
+                <FillWeekForm
+                  day={plan.days[0]}
+                  lists={lists}
+                  targetListId={destinationId}
+                  weekStart={weekStart}
+                />
+              </Disclosure.Body>
+            </Disclosure.Content>
+          </Disclosure>
+        </ContentCard>
+      </PlanGenerationSettingsProvider>
 
       <WeekSwitcher
         nextHref={`/planner?week=${addWeeks(weekStart, 1)}`}
