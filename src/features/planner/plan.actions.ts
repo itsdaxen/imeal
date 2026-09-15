@@ -117,6 +117,7 @@ export async function generateWeekPlan(
     weekStart: formData.get("weekStart"),
     source: formData.get("source"),
     slots: formData.getAll("slots"),
+    mealsPerDay: formData.get("mealsPerDay") || undefined,
     listId: formData.get("listId") || undefined,
   });
 
@@ -125,8 +126,8 @@ export async function generateWeekPlan(
   }
 
   const { supabase, userId } = await requireUserId();
-  const { weekStart, source, slots, listId } = parsed.data;
-  const day = buildDay(slots, slots.length);
+  const { weekStart, source, slots, mealsPerDay, listId } = parsed.data;
+  const day = buildDay(slots, mealsPerDay ?? slots.length);
 
   if (listId) {
     const { data: destination } = await supabase

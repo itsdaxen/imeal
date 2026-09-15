@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Input, Label, TextField } from "@heroui/react";
 
 import { CheckChip } from "@/components/ui/check-chip";
@@ -47,13 +48,28 @@ export function MealsPerDayField({
   onChange: (value: number) => void;
   value: number;
 }) {
+  // Empty is a real editing state: immediately replacing it with the previous number
+  // makes typing `4` after clearing `3` produce `34`. Null follows the parent value.
+  const [draft, setDraft] = useState<string | null>(null);
+  const inputValue = draft ?? String(value);
+
   return (
     <TextField
       isRequired
       name={name}
-      onChange={(next) => onChange(Number(next))}
+      onBlur={() => {
+        if (inputValue === "") setDraft(null);
+      }}
+      onChange={(next) => {
+        if (next === "") {
+          setDraft("");
+        } else {
+          setDraft(null);
+          onChange(Number(next));
+        }
+      }}
       type="number"
-      value={String(value)}
+      value={inputValue}
     >
       <Label>Meals per day</Label>
       <Input max={MAX_MEALS_PER_DAY} min={min} />

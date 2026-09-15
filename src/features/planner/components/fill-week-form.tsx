@@ -5,19 +5,24 @@ import {
   type ReactNode,
   useActionState,
   useContext,
+  useEffect,
   useState,
 } from "react";
-import { Typography } from "@heroui/react";
+import { Typography, toast } from "@heroui/react";
 
 import { ActionButton } from "@/components/ui/action";
 
-import { FormMessage } from "@/components/ui/form-message";
 import { MEAL_SLOTS, type MealSlot } from "@/features/recipes/recipe.schema";
+import {
+  MealsPerDayField,
+  MealTypeChoices,
+} from "@/features/profile/components/planning-default-fields";
 
 import { generateWeekPlan, type PlannerFormState } from "../plan.actions";
 import { GENERATION_SOURCES } from "../plan.schema";
 import type { GenerationSource } from "../plan.schema";
 import { SelectField } from "@/components/ui/select-field";
+import { buildDay, MAX_MEALS_PER_DAY, mealLabel } from "../day-shape";
 
 const SOURCE_LABEL: Record<(typeof GENERATION_SOURCES)[number], string> = {
   mine: "My recipes",
@@ -40,7 +45,9 @@ type FillWeekFormProps = {
 
 type GenerationSettings = {
   listId: string | null;
+  mealsPerDay: number;
   setListId: (listId: string) => void;
+  setMealsPerDay: (meals: number) => void;
   setSource: (source: GenerationSource) => void;
   setSlot: (slot: MealSlot, selected: boolean) => void;
   slots: MealSlot[];
@@ -64,7 +71,15 @@ export function PlanGenerationSettingsProvider({
   const [slots, setSlots] = useState<MealSlot[]>(() =>
     MEAL_SLOTS.filter((slot) => day.includes(slot)),
   );
+  const [extras, setExtras] = useState(() =>
+    Math.max(day.length - new Set(day).size, 0),
+  );
   const [listId, setListId] = useState(targetListId);
+  const mealsPerDay = Math.min(slots.length + extras, MAX_MEALS_PER_DAY);
+
+  function setMealsPerDay(meals: number) {
+    setExtras(Number.isFinite(meals) ? Math.max(meals - slots.length, 0) : 0);
+  }
 
   function setSlot(slot: MealSlot, selected: boolean) {
     setSlots((current) =>
@@ -78,7 +93,16 @@ export function PlanGenerationSettingsProvider({
 
   return (
     <GenerationSettingsContext.Provider
-      value={{ listId, setListId, setSlot, setSource, slots, source }}
+      value={{
+        listId,
+        mealsPerDay,
+        setListId,
+        setMealsPerDay,
+        setSlot,
+        setSource,
+        slots,
+        source,
+      }}
     >
       {children}
     </GenerationSettingsContext.Provider>
@@ -94,7 +118,9 @@ function useGenerationSettings(
   return (
     shared ?? {
       listId,
+      mealsPerDay: day.length,
       setListId: () => undefined,
+      setMealsPerDay: () => undefined,
       setSlot: () => undefined,
       setSource: () => undefined,
       slots: MEAL_SLOTS.filter((slot) => day.includes(slot)),
@@ -116,6 +142,15 @@ export function FillWeekForm({
   >(generateWeekPlan, {});
   const settings = useGenerationSettings(day, targetListId);
 
+  // Raised rather than printed: either form can fail, the compact one is a lone
+  // button with nowhere to put a sentence, and a week that could not be filled is
+  // news — not a note to find later.
+  useEffect(() => {
+    if (state?.error) {
+      toast.danger(state.error);
+    }
+  }, [state]);
+
   if (compact) {
     return (
       <form action={formAction}>
@@ -124,6 +159,7 @@ export function FillWeekForm({
         {settings.slots.map((slot) => (
           <input key={slot} name="slots" type="hidden" value={slot} />
         ))}
+        <input name="mealsPerDay" type="hidden" value={settings.mealsPerDay} />
         {settings.listId ? (
           <input name="listId" type="hidden" value={settings.listId} />
         ) : null}
@@ -138,11 +174,7 @@ export function FillWeekForm({
     <form action={formAction} className="flex flex-col gap-4">
       <input name="weekStart" type="hidden" value={weekStart} />
 
-      {state.error ? (
-        <FormMessage tone="error">{state.error}</FormMessage>
-      ) : null}
-
-      <div className="flex flex-col gap-5 md:flex-row md:flex-wrap md:gap-8">
+      <div className="grid items-start gap-5 md:grid-cols-[auto_12rem_minmax(24rem,1fr)] md:gap-8">
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium text-foreground">
             Fill from
@@ -167,32 +199,27 @@ export function FillWeekForm({
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-foreground">
-            Kinds of meal
-          </legend>
-          <div className="flex flex-wrap gap-4">
-            {MEAL_SLOTS.map((slot) => (
-              <label
-                className="flex min-h-11 items-center gap-2 pr-3 text-sm capitalize"
-                key={slot}
-              >
-                <input
-                  className="size-4 accent-accent"
-                  checked={settings.slots.includes(slot)}
-                  name="slots"
-                  onChange={(event) =>
-                    settings.setSlot(slot, event.currentTarget.checked)
-                  }
-                  type="checkbox"
-                  value={slot}
-                />
-                {slot}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <MealsPerDayField
+          min={settings.slots.length}
+          name="mealsPerDay"
+          onChange={settings.setMealsPerDay}
+          value={settings.mealsPerDay}
+        />
+
+        <MealTypeChoices
+          name="slots"
+          onChange={settings.setSlot}
+          types={settings.slots}
+        />
       </div>
+
+      <Typography color="muted" type="body-sm">
+        {settings.slots.length === 0
+          ? "Choose at least one kind of meal."
+          : `A day runs ${buildDay(settings.slots, settings.mealsPerDay)
+              .map((_, index, shape) => mealLabel(shape, index))
+              .join(", ")}.`}
+      </Typography>
 
       {lists.length > 0 ? (
         <div className="flex max-w-sm flex-col gap-1">
