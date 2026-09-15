@@ -23,6 +23,7 @@ export function AssignmentBrowser({
   dayIndex,
   mealSlot,
   recipes,
+  shelf,
   slotIndex,
   view,
   weekStart,
@@ -31,6 +32,8 @@ export function AssignmentBrowser({
   mealSlot: MealSlot;
   slotIndex: number;
   recipes: RecipeSummary[];
+  /** Which shelf these came from, so an empty search says which one it searched. */
+  shelf: "mine" | "catalog";
   view?: string;
   weekStart: string;
 }) {
@@ -73,7 +76,9 @@ export function AssignmentBrowser({
             : []
         }
         onSearchChange={setTerm}
-        searchLabel="Search your recipes"
+        searchLabel={
+          shelf === "catalog" ? "Search the catalog" : "Search your recipes"
+        }
         searchValue={term}
       />
 
@@ -90,7 +95,11 @@ export function AssignmentBrowser({
               Clear the filters
             </ActionButton>
           }
-          description={`None of your ${mealSlot} recipes match that search.`}
+          description={
+            shelf === "catalog"
+              ? `No ${mealSlot} recipe in the catalog matches that search.`
+              : `None of your ${mealSlot} recipes match that search.`
+          }
           icon={<SearchX aria-hidden="true" className="size-6" />}
           title="No recipes match"
         />

@@ -138,6 +138,87 @@ try {
   }
   pass("the way to the meal chooser and back keeps its place in the week");
 
+  // The chooser can look at your own recipes or at the catalog, and says which.
+  const { data: fromCatalog } = await admin
+    .from("recipes")
+    .insert({
+      title: "Catalog dinner",
+      owner_id: null,
+      visibility: "public",
+      status: "active",
+      ingredients: ["Pepper"],
+      steps: ["Cook."],
+      meal_tags: ["dinner"],
+    })
+    .select("id")
+    .single();
+
+  try {
+    const chooser = (shelf) =>
+      `/planner/assign?week=${week}&day=2&slot=dinner&index=3&view=day${
+        shelf ? `&source=${shelf}` : ""
+      }`;
+    const titlesOn = async (path) => {
+      const document = new JSDOM(
+        await (
+          await fetch(`${base}${path}`, { headers: { cookie: cook.cookie } })
+        ).text(),
+      ).window.document;
+
+      return {
+        document,
+        text: [...document.querySelectorAll("li")]
+          .map((entry) => entry.textContent)
+          .join(" "),
+      };
+    };
+
+    const own = await titlesOn(chooser());
+    assert.match(own.document.body.innerHTML, /Where to choose a recipe from/);
+    assert.match(own.text, /Thursday dinner/);
+    assert.equal(/Catalog dinner/.test(own.text), false);
+    pass("the chooser opens on your own recipes and offers the catalog");
+
+    const catalog = await titlesOn(chooser("catalog"));
+    assert.match(catalog.text, /Catalog dinner/);
+    assert.equal(/Thursday dinner/.test(catalog.text), false);
+    pass("and asking for the catalog shows the catalog");
+
+    const addForm = [...catalog.document.forms].find(
+      (form) =>
+        form.querySelector('input[name="recipeId"]')?.value === fromCatalog.id,
+    );
+    assert(addForm, "a catalog recipe offers to be added to the plan");
+
+    const data = new FormData();
+    for (const input of addForm.querySelectorAll("input[name]")) {
+      data.set(input.name, input.value);
+    }
+    const added = await fetch(`${base}${chooser("catalog")}`, {
+      method: "POST",
+      body: data,
+      redirect: "manual",
+      headers: { cookie: cook.cookie, origin: new URL(base).origin },
+    });
+    await added.body?.cancel();
+    assert(added.status < 400, `planning returned ${added.status}`);
+
+    assert.equal(
+      (
+        await result(
+          cook.client
+            .from("meal_plan_items")
+            .select("id")
+            .eq("recipe_id", fromCatalog.id),
+        )
+      ).length,
+      1,
+    );
+    pass("and a catalog recipe can be planned from there");
+  } finally {
+    await admin.from("recipes").delete().eq("id", fromCatalog.id);
+  }
+
   summary("planner view checks passed");
 } finally {
   await cleanUp("Disposable planner-view account and its data removed.", (id) =>
