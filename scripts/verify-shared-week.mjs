@@ -132,6 +132,59 @@ try {
   assert.equal(ownCopy[0].title, "Owner's private dinner");
   pass("and the recipe with it, as a copy of their own");
 
+  // An invitation is spent once it is taken: gone from the recipient's planner, and
+  // gone from the sharer's list of who holds this week. Neither side has to watch the
+  // other for it to disappear.
+  assert.deepEqual(
+    await result(
+      admin
+        .from("meal_plan_shares")
+        .select("meal_plan_id")
+        .eq("meal_plan_id", theirs.id)
+        .eq("recipient_id", buddy.id),
+    ),
+    [],
+  );
+  pass("accepting a week takes the invitation with it");
+
+  // The same recipe arriving twice is still one recipe.
+  const { data: secondWeek } = await admin
+    .from("meal_plans")
+    .insert({ user_id: owner.id, week_start: "2026-09-14" })
+    .select("id")
+    .single();
+  await admin.from("meal_plan_items").insert({
+    meal_plan_id: secondWeek.id,
+    recipe_id: recipe.id,
+    day_index: 4,
+    slot_index: 3,
+    slot: "dinner",
+    approved: true,
+  });
+  await admin.from("meal_plan_shares").insert({
+    meal_plan_id: secondWeek.id,
+    owner_id: owner.id,
+    recipient_id: buddy.id,
+  });
+  await buddy.client.rpc("copy_shared_plan", {
+    p_meal_plan_id: secondWeek.id,
+    p_week_start: "2026-09-14",
+  });
+
+  assert.equal(
+    (
+      await result(
+        buddy.client
+          .from("recipes")
+          .select("id")
+          .eq("source_recipe_id", recipe.id)
+          .eq("status", "active"),
+      )
+    ).length,
+    1,
+  );
+  pass("and the same recipe shared twice is still one recipe");
+
   // The share is the permission; without one the function hands over nothing.
   const stranger = await account({
     label: "shared-week-stranger",
