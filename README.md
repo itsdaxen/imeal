@@ -1,5 +1,10 @@
 # iMeal
 
+[Access the live app](https://imealv2.vercel.app)
+
+![The Today view: how much of the week is planned, the next meal ready to cook,
+and what is still left to buy](public/today-dashboard.webp)
+
 iMeal is a meal-planning application designed to turn saved recipes into a
 realistic weekly plan and an actionable shopping list.
 
