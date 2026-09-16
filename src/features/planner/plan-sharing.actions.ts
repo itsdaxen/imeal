@@ -75,11 +75,17 @@ export async function copySharedWeek(formData: FormData) {
 
   const { supabase } = await requireUserId();
 
-  // Copies the recipes too, so the two weeks stop being entangled.
-  await supabase.rpc("copy_shared_plan", {
+  // Copies the recipes too, so the two weeks stop being entangled. The result was
+  // thrown away here, so a copy that failed looked exactly like one that worked: the
+  // page reloaded on an empty week and said nothing.
+  const { error } = await supabase.rpc("copy_shared_plan", {
     p_meal_plan_id: parsed.data.planId,
     p_week_start: parsed.data.weekStart,
   });
+
+  if (error) {
+    throw new Error("Could not copy that week. Try again.");
+  }
 
   revalidatePath("/planner");
   redirect(`/planner?week=${parsed.data.weekStart}`);

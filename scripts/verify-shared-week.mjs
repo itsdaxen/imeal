@@ -10,6 +10,7 @@ import {
   base,
   cleanUp,
   pass,
+  result,
   summary,
 } from "./lib/harness.mjs";
 
@@ -74,6 +75,86 @@ try {
     "planner still failed to load the week",
   );
   pass("the planner loads the recipient's own week regardless");
+
+  // Copying is the point of sharing, and it quietly stopped working twice: once when
+  // a day became a list of meals and the function still wrote a column that had gone,
+  // and again because a recipient may read a shared week but not the private recipes
+  // inside it, so the copy joined them away to nothing.
+  const { data: recipe } = await admin
+    .from("recipes")
+    .insert({
+      owner_id: owner.id,
+      title: "Owner's private dinner",
+      ingredients: ["Salt"],
+      steps: ["Cook."],
+      prep_minutes: 10,
+      servings: 2,
+      meal_tags: ["dinner"],
+    })
+    .select("id")
+    .single();
+  await admin.from("meal_plan_items").insert({
+    meal_plan_id: theirs.id,
+    recipe_id: recipe.id,
+    day_index: 2,
+    slot_index: 3,
+    slot: "dinner",
+    approved: true,
+  });
+
+  const { error: copyError } = await buddy.client.rpc("copy_shared_plan", {
+    p_meal_plan_id: theirs.id,
+    p_week_start: weekStart,
+  });
+  assert.equal(copyError, null, "copying a shared week failed");
+
+  const copiedItems = await result(
+    buddy.client
+      .from("meal_plan_items")
+      .select("day_index, slot_index, slot")
+      .eq("meal_plan_id", mine.id),
+  );
+  assert.equal(copiedItems.length, 1);
+  assert.deepEqual(copiedItems[0], {
+    day_index: 2,
+    slot_index: 3,
+    slot: "dinner",
+  });
+  pass("copying a shared week brings its meals across");
+
+  const ownCopy = await result(
+    buddy.client
+      .from("recipes")
+      .select("id, title")
+      .eq("source_recipe_id", recipe.id),
+  );
+  assert.equal(ownCopy.length, 1);
+  assert.equal(ownCopy[0].title, "Owner's private dinner");
+  pass("and the recipe with it, as a copy of their own");
+
+  // The share is the permission; without one the function hands over nothing.
+  const stranger = await account({
+    label: "shared-week-stranger",
+    name: "strangerProbe",
+  });
+  const { error: refused } = await stranger.client.rpc("copy_shared_plan", {
+    p_meal_plan_id: theirs.id,
+    p_week_start: weekStart,
+  });
+  assert(refused, "a week nobody shared was copied anyway");
+  assert.equal(
+    (
+      await result(
+        admin
+          .from("recipes")
+          .select("id")
+          .eq("owner_id", stranger.id)
+          .eq("source_recipe_id", recipe.id),
+      )
+    ).length,
+    0,
+  );
+  pass("and a week shared with nobody cannot be copied at all");
 
   summary("shared week checks passed");
 } finally {
