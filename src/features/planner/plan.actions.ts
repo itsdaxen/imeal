@@ -405,30 +405,6 @@ export async function setMealApproval(formData: FormData) {
   revalidatePath("/shopping");
 }
 
-export async function approveWholeWeek(formData: FormData) {
-  const parsed = slotTargetSchema
-    .pick({ weekStart: true })
-    .safeParse({ weekStart: formData.get("weekStart") });
-
-  if (!parsed.success) {
-    return;
-  }
-
-  const { supabase, userId } = await requireUserId();
-  const plan = await findWeekPlan(supabase, userId, parsed.data.weekStart);
-
-  if (!plan) {
-    return;
-  }
-
-  await supabase
-    .from("meal_plan_items")
-    .update({ approved: true })
-    .eq("meal_plan_id", plan.id);
-
-  revalidatePath("/planner");
-}
-
 export async function deleteWeekPlan(formData: FormData) {
   const parsed = slotTargetSchema
     .pick({ weekStart: true })

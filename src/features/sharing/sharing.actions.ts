@@ -44,6 +44,7 @@ export async function unshareRecipe(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
+  // Nothing to delete means they cannot see it any more, which is what was asked.
   await supabase
     .from("recipe_shares")
     .delete()
@@ -65,6 +66,7 @@ export async function dropSharedRecipe(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
+  // The sharer may have taken it back first; either way it leaves this list.
   await supabase
     .from("recipe_shares")
     .delete()

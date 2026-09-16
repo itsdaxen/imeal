@@ -52,9 +52,9 @@ export async function generateShoppingList(formData: FormData) {
 
   // The week is pointed at the chosen list before its items are built, because the
   // items are written against the week's destination rather than against whatever the
-  // button sent. Without this the planner could name one list and fill another: it
-  // used to refuse the whole thing when the two disagreed, when the honest reading is
-  // that the list you are looking at is the one you meant.
+  // button sent. Without this the planner could name one list and fill another.
+  // Refusing when the two disagree is the wrong answer: the list you are looking at
+  // is the one you meant.
   const { data: plan, error: planError } = await supabase
     .from("meal_plans")
     .update({ target_list_id: parsed.data.listId })
@@ -226,6 +226,9 @@ export async function removeItem(formData: FormData) {
   }
 
   const { supabase } = await requireUserId();
+
+  // On a shared list somebody else may have removed it first, which is the same
+  // outcome by a different hand.
   await supabase.from("shopping_items").delete().eq("id", parsed.data.itemId);
 
   revalidatePath("/shopping");
@@ -493,9 +496,14 @@ export async function addListMember(formData: FormData) {
   }
 
   const { supabase } = await requireUserId();
-  await supabase
+
+  const { error } = await supabase
     .from("shopping_list_members")
     .insert({ list_id: parsed.data.listId, user_id: parsed.data.userId });
+
+  if (error) {
+    throw new Error("Could not share the list with them. Try again.");
+  }
 
   revalidatePath("/shopping");
 }
@@ -511,6 +519,8 @@ export async function removeListMember(formData: FormData) {
   }
 
   const { supabase } = await requireUserId();
+
+  // If they are not on the list, they are off it, which is the point.
   await supabase
     .from("shopping_list_members")
     .delete()
@@ -548,6 +558,8 @@ export async function removeStaple(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
+
+  // A staple that is already gone is a staple removed.
   await supabase
     .from("staples")
     .delete()

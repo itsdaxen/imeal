@@ -86,6 +86,9 @@ export async function signUp(
 
 export async function signOut() {
   const supabase = await createSupabaseServerClient();
+
+  // The redirect stands whether or not the call reached Supabase: a session that
+  // somehow survived is caught the moment they open anything behind requireUserId.
   await supabase.auth.signOut();
   redirect("/sign-in");
 }

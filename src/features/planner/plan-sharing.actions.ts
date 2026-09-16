@@ -53,6 +53,7 @@ export async function unshareWeek(formData: FormData) {
     return;
   }
 
+  // No share left to remove means it is already not shared — with them, or at all.
   await supabase
     .from("meal_plan_shares")
     .delete()
@@ -100,6 +101,8 @@ export async function dismissSharedWeek(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
+  // An invitation that is not there has been answered or withdrawn already, which
+  // is what dismissing it was for.
   await supabase
     .from("meal_plan_shares")
     .delete()

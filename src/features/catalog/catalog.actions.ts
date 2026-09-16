@@ -22,9 +22,13 @@ export async function suggestRecipe(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
-  await supabase
+  const { error } = await supabase
     .from("recipe_suggestions")
     .insert({ recipe_id: parsed.data.recipeId, suggested_by: userId });
+
+  if (error) {
+    throw new Error("Could not send that suggestion. Try again.");
+  }
 
   revalidatePath(`/recipes/${parsed.data.recipeId}`);
 }
@@ -40,6 +44,8 @@ export async function withdrawSuggestion(formData: FormData) {
 
   const { supabase, userId } = await requireUserId();
 
+  // A suggestion that is no longer pending has been answered by an editor, and
+  // withdrawing an answered suggestion is meant to do nothing.
   await supabase
     .from("recipe_suggestions")
     .delete()
@@ -118,10 +124,14 @@ export async function rejectSuggestion(formData: FormData) {
 
   const { supabase } = await requireUserId();
 
-  await supabase.rpc("reject_recipe_suggestion", {
+  const { error } = await supabase.rpc("reject_recipe_suggestion", {
     p_suggestion_id: parsed.data.suggestionId,
     p_note: parsed.data.note,
   });
+
+  if (error) {
+    throw new Error("Could not reject that suggestion. Try again.");
+  }
 
   revalidatePath("/admin");
 }

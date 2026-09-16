@@ -47,9 +47,13 @@ export async function acceptFriendRequest(formData: FormData) {
   }
 
   const { supabase } = await requireUserId();
-  await supabase.rpc("accept_friend_request", {
+  const { error } = await supabase.rpc("accept_friend_request", {
     p_request_id: parsed.data.requestId,
   });
+
+  if (error) {
+    throw new Error("Could not accept that request. Try again.");
+  }
 
   revalidateFriends();
 }
@@ -64,9 +68,13 @@ export async function declineFriendRequest(formData: FormData) {
   }
 
   const { supabase } = await requireUserId();
-  await supabase.rpc("decline_friend_request", {
+  const { error } = await supabase.rpc("decline_friend_request", {
     p_request_id: parsed.data.requestId,
   });
+
+  if (error) {
+    throw new Error("Could not decline that request. Try again.");
+  }
 
   revalidateFriends();
 }
@@ -81,6 +89,9 @@ export async function withdrawFriendRequest(formData: FormData) {
   }
 
   const { supabase, userId } = await requireUserId();
+
+  // Deleting nothing is the outcome either way: a request that is not there is a
+  // request already withdrawn, or one the other person has just answered.
   await supabase
     .from("friend_requests")
     .delete()

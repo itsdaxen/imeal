@@ -242,11 +242,19 @@ export async function setRecipeArchived(
 
   // Archiving keeps the recipe out of the library and the planner's pool while
   // leaving past weeks that reference it intact, which deleting cannot do.
-  await supabase
+  const { error } = await supabase
     .from("recipes")
     .update({ status: archived ? "archived" : "active" })
     .eq("id", id)
     .eq("owner_id", userId);
+
+  if (error) {
+    throw new Error(
+      archived
+        ? "Could not archive that recipe. Try again."
+        : "Could not restore that recipe. Try again.",
+    );
+  }
 
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${id}`);
