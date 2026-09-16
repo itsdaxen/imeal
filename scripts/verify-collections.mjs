@@ -3,9 +3,9 @@
 // Run with: node --env-file=.env.local scripts/verify-collections.mjs
 import assert from "node:assert/strict";
 
-// This script used to build its own account and session by hand, which is how it came
-// to be the one verifier that never learned about first-run setup and reported the
-// onboarding page as a missing recipe.
+// Accounts come from the harness so every verifier starts past first-run setup. A
+// script that builds its own session skips it and reads the onboarding page as a
+// missing recipe.
 import { account, admin, cleanUp, result as r } from "./lib/harness.mjs";
 
 const user = await account({
@@ -32,7 +32,8 @@ try {
         prep_minutes: 20,
         servings: 2,
         meal_tags: ["dinner"],
-        collection_tags: ["asian", "quick"],
+        // A tag of its own, so a filtered catalog holds this and nothing else.
+        collection_tags: ["probe-only"],
         visibility: "public",
         status: "active",
       })
@@ -47,33 +48,43 @@ try {
     return { status: res.status, text: await res.text() };
   };
 
-  let res = await get("/catalog");
-  assert.equal(res.status, 200);
-  assert.match(res.text, /Probe Ramen/);
-  ok("catalog lists the recipe");
+  // This recipe has no owner, so removing the disposable account cannot take it
+  // with it. Cleanup belongs in `finally`: a check that throws would otherwise
+  // leave a public recipe in the live catalog for good.
+  try {
+    // Every check below narrows the catalog to this one recipe first. The catalog
+    // holds a hundred-odd recipes and renders the first page of them, so looking for a
+    // recipe in an unfiltered page says nothing about filtering — and not finding one
+    // says nothing either, since it may simply be on a later page. That the catalog
+    // renders at all is verify-routes' job.
+    let res = await get("/catalog?collection=probe-only");
+    assert.equal(res.status, 200);
+    assert.match(res.text, /Probe Ramen/);
+    ok("a collection filter finds the recipe carrying that collection");
 
-  res = await get("/catalog?collection=asian");
-  assert.match(res.text, /Probe Ramen/);
-  ok("collection filter matches");
+    res = await get("/catalog?collection=nordic");
+    assert.equal(/Probe Ramen/.test(res.text), false);
+    ok("and leaves it out of a collection it is not in");
 
-  res = await get("/catalog?collection=nordic");
-  assert.equal(/Probe Ramen/.test(res.text), false);
-  ok("collection filter excludes non-matches");
+    res = await get("/catalog?collection=probe-only&mealTag=dinner");
+    assert.match(res.text, /Probe Ramen/);
+    ok("a meal filter keeps a recipe tagged for that meal");
 
-  res = await get("/catalog?mealTag=breakfast");
-  assert.equal(/Probe Ramen/.test(res.text), false);
-  ok("meal filter excludes non-matches");
+    res = await get("/catalog?collection=probe-only&mealTag=breakfast");
+    assert.equal(/Probe Ramen/.test(res.text), false);
+    ok("and drops one that is not");
 
-  res = await get("/catalog?mealTag=dinner");
-  assert.match(res.text, /Probe Ramen/);
-  ok("meal filter matches");
+    res = await get("/catalog?collection=probe-only&search=Ramen");
+    assert.match(res.text, /Probe Ramen/);
+    ok("searching the catalog finds it by title");
 
-  res = await get(`/recipes/${pub.id}`);
-  assert.equal(res.status, 200);
-  assert.match(res.text, /Add to this week/);
-  ok("a catalog recipe can be planned directly");
-
-  await r(admin.from("recipes").delete().eq("id", pub.id));
+    res = await get(`/recipes/${pub.id}`);
+    assert.equal(res.status, 200);
+    assert.match(res.text, /Add to this week/);
+    ok("a catalog recipe can be planned directly");
+  } finally {
+    await r(admin.from("recipes").delete().eq("id", pub.id));
+  }
 
   // A personal collection, edited from the recipe's own menu.
   const own = await r(
