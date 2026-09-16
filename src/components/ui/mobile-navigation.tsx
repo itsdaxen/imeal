@@ -1,7 +1,8 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { Button, Link } from "@heroui/react";
 
@@ -15,9 +16,20 @@ type MobileNavigationProps = {
   items: ReadonlyArray<AppHeaderNavigationItem>;
 };
 
+// Returns false on SSR and true on the client without triggering ESLint compiler errors
+const emptySubscribe = () => () => {};
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
 export function MobileNavigation({ items }: MobileNavigationProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,64 +65,74 @@ export function MobileNavigation({ items }: MobileNavigationProps) {
         <Menu aria-hidden="true" className="size-5" />
       </Button>
 
-      <button
-        aria-hidden={!isOpen}
-        aria-label="Close the main menu"
-        className={`fixed inset-0 z-40 bg-foreground/25 backdrop-blur-xs transition-opacity duration-200 motion-reduce:transition-none ${
-          isOpen
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
-        onClick={() => setIsOpen(false)}
-        tabIndex={isOpen ? 0 : -1}
-        type="button"
-      />
+      {isMounted &&
+        createPortal(
+          <>
+            <button
+              aria-hidden={!isOpen}
+              aria-label="Close the main menu"
+              className={`fixed inset-0 z-40 bg-foreground/25 backdrop-blur-xs transition-opacity duration-200 motion-reduce:transition-none ${
+                isOpen
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0"
+              }`}
+              onClick={() => setIsOpen(false)}
+              tabIndex={isOpen ? 0 : -1}
+              type="button"
+            />
 
-      <div
-        aria-hidden={!isOpen}
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-4 border-r border-separator bg-surface px-3 py-4 transition-transform duration-200 will-change-transform motion-reduce:transition-none ${
-          isOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between px-2">
-          <span className="font-brand text-2xl leading-normal">iMeal</span>
-          <Button
-            aria-label="Close the main menu"
-            className="size-11 rounded-full p-0"
-            isIconOnly
-            onPress={() => setIsOpen(false)}
-            variant="ghost"
-          >
-            <X aria-hidden="true" className="size-5" />
-          </Button>
-        </div>
+            <div
+              aria-hidden={!isOpen}
+              className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-4 border-r border-separator bg-surface px-3 py-4 transition-transform duration-200 will-change-transform motion-reduce:transition-none ${
+                isOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"
+              }`}
+            >
+              <div className="flex items-center justify-between px-2">
+                <span className="font-brand text-2xl leading-normal">
+                  iMeal
+                </span>
+                <Button
+                  aria-label="Close the main menu"
+                  className="size-11 rounded-full p-0"
+                  isIconOnly
+                  onPress={() => setIsOpen(false)}
+                  variant="ghost"
+                >
+                  <X aria-hidden="true" className="size-5" />
+                </Button>
+              </div>
 
-        <nav aria-label="Main navigation">
-          <ul className="flex list-none flex-col gap-1 p-0">
-            {items.map((item) => {
-              const isActive = isCurrentSection(pathname, item.href);
+              <nav aria-label="Main navigation">
+                <ul className="flex list-none flex-col gap-1 p-0">
+                  {items.map((item) => {
+                    const isActive = isCurrentSection(pathname, item.href);
 
-              return (
-                <li key={item.href}>
-                  <Link
-                    aria-current={isActive ? "page" : undefined}
-                    className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-medium no-underline transition-colors motion-reduce:transition-none ${
-                      isActive
-                        ? "bg-foreground text-background"
-                        : "text-muted hover:bg-default hover:text-foreground"
-                    }`}
-                    href={item.href}
-                    onPress={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                    {item.badge ? <CountBadge count={item.badge} /> : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </div>
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          aria-current={isActive ? "page" : undefined}
+                          className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-medium no-underline transition-colors motion-reduce:transition-none ${
+                            isActive
+                              ? "bg-foreground text-background"
+                              : "text-muted hover:bg-default hover:text-foreground"
+                          }`}
+                          href={item.href}
+                          onPress={() => setIsOpen(false)}
+                        >
+                          {item.label}
+                          {item.badge ? (
+                            <CountBadge count={item.badge} />
+                          ) : null}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   );
 }
