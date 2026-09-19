@@ -36,6 +36,7 @@ type WeekGridProps = {
  */
 export type MealChange =
   | { itemId: string; kind: "approval" }
+  | { itemId: string; kind: "cooked" }
   | { dayIndex: number; kind: "remove"; slotIndex: number };
 
 export type RunMealChange = (
@@ -55,9 +56,16 @@ function applyChange(meals: PlannedMeal[], change: MealChange) {
     );
   }
 
-  return meals.map((meal) =>
-    meal.id === change.itemId ? { ...meal, approved: !meal.approved } : meal,
-  );
+  return meals.map((meal) => {
+    if (meal.id !== change.itemId) return meal;
+    if (change.kind === "cooked") {
+      return {
+        ...meal,
+        cookedAt: meal.cookedAt ? null : new Date().toISOString(),
+      };
+    }
+    return { ...meal, approved: !meal.approved };
+  });
 }
 
 /** A day asked for by number, if it is one of this week's. */

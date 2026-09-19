@@ -7,7 +7,7 @@ import { Dropdown } from "@heroui/react";
 import { IconButton } from "@/components/ui/icon-button";
 import type { MealSlot } from "@/features/recipes/recipe.schema";
 
-import { clearSlot, shuffleMeal } from "../plan.actions";
+import { clearSlot, setMealCooked, shuffleMeal } from "../plan.actions";
 import type { RunMealChange } from "./week-grid";
 import { useServerAction } from "@/lib/use-server-action";
 
@@ -15,6 +15,7 @@ type MealMenuProps = {
   /** Built by the cell, so the menu and the empty slot lead to the same place. */
   assignHref: string;
   dayIndex: number;
+  cooked: boolean;
   itemId: string;
   onMealChange: RunMealChange;
   recipeId: string;
@@ -26,6 +27,7 @@ type MealMenuProps = {
 export function MealMenu({
   assignHref,
   dayIndex,
+  cooked,
   itemId,
   onMealChange,
   recipeId,
@@ -61,6 +63,18 @@ export function MealMenu({
             textValue="Cook now"
           >
             Cook now
+          </Dropdown.Item>
+          <Dropdown.Item
+            id="cooked"
+            onAction={() =>
+              onMealChange({ itemId, kind: "cooked" }, setMealCooked, {
+                itemId,
+                weekStart,
+              })
+            }
+            textValue={cooked ? "Mark as not cooked" : "Mark as cooked & done"}
+          >
+            {cooked ? "Mark as not cooked" : "Mark as cooked & done"}
           </Dropdown.Item>
           <Dropdown.Item
             id="change"

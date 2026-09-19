@@ -117,6 +117,7 @@ export type Database = {
       meal_plan_items: {
         Row: {
           approved: boolean;
+          cooked_at: string | null;
           created_at: string;
           day_index: number;
           id: string;
@@ -128,6 +129,7 @@ export type Database = {
         };
         Insert: {
           approved?: boolean;
+          cooked_at?: string | null;
           created_at?: string;
           day_index: number;
           id?: string;
@@ -139,6 +141,7 @@ export type Database = {
         };
         Update: {
           approved?: boolean;
+          cooked_at?: string | null;
           created_at?: string;
           day_index?: number;
           id?: string;

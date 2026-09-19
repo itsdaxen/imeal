@@ -11,6 +11,7 @@ import {
 export type PlannedMeal = {
   id: string;
   approved: boolean;
+  cookedAt: string | null;
   dayIndex: number;
   /** Which meal of the day this is, since a day may hold two lunches. */
   slotIndex: number;
@@ -83,7 +84,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
   const { data: items, error: itemsError } = await supabase
     .from("meal_plan_items")
     .select(
-      "id, approved, day_index, slot_index, slot, recipes (id, title, prep_minutes, image_url)",
+      "id, approved, cooked_at, day_index, slot_index, slot, recipes (id, title, prep_minutes, image_url)",
     )
     .eq("meal_plan_id", plan.id)
     .order("day_index")
@@ -98,6 +99,7 @@ export async function getWeekPlan(weekStart: string): Promise<WeekPlan> {
     .map((item) => ({
       id: item.id,
       approved: item.approved,
+      cookedAt: item.cooked_at,
       dayIndex: item.day_index,
       slotIndex: item.slot_index,
       slot: item.slot,

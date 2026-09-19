@@ -59,6 +59,7 @@ export async function assignRecipeToSlot(formData: FormData) {
     {
       meal_plan_id: plan.id,
       recipe_id: recipeId,
+      cooked_at: null,
       day_index: dayIndex,
       slot_index: slotIndex,
       slot,
@@ -228,7 +229,7 @@ export async function shuffleMeal(formData: FormData) {
   // A swapped meal is a fresh proposal, so it is no longer approved.
   await supabase
     .from("meal_plan_items")
-    .update({ recipe_id: replacement, approved: false })
+    .update({ recipe_id: replacement, approved: false, cooked_at: null })
     .eq("id", meal.id);
 
   revalidatePath("/planner");
@@ -340,6 +341,52 @@ async function resolveTargetList({
     .eq("id", planId);
 
   return fallback.id;
+}
+
+export async function setMealCooked(formData: FormData) {
+  const parsed = mealSchema.safeParse({
+    weekStart: formData.get("weekStart"),
+    itemId: formData.get("itemId"),
+  });
+
+  if (!parsed.success) {
+    throw new Error("That meal is not valid.");
+  }
+
+  const { supabase, userId } = await requireUserId();
+  const { data: meal, error: readError } = await supabase
+    .from("meal_plan_items")
+    .select("id, cooked_at, meal_plan_id")
+    .eq("id", parsed.data.itemId)
+    .maybeSingle();
+
+  if (readError || !meal) {
+    throw new Error("That meal is no longer available.");
+  }
+
+  const { data: plan } = await supabase
+    .from("meal_plans")
+    .select("id")
+    .eq("id", meal.meal_plan_id)
+    .eq("user_id", userId)
+    .eq("week_start", parsed.data.weekStart)
+    .maybeSingle();
+
+  if (!plan) {
+    throw new Error("That meal is not in your week.");
+  }
+
+  const { error } = await supabase
+    .from("meal_plan_items")
+    .update({ cooked_at: meal.cooked_at ? null : new Date().toISOString() })
+    .eq("id", meal.id)
+    .eq("meal_plan_id", plan.id);
+
+  if (error) {
+    throw new Error(`Could not update this meal: ${error.message}`);
+  }
+
+  revalidatePath("/planner");
 }
 
 export async function setMealApproval(formData: FormData) {

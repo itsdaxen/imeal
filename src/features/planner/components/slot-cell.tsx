@@ -43,7 +43,7 @@ export function SlotCell({
     >
       {meal ? (
         <div className="flex flex-col gap-2 p-3">
-          <span className="aspect-[4/3] w-full overflow-hidden rounded-xl">
+          <span className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
             <RecipeImage
               className="size-full"
               height={192}
@@ -52,6 +52,11 @@ export function SlotCell({
               sizes="(min-width: 1280px) 10rem, (min-width: 640px) 45vw, 100vw"
               width={256}
             />
+            {meal.cookedAt ? (
+              <span className="absolute inset-0 grid place-items-center bg-black/55 px-2 text-center text-lg font-bold text-white">
+                Cooked &amp; done
+              </span>
+            ) : null}
           </span>
 
           <Typography
@@ -81,6 +86,7 @@ export function SlotCell({
             <MealMenu
               assignHref={assignHref}
               dayIndex={dayIndex}
+              cooked={Boolean(meal.cookedAt)}
               itemId={meal.id}
               onMealChange={onMealChange}
               recipeId={meal.recipe.id}
